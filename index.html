@@ -3,95 +3,91 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BACKSTAGE HUB - 2026</title>
+    <title>BACKSTAGE CONNECT - 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #050507; color: #f8fafc; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        body { background: #050507; color: #f8fafc; font-family: 'Inter', sans-serif; }
         .glass { background: rgba(15, 15, 20, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.05); }
         .tab-content { display: none; padding-bottom: 120px; }
         .active { display: block; animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .admin-only { display: none; }
-        .is-admin .admin-only { display: block; }
-        nav { bottom: 0; left: 0; right: 0; position: fixed; }
+        #login-screen { position: fixed; inset: 0; z-index: 100; background: #050507; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .admin-controls { display: none; }
+        .is-admin .admin-controls { display: block; }
     </style>
 </head>
-<body class="is-admin"> <header class="p-5 glass sticky top-0 z-50 flex justify-between items-center">
-        <div>
-            <h1 class="text-xl font-black text-cyan-400 italic">LIVE HUB 2026</h1>
-            <p id="user-role" class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Admin</p>
+<body class="">
+
+    <div id="login-screen">
+        <h1 class="text-3xl font-black text-cyan-400 italic mb-8">LIVE HUB 2026</h1>
+        <div class="glass p-8 rounded-3xl w-80 text-center">
+            <p class="text-xs uppercase tracking-widest text-slate-500 mb-4">Entrez votre code</p>
+            <input type="password" id="access-code" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-center text-2xl tracking-[1em] mb-4 outline-none focus:border-cyan-500" placeholder="****">
+            <button onclick="checkAccess()" class="w-full bg-cyan-500 text-black font-black py-4 rounded-xl uppercase text-xs">Se connecter</button>
+            <p id="login-error" class="text-red-500 text-[10px] mt-4 hidden">Code incorrect</p>
         </div>
-        <button onclick="toggleAdmin()" class="bg-slate-800 p-2 rounded-full border border-white/10 text-xs text-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.2)]">
-            <i class="fas fa-shield-alt"></i>
-        </button>
-    </header>
+    </div>
 
-    <main class="p-4">
-        <section id="tab-hub" class="tab-content active">
-            <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-6 shadow-xl">
-                <span class="text-cyan-500 text-[10px] font-black uppercase tracking-tighter">Prochaine séance</span>
-                <h2 class="text-3xl font-black italic mt-1 leading-tight">Vendredi @ 19:00</h2>
-                <p class="text-slate-400 text-sm mt-2 italic leading-relaxed">"Objectif : Filage complet du set et calage des danseurs."</p>
+    <div id="app-content" class="hidden">
+        <header class="p-5 glass sticky top-0 z-50 flex justify-between items-center">
+            <div>
+                <h1 class="text-xl font-black text-cyan-400 italic">LIVE HUB</h1>
+                <p id="user-status" class="text-[9px] text-slate-500 font-bold uppercase"></p>
             </div>
+            <button onclick="location.reload()" class="text-slate-500 text-xs"><i class="fas fa-sign-out-alt"></i></button>
+        </header>
 
-            <div class="grid grid-cols-2 gap-4">
-                <div class="glass p-5 rounded-3xl text-center border border-white/5">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Membres</p>
-                    <p id="stat-members" class="text-2xl font-black text-white">0</p>
+        <main class="p-4">
+            <section id="tab-hub" class="tab-content active">
+                <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-6">
+                    <h2 class="text-3xl font-black italic">PROCHAINE RÉPÉTITION</h2>
+                    <p class="text-slate-400 mt-2">Vendredi @ 19:00 - Studio 4</p>
                 </div>
-                <div class="glass p-5 rounded-3xl text-center border border-white/5">
-                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-1">Morceaux</p>
-                    <p id="stat-songs" class="text-2xl font-black text-white">0</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass p-5 rounded-2xl text-center"><p class="text-[10px] text-slate-500 uppercase">Membres</p><p id="stat-members" class="text-2xl font-black">0</p></div>
+                    <div class="glass p-5 rounded-2xl text-center"><p class="text-[10px] text-slate-500 uppercase">Setlist</p><p id="stat-songs" class="text-2xl font-black">0</p></div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <section id="tab-set" class="tab-content">
-            <div class="flex justify-between items-center mb-6 px-1">
-                <h2 class="text-2xl font-black italic">SET LIVE</h2>
-                <button onclick="addTrackPrompt()" class="admin-only bg-cyan-600 w-10 h-10 rounded-full flex items-center justify-center shadow-lg">+</button>
-            </div>
-            <div id="setlist-container" class="space-y-3"></div>
-        </section>
-
-        <section id="tab-feedback" class="tab-content">
-            <h2 class="text-2xl font-black italic mb-6 px-1">IDÉES & FEEDBACK</h2>
-            <div id="chat-messages" class="space-y-4 mb-4 h-[50vh] overflow-y-auto p-2"></div>
-            <div class="flex gap-2 p-2 glass rounded-2xl border border-white/10">
-                <input type="text" id="chat-input" placeholder="Ton message..." class="flex-1 bg-transparent p-2 text-sm outline-none">
-                <button onclick="dbSendMessage()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl flex items-center justify-center">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
-        </section>
-
-        <section id="tab-training" class="tab-content">
-            <h2 class="text-2xl font-black italic mb-6 px-1 text-cyan-400">TRAINING CENTER</h2>
-            
-            <div class="admin-only glass p-5 rounded-3xl mb-8 border-dashed border-cyan-500/40">
-                <h3 class="text-xs font-black uppercase mb-4 text-cyan-500">Ajouter à l'équipe</h3>
-                <input type="text" id="mem-name" placeholder="Nom du membre" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl mb-3 text-sm">
-                <select id="mem-role" class="w-full bg-black/40 border border-white/10 p-3 rounded-xl mb-4 text-sm text-slate-400">
-                    <option>Musicien</option>
-                    <option>Chanteur</option>
-                    <option>Danseur</option>
-                </select>
-                <button onclick="dbAddMember()" class="w-full bg-cyan-500 text-black py-3 rounded-xl font-bold uppercase text-xs">Valider l'inscription</button>
-            </div>
-
-            <div id="members-list" class="space-y-2 mb-10">
-                <h3 class="text-[10px] font-black uppercase text-slate-500 mb-3 px-1">Membres du groupe</h3>
+            <section id="tab-set" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-black italic">SET LIVE</h2>
+                    <button onclick="addTrackPrompt()" class="admin-controls bg-cyan-600 w-10 h-10 rounded-full">+</button>
                 </div>
-        </section>
-    </main>
+                <div id="setlist-container" class="space-y-3"></div>
+            </section>
 
-    <nav class="glass border-t border-white/10 flex justify-around p-6 z-50">
-        <button onclick="switchTab('hub')" class="nav-btn text-cyan-400"><i class="fas fa-th-large text-xl"></i></button>
-        <button onclick="switchTab('set')" class="nav-btn text-slate-600"><i class="fas fa-list-ul text-xl"></i></button>
-        <button onclick="switchTab('feedback')" class="nav-btn text-slate-600"><i class="fas fa-comments text-xl"></i></button>
-        <button onclick="switchTab('training')" class="nav-btn text-slate-600"><i class="fas fa-user-friends text-xl"></i></button>
-    </nav>
+            <section id="tab-feedback" class="tab-content">
+                <h2 class="text-2xl font-black italic mb-6 text-cyan-400">DISCUSSIONS</h2>
+                <div id="chat-messages" class="space-y-4 mb-4 h-[50vh] overflow-y-auto p-2"></div>
+                <div class="flex gap-2 p-2 glass rounded-2xl">
+                    <input type="text" id="chat-input" placeholder="Message..." class="flex-1 bg-transparent p-2 text-sm outline-none">
+                    <button onclick="dbSendMessage()" class="bg-cyan-500 text-black w-12 h-12 rounded-xl"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </section>
+
+            <section id="tab-training" class="tab-content">
+                <h2 class="text-2xl font-black italic mb-6">TRAINING CENTER</h2>
+                <div class="admin-controls glass p-5 rounded-3xl mb-8 border-dashed border-cyan-500/40">
+                    <h3 class="text-xs font-black uppercase mb-4 text-cyan-500">Ajouter Membre</h3>
+                    <input type="text" id="mem-name" placeholder="Nom" class="w-full bg-black/40 p-3 rounded-xl mb-3 text-sm">
+                    <select id="mem-role" class="w-full bg-black/40 p-3 rounded-xl mb-4 text-sm text-slate-400">
+                        <option>Musicien</option><option>Danseur</option><option>Chanteur</option>
+                    </select>
+                    <button onclick="dbAddMember()" class="w-full bg-cyan-500 text-black py-3 rounded-xl font-bold">AJOUTER</button>
+                </div>
+                <div id="members-list" class="space-y-2"></div>
+            </section>
+        </main>
+
+        <nav class="glass border-t border-white/10 flex justify-around p-6 z-50">
+            <button onclick="switchTab('hub')" class="nav-btn text-cyan-400"><i class="fas fa-th-large text-xl"></i></button>
+            <button onclick="switchTab('set')" class="nav-btn text-slate-600"><i class="fas fa-list-ul text-xl"></i></button>
+            <button onclick="switchTab('feedback')" class="nav-btn text-slate-600"><i class="fas fa-comments text-xl"></i></button>
+            <button onclick="switchTab('training')" class="nav-btn text-slate-600"><i class="fas fa-user-friends text-xl"></i></button>
+        </nav>
+    </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -109,68 +105,77 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // SYNC SETLIST
-        onSnapshot(query(collection(db, "setlist"), orderBy("createdAt")), (snapshot) => {
-            const container = document.getElementById('setlist-container');
-            container.innerHTML = "";
-            document.getElementById('stat-songs').innerText = snapshot.size;
-            snapshot.forEach(doc => {
-                const s = doc.data();
-                container.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center border-l-2 border-cyan-500 shadow-md">
-                    <span class="font-bold tracking-tight">${s.name}</span><span class="text-[10px] font-mono text-cyan-500/60">${s.bpm} BPM</span>
+        // --- GESTION ACCÈS ---
+        window.checkAccess = () => {
+            const code = document.getElementById('access-code').value;
+            const error = document.getElementById('login-error');
+            
+            if(code === "1234") { // CODE ADMIN
+                document.body.classList.add('is-admin');
+                enterApp("ADMINISTRATEUR");
+            } else if(code === "0000") { // CODE MEMBRE
+                enterApp("MEMBRE DU GROUPE");
+            } else {
+                error.classList.remove('hidden');
+            }
+        };
+
+        function enterApp(role) {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('app-content').classList.remove('hidden');
+            document.getElementById('user-status').innerText = role;
+        }
+
+        // --- SYNCHRO FIREBASE (SETLIST / MEMBRES / CHAT) ---
+        onSnapshot(query(collection(db, "setlist"), orderBy("createdAt")), (s) => {
+            const c = document.getElementById('setlist-container'); c.innerHTML = "";
+            document.getElementById('stat-songs').innerText = s.size;
+            s.forEach(doc => { 
+                const track = doc.data();
+                c.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between border-l-2 border-cyan-500">
+                    <span class="font-bold">${track.name}</span><span class="text-xs text-cyan-500">${track.bpm} BPM</span>
                 </div>`;
             });
         });
 
-        // SYNC MEMBRES
-        onSnapshot(collection(db, "membres"), (snapshot) => {
-            const container = document.getElementById('members-list');
-            document.getElementById('stat-members').innerText = snapshot.size;
-            container.innerHTML = `<h3 class="text-[10px] font-black uppercase text-slate-500 mb-3 px-1">L'ÉQUIPE (${snapshot.size})</h3>`;
-            snapshot.forEach(doc => {
+        onSnapshot(collection(db, "membres"), (s) => {
+            const l = document.getElementById('members-list');
+            document.getElementById('stat-members').innerText = s.size;
+            l.innerHTML = `<h3 class="text-[10px] font-black text-slate-500 uppercase mb-4">L'Équipe (${s.size})</h3>`;
+            s.forEach(doc => {
                 const m = doc.data();
-                container.innerHTML += `<div class="glass p-4 rounded-xl flex justify-between items-center mb-2">
-                    <span class="font-bold text-sm">${m.name}</span><span class="text-[9px] bg-white/5 px-2 py-1 rounded text-slate-400 font-bold uppercase">${m.role}</span>
+                l.innerHTML += `<div class="glass p-4 rounded-xl flex justify-between items-center mb-2">
+                    <span class="font-bold text-sm">${m.name}</span><span class="text-[9px] bg-cyan-500/10 text-cyan-500 px-2 py-1 rounded uppercase">${m.role}</span>
                 </div>`;
             });
         });
 
-        // SYNC CHAT
-        onSnapshot(query(collection(db, "chat"), orderBy("date", "asc")), (snapshot) => {
-            const box = document.getElementById('chat-messages');
-            box.innerHTML = "";
-            snapshot.forEach(doc => {
+        onSnapshot(query(collection(db, "chat"), orderBy("date", "asc")), (s) => {
+            const b = document.getElementById('chat-messages'); b.innerHTML = "";
+            s.forEach(doc => {
                 const m = doc.data();
-                box.innerHTML += `<div class="flex flex-col mb-1"><div class="bg-slate-800/60 border border-white/5 p-3 rounded-2xl rounded-tl-none text-xs italic shadow-sm">${m.text}</div></div>`;
+                b.innerHTML += `<div class="flex flex-col"><div class="bg-slate-800/60 p-3 rounded-2xl rounded-tl-none text-xs italic border border-white/5">${m.text}</div></div>`;
             });
-            box.scrollTop = box.scrollHeight;
+            b.scrollTop = b.scrollHeight;
         });
 
-        // EXPOSE ACTIONS
+        // --- ACTIONS DB ---
         window.dbSendMessage = async () => {
-            const input = document.getElementById('chat-input');
-            if(input.value.trim()) { await addDoc(collection(db, "chat"), { text: input.value, date: serverTimestamp() }); input.value = ""; }
+            const i = document.getElementById('chat-input');
+            if(i.value) { await addDoc(collection(db, "chat"), { text: i.value, date: serverTimestamp() }); i.value = ""; }
         };
-
         window.dbAddMember = async () => {
-            const name = document.getElementById('mem-name').value;
-            const role = document.getElementById('mem-role').value;
-            if(name) { await addDoc(collection(db, "membres"), { name, role }); document.getElementById('mem-name').value = ""; }
+            const n = document.getElementById('mem-name').value;
+            const r = document.getElementById('mem-role').value;
+            if(n) { await addDoc(collection(db, "membres"), { name: n, role: r }); document.getElementById('mem-name').value = ""; }
         };
-
         window.addTrackPrompt = async () => {
-            const name = prompt("Titre du morceau ?");
-            const bpm = prompt("BPM ?");
-            if(name) await addDoc(collection(db, "setlist"), { name, bpm: bpm || "---", createdAt: serverTimestamp() });
+            const n = prompt("Titre ?");
+            if(n) await addDoc(collection(db, "setlist"), { name: n, bpm: "---", createdAt: serverTimestamp() });
         };
     </script>
 
     <script>
-        function toggleAdmin() {
-            document.body.classList.toggle('is-admin');
-            const isAdmin = document.body.classList.contains('is-admin');
-            document.getElementById('user-role').innerText = isAdmin ? "Administrateur" : "Membre";
-        }
         function switchTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById('tab-' + id).classList.add('active');
