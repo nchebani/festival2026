@@ -7,83 +7,79 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #0a0a0c; color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        body { background: #0a0a0c; color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; }
         .glass { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
-        .admin-only { display: none; }
-        .is-admin .admin-only { display: flex; }
-        .tab-content { display: none; padding-bottom: 100px; animation: fadeIn 0.2s ease; }
+        .admin-only { display: none !important; }
+        .is-admin .admin-only { display: flex !important; }
+        .tab-content { display: none; padding-bottom: 120px; }
         .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        #login-page, #name-page { position: fixed; inset: 0; z-index: 100; background: #0a0a0c; display: flex; align-items: center; justify-content: center; p: 1.5rem; text-align: center; }
+        .page { position: fixed; inset: 0; z-index: 100; background: #0a0a0c; display: flex; align-items: center; justify-content: center; padding: 20px; text-align: center; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div id="login-page">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm shadow-2xl border border-cyan-500/20">
+    <div id="page-login" class="page">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/20 shadow-2xl">
             <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
-            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-10 font-bold italic">Security Check</p>
-            <input type="tel" id="pass" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 outline-none focus:border-cyan-500 text-white" placeholder="****">
-            <button id="entry-btn" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs tracking-widest shadow-lg shadow-cyan-900/40">Vérifier</button>
+            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-10 font-bold">Security Check</p>
+            <input type="tel" id="input-pass" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 outline-none focus:border-cyan-500 text-white" placeholder="****">
+            <button id="btn-to-name" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs tracking-widest shadow-lg">Vérifier</button>
         </div>
     </div>
 
-    <div id="name-page" class="hidden">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm shadow-2xl border border-white/10">
-            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-4 font-bold">Qui es-tu ?</p>
-            <input type="text" id="user-name" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 outline-none focus:border-cyan-500 text-white" placeholder="Ton Prénom">
-            <button id="name-btn" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs tracking-widest">Rejoindre le Hub</button>
+    <div id="page-name" class="page hidden">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-white/10 shadow-2xl">
+            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-4 font-bold">Bienvenue</p>
+            <input type="text" id="input-name" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 outline-none focus:border-cyan-500 text-white" placeholder="Ton Prénom">
+            <button id="btn-to-app" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs tracking-widest">Rejoindre le Hub</button>
         </div>
     </div>
 
-    <div id="main-app" class="hidden">
+    <div id="main-app" class="hidden min-h-screen">
         <header class="p-6 flex justify-between items-center sticky top-0 bg-[#0a0a0c]/90 backdrop-blur-xl z-40 border-b border-white/5">
             <div>
                 <h2 class="font-black italic text-xl tracking-tighter">LIVE HUB <span class="text-cyan-500">2026</span></h2>
-                <div class="flex items-center gap-2">
-                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                    <p id="role-tag" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest"></p>
-                </div>
+                <p id="role-tag" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest"></p>
             </div>
-            <button onclick="location.reload()" class="w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-power-off text-xs text-red-500"></i></button>
+            <button onclick="location.reload()" class="w-10 h-10 glass rounded-full flex items-center justify-center text-red-500"><i class="fas fa-power-off"></i></button>
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
-            <section id="home" class="tab-content active">
+            <section id="tab-home" class="tab-content active">
                 <div class="glass p-8 rounded-[2.5rem] border-l-4 border-cyan-500 mb-6 bg-gradient-to-br from-cyan-500/10 to-transparent">
-                    <h3 class="text-[10px] font-black text-cyan-500 uppercase mb-2 tracking-widest italic">Live Status</h3>
-                    <p class="text-3xl font-black italic mb-1 uppercase tracking-tighter" id="display-name">Prénom</p>
+                    <p class="text-3xl font-black italic mb-1 uppercase tracking-tighter" id="display-name">---</p>
                     <p class="text-slate-400 text-sm">Prêt pour le show</p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1 italic">Songs</span><b id="count-s" class="text-3xl font-black text-white">0</b></div>
-                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1 italic">Backstage</span><b id="online-count" class="text-3xl font-black text-green-400">1</b></div>
+                    <div class="glass p-6 rounded-3xl text-center font-black"><span class="text-[10px] text-slate-500 block uppercase mb-1">Songs</span><b id="count-s">0</b></div>
+                    <div class="glass p-6 rounded-3xl text-center font-black"><span class="text-[10px] text-slate-500 block uppercase mb-1">Status</span><b class="text-green-500">LIVE</b></div>
                 </div>
             </section>
 
-            <section id="setlist" class="tab-content">
+            <section id="tab-setlist" class="tab-content">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-2xl font-black italic uppercase">The Show</h3>
-                    <button id="add-s" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center text-xl font-bold">+</button>
+                    <button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center text-xl font-bold">+</button>
                 </div>
-                <div id="list-s" class="space-y-3"></div>
+                <div id="list-songs" class="space-y-3"></div>
             </section>
 
-            <section id="chat" class="tab-content">
+            <section id="tab-chat" class="tab-content">
                 <h3 class="text-2xl font-black italic mb-6 uppercase">Team Chat</h3>
-                <div id="chat-box" class="h-[50vh] overflow-y-auto mb-4 space-y-4 pr-2"></div>
+                <div id="chat-box" class="h-[50vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div>
                 <div class="flex gap-2 p-2 glass rounded-[2rem] border border-white/10">
-                    <input type="text" id="chat-msg" class="flex-1 bg-transparent p-4 outline-none text-sm text-white" placeholder="Ton message...">
-                    <button id="send-btn" class="bg-cyan-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-xs"></i></button>
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent p-4 outline-none text-sm text-white" placeholder="Message...">
+                    <button id="btn-send" class="bg-cyan-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-xs"></i></button>
                 </div>
             </section>
         </main>
 
         <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-50">
-            <div class="glass rounded-[2.5rem] flex justify-around p-4 items-center border border-white/10 shadow-2xl">
-                <button onclick="show('home', this)" class="nav-link text-cyan-500 transition-all"><i class="fas fa-home text-lg"></i></button>
-                <button onclick="show('setlist', this)" class="nav-link text-slate-500 transition-all"><i class="fas fa-list-ul text-lg"></i></button>
-                <button onclick="show('chat', this)" class="nav-link text-slate-500 transition-all"><i class="fas fa-comment-dots text-lg"></i></button>
+            <div class="glass rounded-[2.5rem] flex justify-around p-4 border border-white/10 shadow-2xl">
+                <button onclick="switchTab('home', this)" class="nav-btn text-cyan-500"><i class="fas fa-home text-lg"></i></button>
+                <button onclick="switchTab('setlist', this)" class="nav-btn text-slate-500"><i class="fas fa-list-ul text-lg"></i></button>
+                <button onclick="switchTab('chat', this)" class="nav-btn text-slate-500"><i class="fas fa-comment-dots text-lg"></i></button>
             </div>
         </nav>
     </div>
@@ -104,42 +100,41 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let currentUser = "";
-        let currentRole = "";
+        let userName = "";
 
-        // LOGIN ET NOM
-        document.getElementById('entry-btn').addEventListener('click', () => {
-            const code = document.getElementById('pass').value;
-            if(code === "1234" || code === "0000") { 
-                currentRole = (code === "1234") ? "ADMINISTRATEUR" : "MEMBRE DU GROUPE";
+        // NAVIGATION LOGIN -> NAME
+        document.getElementById('btn-to-name').addEventListener('click', () => {
+            const code = document.getElementById('input-pass').value;
+            if(code === "1234" || code === "0000") {
                 if(code === "1234") document.body.classList.add('is-admin');
-                document.getElementById('login-page').classList.add('hidden');
-                document.getElementById('name-page').classList.remove('hidden');
-            } else { alert("Code invalide"); }
+                document.getElementById('page-login').classList.add('hidden');
+                document.getElementById('page-name').classList.remove('hidden');
+                document.getElementById('role-tag').innerText = (code === "1234") ? "ADMIN" : "MEMBRE";
+            } else { alert("Code incorrect"); }
         });
 
-        document.getElementById('name-btn').addEventListener('click', () => {
-            const name = document.getElementById('user-name').value;
-            if(name.trim().length > 1) {
-                currentUser = name;
-                document.getElementById('name-page').classList.add('hidden');
+        // NAVIGATION NAME -> APP
+        document.getElementById('btn-to-app').addEventListener('click', () => {
+            const name = document.getElementById('input-name').value.trim();
+            if(name.length >= 2) {
+                userName = name;
+                document.getElementById('page-name').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
-                document.getElementById('role-tag').innerText = currentRole;
-                document.getElementById('display-name').innerText = currentUser;
-            }
+                document.getElementById('display-name').innerText = userName;
+            } else { alert("Entre un prénom valide"); }
         });
 
-        // CHAT SYNC (Avec signature)
+        // FIREBASE : CHAT
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), (snap) => {
             const box = document.getElementById('chat-box');
             box.innerHTML = "";
             snap.forEach(doc => {
                 const m = doc.data();
-                const isMe = m.user === currentUser;
+                const isMe = m.user === userName;
                 box.innerHTML += `
-                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
-                        <span class="text-[9px] uppercase font-bold text-slate-500 mb-1 px-2">${m.user}</span>
-                        <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} max-w-[85%] border border-white/5 shadow-sm">
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-3">
+                        <span class="text-[8px] uppercase font-bold text-slate-600 mb-1 px-2">${m.user}</span>
+                        <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} max-w-[80%]">
                             <p class="text-sm text-white">${m.txt}</p>
                         </div>
                     </div>`;
@@ -147,47 +142,43 @@
             box.scrollTop = box.scrollHeight;
         });
 
-        // SETLIST SYNC
+        // FIREBASE : SONGS
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), (snap) => {
-            const list = document.getElementById('list-s');
+            const list = document.getElementById('list-songs');
             list.innerHTML = "";
             document.getElementById('count-s').innerText = snap.size;
             snap.forEach(doc => {
                 const s = doc.data();
                 list.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center mb-2 border-l-2 border-cyan-500">
                     <b class="text-sm font-bold uppercase">${s.name}</b>
-                    <span class="text-cyan-500 font-mono text-[10px] font-bold">${s.bpm} BPM</span>
+                    <span class="text-cyan-500 font-mono text-[10px]">${s.bpm} BPM</span>
                 </div>`;
             });
         });
 
-        // ENVOI
-        document.getElementById('send-btn').addEventListener('click', async () => {
-            const i = document.getElementById('chat-msg');
-            if(i.value.trim()) { 
-                await addDoc(collection(db, "chats"), { 
-                    txt: i.value, 
-                    user: currentUser,
-                    time: serverTimestamp() 
-                }); 
-                i.value = ""; 
+        // ACTIONS
+        document.getElementById('btn-send').addEventListener('click', async () => {
+            const i = document.getElementById('chat-input');
+            if(i.value.trim()) {
+                await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() });
+                i.value = "";
             }
         });
 
-        document.getElementById('add-s').addEventListener('click', async () => {
-            const n = prompt("Nom du morceau ?");
-            if(n) { 
+        document.getElementById('btn-add-song').addEventListener('click', async () => {
+            const n = prompt("Titre ?");
+            if(n) {
                 const b = prompt("BPM ?", "120");
-                await addDoc(collection(db, "songs"), { name: n, bpm: b, time: serverTimestamp() }); 
+                await addDoc(collection(db, "songs"), { name: n, bpm: b, time: serverTimestamp() });
             }
         });
     </script>
 
     <script>
-        function show(id, btn) {
+        function switchTab(id, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.replace('text-cyan-500', 'text-slate-500'));
+            document.getElementById('tab-' + id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(l => l.classList.replace('text-cyan-500', 'text-slate-500'));
             btn.classList.replace('text-slate-500', 'text-cyan-500');
         }
     </script>
