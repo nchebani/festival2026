@@ -3,99 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE HUB 2026</title>
+    <title>BACKSTAGE HUB 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #050507; color: #f8fafc; font-family: 'Inter', sans-serif; margin: 0; }
-        .glass { background: rgba(15, 15, 20, 0.8); backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.05); }
-        .tab-content { display: none; padding-bottom: 120px; }
+        body { background: #0a0a0c; color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
+        .glass { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
+        .admin-only { display: none; }
+        .is-admin .admin-only { display: flex; }
+        .tab-content { display: none; padding-bottom: 100px; animation: fadeIn 0.3s ease; }
         .active { display: block; }
-        #login-screen { position: fixed; inset: 0; z-index: 100; background: #050507; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .admin-controls { display: none; }
-        .is-admin .admin-controls { display: block; }
-        input, select { color: white !important; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body>
 
-    <div id="login-screen">
-        <h1 class="text-3xl font-black text-cyan-400 italic mb-8">LIVE HUB 2026</h1>
-        <div class="glass p-8 rounded-3xl w-80 text-center shadow-2xl">
-            <p class="text-xs uppercase tracking-widest text-slate-500 mb-4 font-bold">Code d'accès</p>
-            <input type="tel" id="access-code" class="w-full bg-black/50 border border-white/10 p-4 rounded-xl text-center text-2xl mb-4 outline-none focus:border-cyan-500" placeholder="****">
-            <button id="btn-login" class="w-full bg-cyan-500 text-black font-black py-4 rounded-xl uppercase text-xs hover:bg-cyan-400 transition-all">Se connecter</button>
-            <p id="login-error" class="text-red-500 text-[10px] mt-4 hidden font-bold uppercase tracking-tighter italic">Code incorrect ou erreur réseau</p>
+    <div id="login-page" class="fixed inset-0 z-[100] bg-[#0a0a0c] flex items-center justify-center p-6 text-center">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm shadow-2xl border border-cyan-500/20">
+            <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
+            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-10 font-bold">Backstage Access Only</p>
+            <input type="tel" id="pass" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 outline-none focus:border-cyan-500 text-white transition-all" placeholder="****">
+            <button id="entry-btn" class="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-black py-5 rounded-2xl uppercase tracking-widest text-xs transition-all shadow-lg shadow-cyan-900/40">Connexion</button>
         </div>
     </div>
 
-    <div id="app-content" class="hidden">
-        <header class="p-5 glass sticky top-0 z-50 flex justify-between items-center">
+    <div id="main-app" class="hidden">
+        <header class="p-6 flex justify-between items-center sticky top-0 bg-[#0a0a0c]/90 backdrop-blur-xl z-40 border-b border-white/5">
             <div>
-                <h1 class="text-xl font-black text-cyan-400 italic">LIVE HUB</h1>
-                <p id="user-status" class="text-[9px] text-slate-500 font-bold uppercase tracking-widest italic"></p>
+                <h2 class="font-black italic text-xl tracking-tighter">LIVE HUB <span class="text-cyan-500">2026</span></h2>
+                <div class="flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                    <p id="role-tag" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest"></p>
+                </div>
             </div>
-            <button onclick="location.reload()" class="text-slate-500 bg-white/5 w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/10 transition-all">
-                <i class="fas fa-power-off"></i>
-            </button>
+            <button onclick="location.reload()" class="w-10 h-10 glass rounded-full flex items-center justify-center hover:bg-white/10"><i class="fas fa-power-off text-xs text-red-500"></i></button>
         </header>
 
-        <main class="p-4">
-            <section id="tab-hub" class="tab-content active">
-                <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-6 shadow-2xl bg-gradient-to-br from-cyan-500/5 to-transparent">
-                    <h2 class="text-2xl font-black italic uppercase leading-none">Prochain Live</h2>
-                    <p class="text-slate-400 mt-2 text-sm font-medium tracking-wide">VENDREDI @ 19:00 - STUDIO 4</p>
+        <main class="p-4 max-w-lg mx-auto">
+            <section id="home" class="tab-content active">
+                <div class="glass p-8 rounded-[2.5rem] border-l-4 border-cyan-500 mb-6 bg-gradient-to-br from-cyan-500/10 to-transparent shadow-xl">
+                    <h3 class="text-[10px] font-black text-cyan-500 uppercase mb-2 tracking-widest">Next Performance</h3>
+                    <p class="text-3xl font-black italic leading-none mb-1 uppercase">Main Stage</p>
+                    <p class="text-slate-400 text-sm">Friday Night @ 21:00</p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-6 rounded-3xl text-center border-t border-white/5">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Membres</p>
-                        <p id="stat-members" class="text-3xl font-black text-white">0</p>
-                    </div>
-                    <div class="glass p-6 rounded-3xl text-center border-t border-white/5">
-                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest mb-1">Setlist</p>
-                        <p id="stat-songs" class="text-3xl font-black text-white">0</p>
-                    </div>
+                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1">Setlist</span><b id="count-s" class="text-3xl font-black text-white">0</b></div>
+                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1">Status</span><b class="text-xs font-black text-green-400 uppercase tracking-widest">Live</b></div>
                 </div>
             </section>
 
-            <section id="tab-set" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-1">
-                    <h2 class="text-2xl font-black italic uppercase tracking-tight">Setlist</h2>
-                    <button id="btn-add-track" class="admin-controls bg-cyan-500 text-black w-12 h-12 rounded-full font-bold shadow-[0_0_20px_rgba(34,211,238,0.3)]">+</button>
+            <section id="setlist" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-2xl font-black italic uppercase">The Show</h3>
+                    <button id="add-s" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center shadow-lg shadow-cyan-900/40 text-xl font-bold">+</button>
                 </div>
-                <div id="setlist-container" class="space-y-3"></div>
+                <div id="list-s" class="space-y-3"></div>
             </section>
 
-            <section id="tab-feedback" class="tab-content">
-                <h2 class="text-2xl font-black italic mb-6 uppercase tracking-tight px-1">Backstage Chat</h2>
-                <div id="chat-messages" class="space-y-4 mb-4 h-[50vh] overflow-y-auto p-4 glass rounded-3xl"></div>
+            <section id="chat" class="tab-content">
+                <h3 class="text-2xl font-black italic mb-6 uppercase">Direct Feed</h3>
+                <div id="chat-box" class="h-[50vh] overflow-y-auto mb-4 space-y-4 pr-2"></div>
                 <div class="flex gap-2 p-2 glass rounded-[2rem] border border-white/10">
-                    <input type="text" id="chat-input" placeholder="Écrire un message..." class="flex-1 bg-transparent p-3 text-sm outline-none">
-                    <button id="btn-send-chat" class="bg-cyan-500 text-black w-12 h-12 rounded-full shadow-lg flex items-center justify-center">
-                        <i class="fas fa-paper-plane text-xs"></i>
-                    </button>
+                    <input type="text" id="chat-msg" class="flex-1 bg-transparent p-4 outline-none text-sm text-white" placeholder="Type a message...">
+                    <button id="send-btn" class="bg-cyan-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-xs"></i></button>
                 </div>
-            </section>
-
-            <section id="tab-training" class="tab-content">
-                <h2 class="text-2xl font-black italic mb-6 uppercase tracking-tight px-1">L'Équipe</h2>
-                <div class="admin-controls glass p-6 rounded-[2rem] mb-8 border border-cyan-500/20 shadow-xl bg-cyan-500/5">
-                    <p class="text-[10px] font-black uppercase text-cyan-500 mb-4 tracking-widest">Ajouter un nouveau membre</p>
-                    <input type="text" id="mem-name" placeholder="Prénom / Nom" class="w-full bg-black/50 p-4 rounded-xl mb-3 text-sm border border-white/10 outline-none focus:border-cyan-500/50">
-                    <select id="mem-role" class="w-full bg-black/50 p-4 rounded-xl mb-4 text-sm border border-white/10 outline-none">
-                        <option>Musicien</option><option>Danseur</option><option>Chanteur</option><option>Staff</option>
-                    </select>
-                    <button id="btn-add-member" class="w-full bg-white text-black py-4 rounded-xl font-black uppercase text-[10px] tracking-widest">Enregistrer</button>
-                </div>
-                <div id="members-list" class="space-y-2"></div>
             </section>
         </main>
 
-        <nav class="glass border-t border-white/10 flex justify-around p-5 fixed bottom-0 left-0 right-0 z-50">
-            <button onclick="switchTab('hub')" class="nav-btn text-cyan-400"><i class="fas fa-home text-xl"></i></button>
-            <button onclick="switchTab('set')" class="nav-btn text-slate-600"><i class="fas fa-list-ul text-xl"></i></button>
-            <button onclick="switchTab('feedback')" class="nav-btn text-slate-600"><i class="fas fa-comments text-xl"></i></button>
-            <button onclick="switchTab('training')" class="nav-btn text-slate-600"><i class="fas fa-users text-xl"></i></button>
+        <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-50">
+            <div class="glass rounded-[2.5rem] flex justify-around p-4 items-center border border-white/10 shadow-2xl">
+                <button onclick="show('home', this)" class="nav-link text-cyan-500 transition-all"><i class="fas fa-home text-lg"></i></button>
+                <button onclick="show('setlist', this)" class="nav-link text-slate-500 transition-all"><i class="fas fa-list-ul text-lg"></i></button>
+                <button onclick="show('chat', this)" class="nav-link text-slate-500 transition-all"><i class="fas fa-comment-dots text-lg"></i></button>
+            </div>
         </nav>
     </div>
 
@@ -103,136 +83,86 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // Tes clés configurées
         const firebaseConfig = {
-            apiKey: "AIzaSyA4wRPUNY7ELW9sQCMIwWDL0JTt4GhiBMY",
-            authDomain: "festival-2026-9821a.firebaseapp.com",
-            projectId: "festival-2026-9821a",
-            storageBucket: "festival-2026-9821a.firebasestorage.app",
-            messagingSenderId: "330460197364",
-            appId: "1:330460197364:web:123ad880e38787ce2789a1"
+            apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
+            authDomain: "live-hub-2026.firebaseapp.com",
+            projectId: "live-hub-2026",
+            storageBucket: "live-hub-2026.firebasestorage.app",
+            messagingSenderId: "56918867184",
+            appId: "1:56918867184:web:7667d75288d14a565e9635"
         };
 
-        // INITIALISATION
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- FONCTION DE CONNEXION ---
-        document.getElementById('btn-login').addEventListener('click', () => {
-            const codeInput = document.getElementById('access-code');
-            const code = codeInput.value;
-            const errorText = document.getElementById('login-error');
-            
-            if(code === "1234") { // CODE ADMIN
+        // --- LOGIN ---
+        document.getElementById('entry-btn').addEventListener('click', () => {
+            const code = document.getElementById('pass').value;
+            if(code === "1234") { 
                 document.body.classList.add('is-admin');
-                enterApp("ADMINISTRATEUR");
-            } else if(code === "0000") { // CODE MEMBRE
-                document.body.classList.remove('is-admin');
-                enterApp("MEMBRE DU GROUPE");
-            } else {
-                errorText.classList.remove('hidden');
-                codeInput.value = "";
+                start("Administrateur");
+            } else if(code === "0000") {
+                start("Membre");
+            } else { alert("Code invalide"); }
+        });
+
+        function start(role) {
+            document.getElementById('login-page').style.display = 'none';
+            document.getElementById('main-app').classList.remove('hidden');
+            document.getElementById('role-tag').innerText = role;
+        }
+
+        // --- REALTIME SYNC (TEMPS RÉEL) ---
+        // Synchronisation du Chat
+        onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), (snap) => {
+            const box = document.getElementById('chat-box');
+            box.innerHTML = "";
+            snap.forEach(doc => {
+                const m = doc.data();
+                box.innerHTML += `<div class="flex flex-col"><div class="bg-white/5 border border-white/5 p-4 rounded-3xl rounded-tl-none max-w-[85%]"><p class="text-[13px] leading-relaxed text-slate-200">${m.txt}</p></div></div>`;
+            });
+            box.scrollTop = box.scrollHeight;
+        });
+
+        // Synchronisation de la Setlist
+        onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), (snap) => {
+            const list = document.getElementById('list-s');
+            list.innerHTML = "";
+            document.getElementById('count-s').innerText = snap.size;
+            snap.forEach(doc => {
+                const s = doc.data();
+                list.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center mb-2 border-l-2 border-cyan-500 shadow-md">
+                    <b class="text-sm font-bold uppercase tracking-tight">${s.name}</b>
+                    <span class="text-cyan-500 font-mono text-[10px] font-bold">${s.bpm} BPM</span>
+                </div>`;
+            });
+        });
+
+        // --- ENVOI DE DONNÉES ---
+        document.getElementById('send-btn').addEventListener('click', async () => {
+            const i = document.getElementById('chat-msg');
+            if(i.value.trim()) { 
+                await addDoc(collection(db, "chats"), { txt: i.value, time: serverTimestamp() }); 
+                i.value = ""; 
             }
         });
 
-        function enterApp(role) {
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-content').classList.remove('hidden');
-            document.getElementById('user-status').innerText = role;
-        }
-
-        // --- SYNCHRONISATION EN TEMPS RÉEL (LECTURE FIREBASE) ---
-
-        // 1. Lire la Setlist
-        onSnapshot(query(collection(db, "setlist"), orderBy("createdAt", "asc")), (snapshot) => {
-            const container = document.getElementById('setlist-container');
-            container.innerHTML = "";
-            document.getElementById('stat-songs').innerText = snapshot.size;
-            snapshot.forEach(doc => { 
-                const track = doc.data();
-                container.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center border-l-4 border-cyan-500 mb-2 shadow-lg">
-                    <span class="font-bold tracking-tight">${track.name}</span>
-                    <span class="text-[10px] bg-white/5 px-3 py-1 rounded-full text-cyan-400 font-mono font-bold">${track.bpm || '---'} BPM</span>
-                </div>`;
-            });
-        }, (err) => console.error("Erreur lecture Setlist: ", err));
-
-        // 2. Lire les Membres
-        onSnapshot(collection(db, "membres"), (snapshot) => {
-            const list = document.getElementById('members-list');
-            document.getElementById('stat-members').innerText = snapshot.size;
-            list.innerHTML = "";
-            snapshot.forEach(doc => {
-                const m = doc.data();
-                list.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center mb-3 border-t border-white/5 shadow-md">
-                    <span class="font-black text-sm uppercase tracking-tight">${m.name}</span>
-                    <span class="text-[9px] bg-cyan-500/10 text-cyan-400 px-3 py-1 rounded-lg uppercase font-black tracking-widest">${m.role}</span>
-                </div>`;
-            });
-        }, (err) => console.error("Erreur lecture Membres: ", err));
-
-        // 3. Lire le Chat
-        onSnapshot(query(collection(db, "chat"), orderBy("date", "asc")), (snapshot) => {
-            const box = document.getElementById('chat-messages');
-            box.innerHTML = "";
-            snapshot.forEach(doc => {
-                const m = doc.data();
-                box.innerHTML += `<div class="flex flex-col mb-4 items-start">
-                    <div class="bg-slate-800/80 p-4 rounded-3xl rounded-tl-none text-[13px] border border-white/5 shadow-sm max-w-[90%] leading-relaxed">${m.text}</div>
-                </div>`;
-            });
-            box.scrollTop = box.scrollHeight;
-        }, (err) => console.error("Erreur lecture Chat: ", err));
-
-        // --- ACTIONS D'ÉCRITURE (ENVOI FIREBASE) ---
-
-        document.getElementById('btn-send-chat').addEventListener('click', async () => {
-            const input = document.getElementById('chat-input');
-            if(!input.value.trim()) return;
-            try {
-                await addDoc(collection(db, "chat"), { 
-                    text: input.value, 
-                    date: serverTimestamp() 
-                });
-                input.value = "";
-            } catch(e) { alert("Erreur Firebase: " + e.message); }
+        document.getElementById('add-s').addEventListener('click', async () => {
+            const n = prompt("Titre du morceau ?");
+            if(n) { 
+                const b = prompt("BPM ?", "120");
+                await addDoc(collection(db, "songs"), { name: n, bpm: b, time: serverTimestamp() }); 
+            }
         });
-
-        document.getElementById('btn-add-member').addEventListener('click', async () => {
-            const name = document.getElementById('mem-name').value;
-            const role = document.getElementById('mem-role').value;
-            if(!name.trim()) return;
-            try {
-                await addDoc(collection(db, "membres"), { 
-                    name: name, 
-                    role: role,
-                    createdAt: serverTimestamp()
-                });
-                document.getElementById('mem-name').value = "";
-            } catch(e) { alert("Erreur Firebase: " + e.message); }
-        });
-
-        document.getElementById('btn-add-track').addEventListener('click', async () => {
-            const name = prompt("Titre du nouveau morceau ?");
-            if(!name) return;
-            const bpm = prompt("BPM (facultatif) ?") || "---";
-            try {
-                await addDoc(collection(db, "setlist"), { 
-                    name: name, 
-                    bpm: bpm, 
-                    createdAt: serverTimestamp() 
-                });
-            } catch(e) { alert("Erreur Firebase: " + e.message); }
-        });
-
     </script>
 
     <script>
-        // NAVIGATION ENTRE ONGLETS
-        function switchTab(id) {
+        function show(id, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.replace('text-cyan-400', 'text-slate-600'));
-            event.currentTarget.classList.replace('text-slate-600', 'text-cyan-400');
+            document.getElementById(id).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.replace('text-cyan-500', 'text-slate-500'));
+            btn.classList.replace('text-slate-500', 'text-cyan-500');
         }
     </script>
 </body>
