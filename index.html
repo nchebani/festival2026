@@ -11,19 +11,28 @@
         .glass { background: rgba(20, 20, 25, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.05); }
         .admin-only { display: none; }
         .is-admin .admin-only { display: flex; }
-        .tab-content { display: none; padding-bottom: 100px; animation: fadeIn 0.3s ease; }
+        .tab-content { display: none; padding-bottom: 100px; animation: fadeIn 0.2s ease; }
         .active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #login-page, #name-page { position: fixed; inset: 0; z-index: 100; background: #0a0a0c; display: flex; align-items: center; justify-content: center; p: 1.5rem; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div id="login-page" class="fixed inset-0 z-[100] bg-[#0a0a0c] flex items-center justify-center p-6 text-center">
+    <div id="login-page">
         <div class="glass p-10 rounded-[3rem] w-full max-w-sm shadow-2xl border border-cyan-500/20">
             <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
-            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-10 font-bold">Backstage Access Only</p>
-            <input type="tel" id="pass" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 outline-none focus:border-cyan-500 text-white transition-all" placeholder="****">
-            <button id="entry-btn" class="w-full bg-cyan-600 hover:bg-cyan-400 text-white font-black py-5 rounded-2xl uppercase tracking-widest text-xs transition-all shadow-lg shadow-cyan-900/40">Connexion</button>
+            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-10 font-bold italic">Security Check</p>
+            <input type="tel" id="pass" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 outline-none focus:border-cyan-500 text-white" placeholder="****">
+            <button id="entry-btn" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs tracking-widest shadow-lg shadow-cyan-900/40">Vérifier</button>
+        </div>
+    </div>
+
+    <div id="name-page" class="hidden">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm shadow-2xl border border-white/10">
+            <p class="text-slate-500 text-[10px] uppercase tracking-[0.3em] mb-4 font-bold">Qui es-tu ?</p>
+            <input type="text" id="user-name" class="w-full bg-black/40 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 outline-none focus:border-cyan-500 text-white" placeholder="Ton Prénom">
+            <button id="name-btn" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs tracking-widest">Rejoindre le Hub</button>
         </div>
     </div>
 
@@ -36,35 +45,35 @@
                     <p id="role-tag" class="text-[9px] font-bold text-slate-400 uppercase tracking-widest"></p>
                 </div>
             </div>
-            <button onclick="location.reload()" class="w-10 h-10 glass rounded-full flex items-center justify-center hover:bg-white/10"><i class="fas fa-power-off text-xs text-red-500"></i></button>
+            <button onclick="location.reload()" class="w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-power-off text-xs text-red-500"></i></button>
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
             <section id="home" class="tab-content active">
-                <div class="glass p-8 rounded-[2.5rem] border-l-4 border-cyan-500 mb-6 bg-gradient-to-br from-cyan-500/10 to-transparent shadow-xl">
-                    <h3 class="text-[10px] font-black text-cyan-500 uppercase mb-2 tracking-widest">Next Performance</h3>
-                    <p class="text-3xl font-black italic leading-none mb-1 uppercase">Main Stage</p>
-                    <p class="text-slate-400 text-sm">Friday Night @ 21:00</p>
+                <div class="glass p-8 rounded-[2.5rem] border-l-4 border-cyan-500 mb-6 bg-gradient-to-br from-cyan-500/10 to-transparent">
+                    <h3 class="text-[10px] font-black text-cyan-500 uppercase mb-2 tracking-widest italic">Live Status</h3>
+                    <p class="text-3xl font-black italic mb-1 uppercase tracking-tighter" id="display-name">Prénom</p>
+                    <p class="text-slate-400 text-sm">Prêt pour le show</p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1">Setlist</span><b id="count-s" class="text-3xl font-black text-white">0</b></div>
-                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1">Status</span><b class="text-xs font-black text-green-400 uppercase tracking-widest">Live</b></div>
+                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1 italic">Songs</span><b id="count-s" class="text-3xl font-black text-white">0</b></div>
+                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[10px] text-slate-500 block uppercase font-bold mb-1 italic">Backstage</span><b id="online-count" class="text-3xl font-black text-green-400">1</b></div>
                 </div>
             </section>
 
             <section id="setlist" class="tab-content">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-2xl font-black italic uppercase">The Show</h3>
-                    <button id="add-s" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center shadow-lg shadow-cyan-900/40 text-xl font-bold">+</button>
+                    <button id="add-s" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center text-xl font-bold">+</button>
                 </div>
                 <div id="list-s" class="space-y-3"></div>
             </section>
 
             <section id="chat" class="tab-content">
-                <h3 class="text-2xl font-black italic mb-6 uppercase">Direct Feed</h3>
+                <h3 class="text-2xl font-black italic mb-6 uppercase">Team Chat</h3>
                 <div id="chat-box" class="h-[50vh] overflow-y-auto mb-4 space-y-4 pr-2"></div>
                 <div class="flex gap-2 p-2 glass rounded-[2rem] border border-white/10">
-                    <input type="text" id="chat-msg" class="flex-1 bg-transparent p-4 outline-none text-sm text-white" placeholder="Type a message...">
+                    <input type="text" id="chat-msg" class="flex-1 bg-transparent p-4 outline-none text-sm text-white" placeholder="Ton message...">
                     <button id="send-btn" class="bg-cyan-600 w-14 h-14 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-xs"></i></button>
                 </div>
             </section>
@@ -83,7 +92,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Tes clés configurées
         const firebaseConfig = {
             apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
             authDomain: "live-hub-2026.firebaseapp.com",
@@ -96,60 +104,78 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- LOGIN ---
+        let currentUser = "";
+        let currentRole = "";
+
+        // LOGIN ET NOM
         document.getElementById('entry-btn').addEventListener('click', () => {
             const code = document.getElementById('pass').value;
-            if(code === "1234") { 
-                document.body.classList.add('is-admin');
-                start("Administrateur");
-            } else if(code === "0000") {
-                start("Membre");
+            if(code === "1234" || code === "0000") { 
+                currentRole = (code === "1234") ? "ADMINISTRATEUR" : "MEMBRE DU GROUPE";
+                if(code === "1234") document.body.classList.add('is-admin');
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('name-page').classList.remove('hidden');
             } else { alert("Code invalide"); }
         });
 
-        function start(role) {
-            document.getElementById('login-page').style.display = 'none';
-            document.getElementById('main-app').classList.remove('hidden');
-            document.getElementById('role-tag').innerText = role;
-        }
+        document.getElementById('name-btn').addEventListener('click', () => {
+            const name = document.getElementById('user-name').value;
+            if(name.trim().length > 1) {
+                currentUser = name;
+                document.getElementById('name-page').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                document.getElementById('role-tag').innerText = currentRole;
+                document.getElementById('display-name').innerText = currentUser;
+            }
+        });
 
-        // --- REALTIME SYNC (TEMPS RÉEL) ---
-        // Synchronisation du Chat
+        // CHAT SYNC (Avec signature)
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), (snap) => {
             const box = document.getElementById('chat-box');
             box.innerHTML = "";
             snap.forEach(doc => {
                 const m = doc.data();
-                box.innerHTML += `<div class="flex flex-col"><div class="bg-white/5 border border-white/5 p-4 rounded-3xl rounded-tl-none max-w-[85%]"><p class="text-[13px] leading-relaxed text-slate-200">${m.txt}</p></div></div>`;
+                const isMe = m.user === currentUser;
+                box.innerHTML += `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
+                        <span class="text-[9px] uppercase font-bold text-slate-500 mb-1 px-2">${m.user}</span>
+                        <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} max-w-[85%] border border-white/5 shadow-sm">
+                            <p class="text-sm text-white">${m.txt}</p>
+                        </div>
+                    </div>`;
             });
             box.scrollTop = box.scrollHeight;
         });
 
-        // Synchronisation de la Setlist
+        // SETLIST SYNC
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), (snap) => {
             const list = document.getElementById('list-s');
             list.innerHTML = "";
             document.getElementById('count-s').innerText = snap.size;
             snap.forEach(doc => {
                 const s = doc.data();
-                list.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center mb-2 border-l-2 border-cyan-500 shadow-md">
-                    <b class="text-sm font-bold uppercase tracking-tight">${s.name}</b>
+                list.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center mb-2 border-l-2 border-cyan-500">
+                    <b class="text-sm font-bold uppercase">${s.name}</b>
                     <span class="text-cyan-500 font-mono text-[10px] font-bold">${s.bpm} BPM</span>
                 </div>`;
             });
         });
 
-        // --- ENVOI DE DONNÉES ---
+        // ENVOI
         document.getElementById('send-btn').addEventListener('click', async () => {
             const i = document.getElementById('chat-msg');
             if(i.value.trim()) { 
-                await addDoc(collection(db, "chats"), { txt: i.value, time: serverTimestamp() }); 
+                await addDoc(collection(db, "chats"), { 
+                    txt: i.value, 
+                    user: currentUser,
+                    time: serverTimestamp() 
+                }); 
                 i.value = ""; 
             }
         });
 
         document.getElementById('add-s').addEventListener('click', async () => {
-            const n = prompt("Titre du morceau ?");
+            const n = prompt("Nom du morceau ?");
             if(n) { 
                 const b = prompt("BPM ?", "120");
                 await addDoc(collection(db, "songs"), { name: n, bpm: b, time: serverTimestamp() }); 
