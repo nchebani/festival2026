@@ -87,21 +87,113 @@
         </nav>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+ <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    // Correction : On importe explicitement les fonctions de base de données
+    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyA4wRPUNY7ELW9sQCMIwWDL0JTt4GhiBMY",
-            authDomain: "festival-2026-9821a.firebaseapp.com",
-            projectId: "festival-2026-9821a",
-            storageBucket: "festival-2026-9821a.firebasestorage.app",
-            messagingSenderId: "330460197364",
-            appId: "1:330460197364:web:123ad880e38787ce2789a1"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyA4wRPUNY7ELW9sQCMIwWDL0JTt4GhiBMY",
+        authDomain: "festival-2026-9821a.firebaseapp.com",
+        projectId: "festival-2026-9821a",
+        storageBucket: "festival-2026-9821a.firebasestorage.app",
+        messagingSenderId: "330460197364",
+        appId: "1:330460197364:web:123ad880e38787ce2789a1"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // Initialisation
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // --- GESTION CONNEXION ---
+    const loginBtn = document.getElementById('btn-login');
+    loginBtn.addEventListener('click', () => {
+        const code = document.getElementById('access-code').value;
+        const error = document.getElementById('login-error');
+        if(code === "1234") {
+            document.body.classList.add('is-admin');
+            enterApp("ADMINISTRATEUR");
+        } else if(code === "0000") {
+            enterApp("MEMBRE");
+        } else {
+            error.classList.remove('hidden');
+        }
+    });
+
+    function enterApp(role) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('app-content').classList.remove('hidden');
+        document.getElementById('user-status').innerText = role;
+    }
+
+    // --- SYNCHRONISATION TEMPS RÉEL (LECTURE) ---
+    // Cette partie est celle qui permet aux autres de voir tes modifs
+    
+    // 1. Setlist
+    onSnapshot(query(collection(db, "setlist"), orderBy("createdAt", "asc")), (s) => {
+        const c = document.getElementById('setlist-container'); c.innerHTML = "";
+        document.getElementById('stat-songs').innerText = s.size;
+        s.forEach(doc => { 
+            const track = doc.data();
+            c.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between border-l-2 border-cyan-500 shadow-md mb-2">
+                <span class="font-bold">${track.name}</span><span class="text-[10px] text-cyan-400 font-mono">${track.bpm || '---'} BPM</span>
+            </div>`;
+        });
+    }, (error) => console.error("Erreur Setlist:", error));
+
+    // 2. Membres
+    onSnapshot(collection(db, "membres"), (s) => {
+        const l = document.getElementById('members-list');
+        document.getElementById('stat-members').innerText = s.size;
+        l.innerHTML = "";
+        s.forEach(doc => {
+            const m = doc.data();
+            l.innerHTML += `<div class="glass p-4 rounded-xl flex justify-between items-center mb-2">
+                <span class="font-bold text-sm">${m.name}</span><span class="text-[9px] bg-cyan-500/10 text-cyan-500 px-2 py-1 rounded-md uppercase font-bold">${m.role}</span>
+            </div>`;
+        });
+    }, (error) => console.error("Erreur Membres:", error));
+
+    // 3. Chat
+    onSnapshot(query(collection(db, "chat"), orderBy("date", "asc")), (s) => {
+        const b = document.getElementById('chat-messages'); b.innerHTML = "";
+        s.forEach(doc => {
+            const m = doc.data();
+            b.innerHTML += `<div class="flex flex-col mb-2"><div class="bg-slate-800/80 p-4 rounded-2xl rounded-tl-none text-xs border border-white/5">${m.text}</div></div>`;
+        });
+        b.scrollTop = b.scrollHeight;
+    }, (error) => console.error("Erreur Chat:", error));
+
+    // --- ACTIONS (ÉCRITURE) ---
+    // On ajoute des alert() pour voir si l'envoi échoue
+    
+    document.getElementById('btn-send-chat').addEventListener('click', async () => {
+        const i = document.getElementById('chat-input');
+        if(!i.value) return;
+        try {
+            await addDoc(collection(db, "chat"), { text: i.value, date: serverTimestamp() });
+            i.value = "";
+        } catch(e) { alert("Erreur Chat: " + e.message); }
+    });
+
+    document.getElementById('btn-add-member').addEventListener('click', async () => {
+        const n = document.getElementById('mem-name').value;
+        const r = document.getElementById('mem-role').value;
+        if(!n) return;
+        try {
+            await addDoc(collection(db, "membres"), { name: n, role: r });
+            document.getElementById('mem-name').value = "";
+        } catch(e) { alert("Erreur Membre: " + e.message); }
+    });
+
+    document.getElementById('btn-add-track').addEventListener('click', async () => {
+        const n = prompt("Titre du morceau ?");
+        if(!n) return;
+        try {
+            await addDoc(collection(db, "setlist"), { name: n, bpm: "---", createdAt: serverTimestamp() });
+        } catch(e) { alert("Erreur Setlist: " + e.message); }
+    });
+</script>
 
         // --- GESTION CONNEXION ---
         const loginBtn = document.getElementById('btn-login');
