@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE HUB 2026 - ULTIMATE</title>
+    <title>LIVE HUB 2026 - DISPO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         body { background: #050505; color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; }
-        .glass { background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); shadow: 0 8px 32px 0 rgba(0,0,0,0.8); }
+        .glass { background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
         .admin-only { display: none !important; }
         .is-admin .admin-only { display: flex !important; }
         .tab-content { display: none; padding-bottom: 140px; animation: fadeIn 0.3s ease; }
@@ -21,17 +21,17 @@
 <body>
 
     <div id="page-login" class="page">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/30 text-center">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/30 text-center shadow-2xl">
             <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
-            <p class="text-[10px] uppercase tracking-[0.4em] mb-10 font-bold text-slate-500">Backstage Security</p>
+            <p class="text-[10px] uppercase tracking-[0.4em] mb-10 font-bold text-slate-500">Security Access</p>
             <input type="tel" id="input-pass" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 text-white outline-none focus:border-cyan-500" placeholder="****">
             <button id="btn-to-name" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs tracking-widest shadow-lg shadow-cyan-900/40">Vérifier</button>
         </div>
     </div>
 
-    <div id="page-name" class="page hidden">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-white/10 text-center">
-            <p class="text-slate-500 text-[10px] uppercase mb-4 font-bold tracking-widest">Ton identité</p>
+    <div id="page-name" class="page hidden text-center">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-white/10">
+            <p class="text-slate-500 text-[10px] uppercase mb-4 font-bold">Identification</p>
             <input type="text" id="input-name" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 text-white outline-none focus:border-cyan-500" placeholder="Ton Prénom">
             <button id="btn-to-app" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs tracking-widest">Entrer</button>
         </div>
@@ -43,36 +43,51 @@
                 <h2 class="font-black italic text-xl">LIVE HUB <span class="text-cyan-500">2026</span></h2>
                 <p id="role-tag" class="text-[8px] font-bold text-cyan-500/50 uppercase tracking-widest"></p>
             </div>
-            <button id="logout-btn" class="w-10 h-10 glass rounded-full flex items-center justify-center text-red-500 hover:bg-red-500/10"><i class="fas fa-power-off text-sm"></i></button>
+            <button id="logout-btn" class="w-10 h-10 glass rounded-full flex items-center justify-center text-red-500"><i class="fas fa-power-off text-sm"></i></button>
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
             
-            <section id="tab-home" class="tab-content active">
-                <div class="glass p-8 rounded-[2.5rem] mb-6 border-t border-white/10 text-center relative overflow-hidden">
+            <section id="tab-home" class="tab-content active text-center">
+                <div class="glass p-8 rounded-[3rem] mb-6 border-t border-white/10">
                     <h3 class="text-3xl font-black italic uppercase mb-2" id="display-name">---</h3>
-                    <div id="status-badge" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 mb-4">
-                        <span class="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
-                        <span class="text-[9px] font-black text-green-500 uppercase tracking-widest">Connecté</span>
-                    </div>
-                    
                     <div class="mt-4 pt-4 border-t border-white/5">
-                        <p class="text-[9px] uppercase font-bold text-slate-500 mb-3 tracking-widest">Actuellement en ligne (<span id="count-online">0</span>)</p>
-                        <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px] font-bold">
-                            </div>
+                        <p class="text-[9px] uppercase font-bold text-slate-500 mb-3 tracking-widest italic text-cyan-500">En ligne :</p>
+                        <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px] font-bold"></div>
                     </div>
                 </div>
-
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div>
-                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Membres</span><b id="count-m" class="text-3xl font-black">0</b></div>
+                    <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div>
+                    <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Équipe</span><b id="count-m" class="text-3xl font-black">0</b></div>
                 </div>
             </section>
 
-            <section id="tab-calendar" class="tab-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black italic uppercase italic">Planning</h3><button id="btn-add-event" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center">+</button></div><div id="list-calendar" class="space-y-4"></div></section>
-            <section id="tab-team" class="tab-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black italic uppercase italic">Équipe</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center">+</button></div><div id="list-members" class="space-y-3"></div></section>
-            <section id="tab-setlist" class="tab-content"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black italic uppercase italic">Setlist</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full items-center justify-center">+</button></div><div id="list-songs" class="space-y-3"></div></section>
-            <section id="tab-chat" class="tab-content"><h3 class="text-2xl font-black italic mb-6 uppercase">Direct Feed</h3><div id="chat-box" class="h-[52vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div><div class="flex gap-2 p-2 glass rounded-[2.5rem] border border-white/10 shadow-2xl"><input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Message..."><button id="btn-send" class="bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center"><i class="fas fa-paper-plane text-[10px]"></i></button></div></section>
+            <section id="tab-calendar" class="tab-content">
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h3 class="text-2xl font-black italic uppercase italic">Planning</h3>
+                    <button id="btn-add-event" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button>
+                </div>
+                <div id="list-calendar" class="space-y-6"></div>
+            </section>
+
+            <section id="tab-team" class="tab-content">
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div id="list-members" class="space-y-3"></div>
+            </section>
+
+            <section id="tab-setlist" class="tab-content">
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div id="list-songs" class="space-y-3"></div>
+            </section>
+
+            <section id="tab-chat" class="tab-content">
+                <h3 class="text-2xl font-black italic mb-6 uppercase px-2">Team Feed</h3>
+                <div id="chat-box" class="h-[52vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div>
+                <div class="flex gap-2 p-2 glass rounded-[2.5rem] border border-white/10 shadow-2xl">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Message...">
+                    <button id="btn-send" class="bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-[10px]"></i></button>
+                </div>
+            </section>
         </main>
 
         <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm z-50">
@@ -88,7 +103,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
@@ -103,14 +118,14 @@
         const db = getFirestore(app);
         let userName = "";
 
-        // LOGIN
+        // LOGIN / AUTH
         document.getElementById('btn-to-name').addEventListener('click', () => {
             const code = document.getElementById('input-pass').value;
             if(code === "1234" || code === "0000") {
                 if(code === "1234") document.body.classList.add('is-admin');
                 document.getElementById('page-login').classList.add('hidden');
                 document.getElementById('page-name').classList.remove('hidden');
-                document.getElementById('role-tag').innerText = (code === "1234") ? "ADMIN" : "MEMBRE";
+                document.getElementById('role-tag').innerText = (code === "1234") ? "ADMINISTRATEUR" : "MEMBRE";
             } else { alert("Code incorrect"); }
         });
 
@@ -121,74 +136,111 @@
                 document.getElementById('page-name').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
-                
-                // Marquer comme en ligne
                 await setDoc(doc(db, "presence", userName), { name: userName, time: serverTimestamp() });
             }
         });
 
-        // QUITTER & LOGOUT
         document.getElementById('logout-btn').addEventListener('click', async () => {
-            if(confirm("Se déconnecter ?")) {
-                await deleteDoc(doc(db, "presence", userName));
-                location.reload();
-            }
+            await deleteDoc(doc(db, "presence", userName));
+            location.reload();
         });
 
-        // --- REALTIME SYNC PRÉSENCE ---
-        onSnapshot(collection(db, "presence"), (snap) => {
+        // ACTIONS PRÉSENCE / VOTE
+        window.vote = async (eventId, status) => {
+            const voteId = `${eventId}_${userName}`;
+            await setDoc(doc(db, "votes", voteId), {
+                eventId: eventId,
+                userName: userName,
+                status: status
+            });
+        };
+
+        // --- REALTIME SYNC CALENDRIER + VOTES ---
+        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), (snapEvents) => {
+            onSnapshot(collection(db, "votes"), (snapVotes) => {
+                const list = document.getElementById('list-calendar');
+                list.innerHTML = "";
+                
+                snapEvents.forEach(d => {
+                    const e = d.data();
+                    const eventId = d.id;
+                    const votes = [];
+                    snapVotes.forEach(v => { if(v.data().eventId === eventId) votes.push(v.data()); });
+                    
+                    const myVote = votes.find(v => v.userName === userName)?.status;
+                    const presentCount = votes.filter(v => v.status === 'yes').length;
+
+                    list.innerHTML += `
+                        <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 relative shadow-xl">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <span class="text-cyan-500 font-black text-xs uppercase tracking-tighter italic">${new Date(e.date).toLocaleDateString('fr-FR', {weekday:'long', day:'2-digit', month:'long'})}</span>
+                                    <h4 class="font-black text-white text-lg leading-tight uppercase mt-1">${e.title}</h4>
+                                </div>
+                                <button onclick="window.deleteItem('calendar', '${eventId}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button>
+                            </div>
+
+                            <div class="space-y-3 mb-5">
+                                <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                                    <p class="text-[9px] uppercase font-bold text-cyan-500 mb-1 tracking-widest italic">Objectifs de la session :</p>
+                                    <p class="text-xs text-slate-300">${e.goals || 'Non définis'}</p>
+                                </div>
+                                ${e.summary ? `<div class="bg-green-500/5 p-4 rounded-2xl border border-green-500/10"><p class="text-[9px] uppercase font-bold text-green-500 mb-1 tracking-widest italic text-xs">Note précédente :</p><p class="text-xs text-slate-400 italic font-medium">"${e.summary}"</p></div>` : ''}
+                            </div>
+
+                            <div class="border-t border-white/5 pt-4">
+                                <div class="flex justify-between items-center mb-4">
+                                    <p class="text-[10px] font-black uppercase text-slate-500 tracking-widest">Ta présence :</p>
+                                    <div class="flex gap-2">
+                                        <button onclick="vote('${eventId}', 'yes')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'} transition-all text-sm shadow-lg"><i class="fas fa-check"></i></button>
+                                        <button onclick="vote('${eventId}', 'no')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'} transition-all text-sm shadow-lg"><i class="fas fa-times"></i></button>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-black/20 rounded-2xl p-3 flex flex-wrap gap-2 items-center">
+                                    <span class="text-[9px] font-bold text-cyan-500/50 uppercase mr-1">${presentCount} PRÉSENT(S) :</span>
+                                    ${votes.map(v => `<span class="${v.status === 'yes' ? 'text-green-500' : 'text-red-500/50'} text-[9px] font-black uppercase tracking-tighter">${v.userName}${v.status === 'yes' ? '✓' : '✗'}</span>`).join('<span class="text-white/5">•</span>')}
+                                </div>
+                            </div>
+                        </div>`;
+                });
+            });
+        });
+
+        // SYNC AUTRES (ON-LINE, TEAM, SONGS, CHAT)
+        onSnapshot(collection(db, "presence"), snap => {
             const list = document.getElementById('list-online');
-            const count = document.getElementById('count-online');
+            document.getElementById('count-online').innerText = snap.size;
             list.innerHTML = "";
-            count.innerText = snap.size;
-            snap.forEach(d => {
-                const p = d.data();
-                list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/20 shadow-sm">${p.name}</span>`;
-            });
-        });
-
-        // --- AUTRES SYNC (CALENDRIER, TEAM, SONGS, CHAT) ---
-        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
-            const list = document.getElementById('list-calendar'); list.innerHTML = "";
-            snap.forEach(d => {
-                const e = d.data(); const isPast = new Date(e.date) < new Date().setHours(0,0,0,0);
-                list.innerHTML += `<div class="glass p-5 rounded-3xl border-l-4 ${isPast ? 'border-slate-800 opacity-50' : 'border-cyan-500'}">
-                    <div class="flex justify-between mb-2"><span class="text-cyan-500 font-black text-[10px]">${e.date}</span><button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30 text-[10px]"><i class="fas fa-trash"></i></button></div>
-                    <h4 class="font-bold text-xs uppercase mb-2">${e.title}</h4>
-                    <p class="text-[10px] text-slate-400 bg-white/5 p-2 rounded-lg">${e.goals || '...'}</p>
-                </div>`;
-            });
+            snap.forEach(d => list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10">${d.data().name}</span>`);
         });
 
         onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
             const list = document.getElementById('list-members'); list.innerHTML = "";
             document.getElementById('count-m').innerText = snap.size;
-            snap.forEach(d => {
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`;
-            });
+            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
         });
 
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
             const list = document.getElementById('list-songs'); list.innerHTML = "";
             document.getElementById('count-s').innerText = snap.size;
-            snap.forEach(d => {
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center border-l-2 border-cyan-500"><div><b class="text-xs uppercase">${d.data().name}</b><p class="text-slate-500 text-[9px]">${d.data().bpm} BPM</p></div><button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`;
-            });
+            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center border-l-2 border-cyan-500"><div><b class="text-xs uppercase">${d.data().name}</b><p class="text-slate-500 text-[9px]">${d.data().bpm} BPM</p></div><button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
         });
 
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
                 const m = d.data(); const isMe = m.user === userName;
-                box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1"><span class="text-[7px] font-black text-slate-600 mb-1 px-3 uppercase tracking-widest">${m.user}</span><div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 px-4 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} max-w-[85%] shadow-sm"><p class="text-[13px] text-white leading-tight">${m.txt}</p></div></div>`;
+                box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-1"><span class="text-[7px] font-black text-slate-600 mb-1 px-3 uppercase tracking-widest">${m.user}</span><div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 px-4 rounded-2xl ${isMe ? 'rounded-tr-none' : 'rounded-tl-none'} max-w-[85%] shadow-sm"><p class="text-[13px] text-white leading-tight font-medium">${m.txt}</p></div></div>`;
             });
             box.scrollTop = box.scrollHeight;
         });
 
-        // --- ACTIONS ---
+        // ACTIONS ADMIN
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
+        
         document.getElementById('btn-add-event').addEventListener('click', async () => {
-            const t = prompt("Titre?"); if(t) await addDoc(collection(db, "calendar"), { title: t, date: prompt("Date (AAAA-MM-JJ)?"), goals: prompt("Objectifs?") });
+            const t = prompt("Titre de la répèt?"); if(t) await addDoc(collection(db, "calendar"), { title: t, date: prompt("Date (AAAA-MM-JJ)?"), goals: prompt("Objectifs?"), summary: prompt("Résumé précédent?") });
         });
         document.getElementById('btn-add-song').addEventListener('click', async () => {
             const n = prompt("Titre?"); if(n) await addDoc(collection(db, "songs"), { name: n, bpm: prompt("BPM?"), time: serverTimestamp() });
@@ -200,7 +252,6 @@
             const i = document.getElementById('chat-input');
             if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
         });
-
     </script>
     <script>
         function switchTab(id, btn) {
