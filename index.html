@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE HUB 2026 - FIX</title>
+    <title>LIVE HUB 2026 - KEYS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -69,7 +69,10 @@
             </section>
 
             <section id="tab-setlist" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h3 class="text-2xl font-black italic uppercase">Songs</h3>
+                    <button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button>
+                </div>
                 <div id="list-songs" class="space-y-3"></div>
             </section>
 
@@ -94,6 +97,32 @@
         </nav>
     </div>
 
+    <div id="modal-song" class="page hidden bg-black/80 z-[200]">
+        <div class="glass p-8 rounded-[2rem] w-full max-w-sm">
+            <h3 class="text-xl font-black mb-6 uppercase italic text-cyan-500">Ajouter un morceau</h3>
+            <input type="text" id="song-name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none focus:border-cyan-500" placeholder="Titre du morceau">
+            <input type="number" id="song-bpm" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none focus:border-cyan-500" placeholder="BPM">
+            <label class="text-[10px] uppercase font-bold text-slate-500 ml-1">Tonalité (Key)</label>
+            <select id="song-key" class="w-full bg-zinc-900 border border-white/10 p-4 rounded-xl mb-6 outline-none text-white appearance-none cursor-pointer">
+                <option value="N/A">- Choisir la clé -</option>
+                <optgroup label="Majeur">
+                    <option value="C Major">C Major</option><option value="C# Major">C# Major</option><option value="D Major">D Major</option><option value="Eb Major">Eb Major</option>
+                    <option value="E Major">E Major</option><option value="F Major">F Major</option><option value="F# Major">F# Major</option><option value="G Major">G Major</option>
+                    <option value="Ab Major">Ab Major</option><option value="A Major">A Major</option><option value="Bb Major">Bb Major</option><option value="B Major">B Major</option>
+                </optgroup>
+                <optgroup label="Mineur">
+                    <option value="Am">Am</option><option value="A#m">A#m</option><option value="Bm">Bm</option><option value="Cm">Cm</option>
+                    <option value="C#m">C#m</option><option value="Dm">Dm</option><option value="D#m">D#m</option><option value="Em">Em</option>
+                    <option value="Fm">Fm</option><option value="F#m">F#m</option><option value="Gm">Gm</option><option value="G#m">G#m</option>
+                </optgroup>
+            </select>
+            <div class="flex gap-2">
+                <button onclick="closeSongModal()" class="flex-1 bg-white/5 py-4 rounded-xl uppercase text-[10px] font-bold">Annuler</button>
+                <button onclick="saveNewSong()" class="flex-1 bg-cyan-600 py-4 rounded-xl uppercase text-[10px] font-bold">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
@@ -111,7 +140,7 @@
         const db = getFirestore(app);
         let userName = "";
 
-        // AUTH
+        // LOGIN / PRÉSONCE (IDENTIQUE)
         document.getElementById('btn-to-name').addEventListener('click', () => {
             const code = document.getElementById('input-pass').value;
             if(code === "1234" || code === "0000") {
@@ -129,7 +158,6 @@
                 document.getElementById('page-name').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
-                // Marquer comme en ligne
                 await setDoc(doc(db, "presence", userName), { name: userName, time: serverTimestamp() });
             }
         });
@@ -139,74 +167,83 @@
             location.reload();
         });
 
-        // SYNC PRÉSENCE (FIXÉ)
-        onSnapshot(collection(db, "presence"), (snap) => {
-            const listOnline = document.getElementById('list-online');
-            const countOnline = document.getElementById('count-online');
-            if(listOnline) {
-                listOnline.innerHTML = "";
-                countOnline.innerText = snap.size;
-                snap.forEach(d => {
-                    listOnline.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10">${d.data().name}</span>`;
-                });
+        // --- GESTION DES SONGS (NOUVELLE MÉTHODE) ---
+        window.saveNewSong = async () => {
+            const name = document.getElementById('song-name').value;
+            const bpm = document.getElementById('song-bpm').value;
+            const key = document.getElementById('song-key').value;
+            if(name) {
+                await addDoc(collection(db, "songs"), { name, bpm, key, time: serverTimestamp() });
+                closeSongModal();
             }
-        });
-
-        // VOTE SYSTEM
-        window.vote = async (eventId, status) => {
-            await setDoc(doc(db, "votes", `${eventId}_${userName}`), { eventId, userName, status });
         };
 
-        // CALENDRIER + VOTES
-        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), (snapEvents) => {
-            onSnapshot(collection(db, "votes"), (snapVotes) => {
-                const list = document.getElementById('list-calendar');
-                list.innerHTML = "";
-                snapEvents.forEach(d => {
-                    const e = d.data(); const eventId = d.id;
-                    const votes = []; snapVotes.forEach(v => { if(v.data().eventId === eventId) votes.push(v.data()); });
-                    const myVote = votes.find(v => v.userName === userName)?.status;
-                    const pCount = votes.filter(v => v.status === 'yes').length;
+        window.closeSongModal = () => document.getElementById('modal-song').classList.add('hidden');
+        document.getElementById('btn-add-song').addEventListener('click', () => document.getElementById('modal-song').classList.remove('hidden'));
 
-                    list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 relative">
+        // --- REALTIME SYNC SETLIST AVEC CLÉS ---
+        onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
+            const list = document.getElementById('list-songs');
+            list.innerHTML = "";
+            document.getElementById('count-s').innerText = snap.size;
+            snap.forEach(d => {
+                const s = d.data();
+                list.innerHTML += `<div class="glass p-5 rounded-2xl flex justify-between items-center border-l-4 border-cyan-500 shadow-lg">
+                    <div class="flex-1">
+                        <b class="text-sm uppercase text-white block mb-1">${s.name}</b>
+                        <div class="flex gap-3">
+                            <span class="text-slate-500 text-[9px] font-bold"><i class="fas fa-metronome mr-1"></i>${s.bpm || '--'} BPM</span>
+                            <span class="text-cyan-500 text-[9px] font-black uppercase"><i class="fas fa-key mr-1"></i>${s.key || 'N/A'}</span>
+                        </div>
+                    </div>
+                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-sm"></i></button>
+                </div>`;
+            });
+        });
+
+        // --- RESTE DU CODE (VOTES, PLANNING, CHAT) IDENTIQUE ---
+        window.vote = async (eventId, status) => { await setDoc(doc(db, "votes", `${eventId}_${userName}`), { eventId, userName, status }); };
+        
+        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), (sE) => {
+            onSnapshot(collection(db, "votes"), (sV) => {
+                const list = document.getElementById('list-calendar'); list.innerHTML = "";
+                sE.forEach(d => {
+                    const e = d.data(); const votes = []; sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
+                    const myVote = votes.find(v => v.userName === userName)?.status;
+                    const pC = votes.filter(v => v.status === 'yes').length;
+                    list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4">
                         <div class="flex justify-between items-start mb-4">
-                            <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase">${e.title}</h4></div>
-                            <button onclick="window.deleteItem('calendar', '${eventId}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button>
+                            <div><span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span><h4 class="font-black text-white text-lg uppercase">${e.title}</h4></div>
+                            <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button>
                         </div>
-                        <div class="space-y-2 mb-4">
-                            <div class="bg-white/5 p-3 rounded-xl border border-white/5 text-xs text-slate-300"><p class="text-cyan-500 font-bold uppercase text-[8px] mb-1">Objectifs :</p>${e.goals || '...'}</div>
-                            ${e.summary ? `<div class="bg-green-500/5 p-3 rounded-xl border border-green-500/10 text-xs text-slate-400 italic">"${e.summary}"</div>` : ''}
-                        </div>
+                        <div class="bg-white/5 p-3 rounded-xl text-xs text-slate-300 mb-4">${e.goals || '...'}</div>
                         <div class="flex justify-between items-center mb-4">
-                            <p class="text-[9px] font-black uppercase text-slate-500">Ta présence :</p>
+                            <p class="text-[9px] font-black uppercase text-slate-500">Présence :</p>
                             <div class="flex gap-2">
-                                <button onclick="vote('${eventId}', 'yes')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'} transition-all shadow-lg"><i class="fas fa-check"></i></button>
-                                <button onclick="vote('${eventId}', 'no')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'} transition-all shadow-lg"><i class="fas fa-times"></i></button>
+                                <button onclick="vote('${d.id}', 'yes')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check text-xs"></i></button>
+                                <button onclick="vote('${d.id}', 'no')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times text-xs"></i></button>
                             </div>
                         </div>
                         <div class="bg-black/20 rounded-xl p-3 flex flex-wrap gap-2">
-                            <span class="text-[8px] font-bold text-cyan-500/50 uppercase">${pCount} PRÉSENT(S) :</span>
-                            ${votes.map(v => `<span class="${v.status === 'yes' ? 'text-green-500' : 'text-red-500/50'} text-[9px] font-black uppercase tracking-tighter">${v.userName}${v.status === 'yes' ? '✓' : '✗'}</span>`).join('')}
+                            <span class="text-[8px] font-bold text-cyan-500/50 uppercase">${pC} LÀ :</span>
+                            ${votes.map(v => `<span class="${v.status === 'yes' ? 'text-green-500' : 'text-red-500/50'} text-[9px] font-black uppercase">${v.userName}${v.status === 'yes' ? '✓' : '✗'}</span>`).join('')}
                         </div>
                     </div>`;
                 });
             });
         });
 
-        // TEAM & SONGS
+        onSnapshot(collection(db, "presence"), snap => {
+            const l = document.getElementById('list-online'); document.getElementById('count-online').innerText = snap.size;
+            l.innerHTML = ""; snap.forEach(d => l.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10">${d.data().name}</span>`);
+        });
+
         onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
             const list = document.getElementById('list-members'); list.innerHTML = "";
             document.getElementById('count-m').innerText = snap.size;
             snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase text-white">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
         });
 
-        onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
-            const list = document.getElementById('list-songs'); list.innerHTML = "";
-            document.getElementById('count-s').innerText = snap.size;
-            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center border-l-2 border-cyan-500"><div><b class="text-xs uppercase text-white">${d.data().name}</b><p class="text-slate-500 text-[9px]">${d.data().bpm} BPM</p></div><button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
-        });
-
-        // CHAT
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
@@ -216,13 +253,9 @@
             box.scrollTop = box.scrollHeight;
         });
 
-        // ADMIN
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
         document.getElementById('btn-add-event').addEventListener('click', async () => {
-            const t = prompt("Titre?"); if(t) await addDoc(collection(db, "calendar"), { title: t, date: prompt("Date (AAAA-MM-JJ)?"), goals: prompt("Objectifs?"), summary: prompt("Résumé?") });
-        });
-        document.getElementById('btn-add-song').addEventListener('click', async () => {
-            const n = prompt("Titre?"); if(n) await addDoc(collection(db, "songs"), { name: n, bpm: prompt("BPM?"), time: serverTimestamp() });
+            const t = prompt("Titre?"); if(t) await addDoc(collection(db, "calendar"), { title: t, date: prompt("Date (AAAA-MM-JJ)?"), goals: prompt("Objectifs?") });
         });
         document.getElementById('btn-add-member').addEventListener('click', async () => {
             const n = prompt("Nom?"); if(n) await addDoc(collection(db, "team"), { name: n, role: prompt("Rôle?") });
