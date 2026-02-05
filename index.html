@@ -18,7 +18,6 @@
         #push-alert { transform: translateY(-130%); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; }
         #push-alert.show { transform: translateY(20px); }
         
-        /* Animation pour les membres en ligne */
         .online-pulse { animation: pulse-cyan 2s infinite; }
         @keyframes pulse-cyan {
             0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
@@ -31,36 +30,44 @@
 
     <div id="push-alert" class="fixed top-0 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass p-4 rounded-3xl border-l-4 border-cyan-500 shadow-2xl flex items-center gap-3">
         <div class="bg-cyan-500/20 w-10 h-10 rounded-full flex items-center justify-center text-cyan-500"><i class="fas fa-bell"></i></div>
-        <div class="flex-1"><p id="push-title" class="text-[10px] font-black uppercase text-cyan-500">Live Hub</p><p id="push-body" class="text-xs text-white">Message...</p></div>
+        <div class="flex-1">
+            <p id="push-title" class="text-[10px] font-black uppercase text-cyan-500">Live Hub</p>
+            <p id="push-body" class="text-xs text-white">Message...</p>
+        </div>
     </div>
 
     <div id="page-login" class="page">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/30 text-center">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/30 text-center shadow-2xl">
             <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
-            <input type="tel" id="input-pass" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 text-white outline-none" placeholder="****">
-            <button id="btn-to-name" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs">Vérifier</button>
+            <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-8 font-bold">Accès Groupe 2026</p>
+            <input type="tel" id="input-pass" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 text-white outline-none focus:border-cyan-500 transition-all" placeholder="****">
+            <button id="btn-to-name" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs hover:bg-cyan-500 transition-all shadow-lg">Vérifier</button>
         </div>
     </div>
 
     <div id="page-name" class="page hidden text-center">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-white/10">
-            <input type="text" id="input-name" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 text-white outline-none" placeholder="Ton Prénom">
-            <button id="btn-to-app" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs">Entrer</button>
+        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-white/10 shadow-2xl">
+            <p class="text-[10px] uppercase font-bold text-cyan-500 mb-4 tracking-widest">Bienvenue</p>
+            <input type="text" id="input-name" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 text-white outline-none focus:border-white/30 transition-all" placeholder="Ton Prénom">
+            <button id="btn-to-app" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs hover:bg-slate-200 transition-all shadow-lg">Entrer dans le Hub</button>
         </div>
     </div>
 
     <div id="main-app" class="hidden min-h-screen">
         <header class="p-6 flex justify-between items-center sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-40 border-b border-white/5">
-            <div><h2 class="font-black italic text-xl uppercase">Live Hub <span class="text-cyan-500">2026</span></h2><p id="role-tag" class="text-[8px] font-bold text-cyan-500/50 uppercase tracking-widest"></p></div>
-            <button id="logout-btn" class="w-10 h-10 glass rounded-full flex items-center justify-center text-red-500"><i class="fas fa-power-off"></i></button>
+            <div>
+                <h2 class="font-black italic text-xl uppercase tracking-tighter">Live Hub <span class="text-cyan-500">2026</span></h2>
+                <p id="role-tag" class="text-[8px] font-bold text-cyan-500/50 uppercase tracking-widest"></p>
+            </div>
+            <button id="logout-btn" class="w-10 h-10 glass rounded-full flex items-center justify-center text-red-500 hover:bg-red-500/10 transition-all"><i class="fas fa-power-off"></i></button>
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
             <section id="tab-home" class="tab-content active text-center">
-                <div class="glass p-8 rounded-[3rem] mb-6">
-                    <h3 class="text-3xl font-black italic uppercase mb-2" id="display-name">---</h3>
+                <div class="glass p-8 rounded-[3rem] mb-6 shadow-2xl">
+                    <h3 class="text-3xl font-black italic uppercase mb-2 tracking-tighter" id="display-name">---</h3>
                     <div class="mt-4 pt-4 border-t border-white/5">
-                        <p class="text-[9px] uppercase font-bold text-cyan-500 mb-3 tracking-widest">En ligne (<span id="count-online">0</span>) :</p>
+                        <p class="text-[9px] uppercase font-bold text-cyan-500 mb-3 tracking-widest">Membres en ligne (<span id="count-online">0</span>)</p>
                         <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px]"></div>
                     </div>
                 </div>
@@ -71,30 +78,33 @@
             </section>
 
             <section id="tab-calendar" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Planning</h3><button id="btn-add-event" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Planning</h3><button id="btn-add-event" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
                 <div id="list-calendar" class="space-y-6"></div>
             </section>
 
             <section id="tab-archives" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Archives</h3><button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Archives</h3><button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
                 <div id="list-archives" class="space-y-4"></div>
             </section>
 
             <section id="tab-team" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
                 <div id="list-members" class="space-y-3"></div>
             </section>
 
             <section id="tab-setlist" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
                 <div id="list-songs" class="space-y-3"></div>
             </section>
 
             <section id="tab-chat" class="tab-content">
-                <h3 class="text-2xl font-black italic mb-6 uppercase px-2">Team Feed</h3>
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h3 class="text-2xl font-black italic uppercase">Team Feed</h3>
+                    <button id="btn-urgent" class="admin-only bg-red-600/20 border border-red-500 text-red-500 font-bold px-4 py-2 rounded-xl text-[10px] uppercase animate-pulse">Urgence</button>
+                </div>
                 <div id="chat-box" class="h-[52vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div>
                 <div class="flex gap-2 p-2 glass rounded-[2.5rem] border border-white/10 shadow-2xl">
-                    <input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Message...">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Écris un message...">
                     <button id="btn-send" class="bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-[10px]"></i></button>
                 </div>
             </section>
@@ -114,7 +124,7 @@
 
     <div id="modal-song" class="page hidden bg-black/80 z-[200]">
         <div class="glass p-8 rounded-[2rem] w-full max-w-sm">
-            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 text-center tracking-tighter">Nouveau Morceau</h3>
+            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 text-center">Nouveau Morceau</h3>
             <input type="text" id="song-name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Titre">
             <input type="number" id="song-bpm" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="BPM">
             <input type="text" id="song-key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none" placeholder="Clé (ex: Am)">
@@ -127,7 +137,7 @@
 
     <div id="modal-archive" class="page hidden bg-black/80 z-[200]">
         <div class="glass p-8 rounded-[2rem] w-full max-w-sm">
-            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 text-center tracking-tighter">Nouveau Résumé</h3>
+            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 text-center">Nouveau Résumé</h3>
             <input type="text" id="arch-date" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Date (ex: 12 Février)">
             <input type="text" id="arch-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Titre">
             <textarea id="arch-content" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none h-32" placeholder="Ce qu'on a fait..."></textarea>
@@ -165,7 +175,7 @@
             setTimeout(() => alert.classList.remove('show'), 5000);
         };
 
-        // --- SYSTEME DE PRÉSENCE RÉELLE (HEARTBEAT) ---
+        // --- GESTION PRÉSENCE (HEARTBEAT) ---
         const updatePresence = async () => {
             if (userName) {
                 await setDoc(doc(db, "presence", userName), { 
@@ -175,7 +185,7 @@
             }
         };
 
-        // CONNEXION
+        // --- AUTH & NAVIGATION ---
         document.getElementById('btn-to-name').addEventListener('click', () => {
             const code = document.getElementById('input-pass').value;
             if(code === "0193" || code === "0000") {
@@ -194,29 +204,26 @@
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
                 
-                // Envoi du premier battement et démarrage du cycle (30s)
                 await updatePresence();
                 setInterval(updatePresence, 30000);
                 
-                // Nettoyage rapide si on ferme l'onglet
                 window.addEventListener('unload', () => { if(userName) deleteDoc(doc(db, "presence", userName)); });
-
                 setTimeout(() => isFirstLoad = false, 1500);
             }
         });
 
-        // ACTIONS ADMIN & MODALES
-        window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
+        // --- ACTIONS ADMIN ---
+        window.deleteItem = async (coll, id) => { if(confirm("Supprimer définitivement ?")) await deleteDoc(doc(db, coll, id)); };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         document.getElementById('btn-add-event').addEventListener('click', async () => {
-            const t = prompt("Titre?"); const d = prompt("Date?");
-            if(t) await addDoc(collection(db, "calendar"), { title: t, date: d });
+            const t = prompt("Titre de la répèt ?"); const d = prompt("Date (ex: 12 Fév) ?");
+            if(t && d) await addDoc(collection(db, "calendar"), { title: t, date: d });
         });
 
         document.getElementById('btn-add-member').addEventListener('click', async () => {
-            const n = prompt("Nom?"); const r = prompt("Rôle?");
-            if(n) await addDoc(collection(db, "team"), { name: n, role: r });
+            const n = prompt("Nom du membre ?"); const r = prompt("Instrument / Rôle ?");
+            if(n && r) await addDoc(collection(db, "team"), { name: n, role: r });
         });
 
         document.getElementById('btn-add-song').addEventListener('click', () => document.getElementById('modal-song').classList.remove('hidden'));
@@ -241,27 +248,25 @@
             }
         });
 
-        // SYNC FIREBASE
+        document.getElementById('btn-urgent').addEventListener('click', async () => {
+            const msg = prompt("MESSAGE D'URGENCE :");
+            if(msg) await addDoc(collection(db, "chats"), { txt: `🚨 URGENT : ${msg}`, user: "URGENT", time: serverTimestamp() });
+        });
+
+        // --- SYNC FIREBASE ---
         onSnapshot(collection(db, "presence"), snap => {
             const now = Date.now();
-            const limit = 120000; // 2 minutes
-            let count = 0;
-            const list = document.getElementById('list-online');
-            list.innerHTML = "";
-            
+            let count = 0; const list = document.getElementById('list-online'); list.innerHTML = "";
             snap.forEach(d => {
                 const data = d.data();
-                if (now - data.lastSeen < limit) {
+                if (now - data.lastSeen < 120000) {
                     count++;
-                    list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10 text-[10px] online-pulse font-bold uppercase">${data.name}</span>`;
-                } else {
-                    deleteDoc(doc(db, "presence", d.id)); // Nettoyage auto des vieux documents
-                }
+                    list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10 text-[10px] online-pulse font-black uppercase tracking-tighter">${data.name}</span>`;
+                } else { deleteDoc(doc(db, "presence", d.id)); }
             });
             document.getElementById('count-online').innerText = count;
         });
 
-        // (Le reste de tes syncs : planning, chat, team, etc. reste inchangé et fonctionnel)
         onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), sE => {
             onSnapshot(collection(db, "votes"), sV => {
                 const list = document.getElementById('list-calendar'); list.innerHTML = "";
@@ -270,13 +275,13 @@
                     sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
                     const myVote = votes.find(v => v.userName === userName)?.status;
                     const presents = votes.filter(v => v.status === 'yes').map(v => v.userName);
-                    list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4">
+                    list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 shadow-xl">
                         <div class="flex justify-between items-start mb-2"><div><span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span><h4 class="font-black text-white text-lg uppercase">${e.title}</h4></div>
-                        <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>
-                        <div class="flex flex-wrap gap-1 mb-4">${presents.length > 0 ? presents.map(n => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold">${n}</span>`).join('') : '<span class="text-[8px] text-slate-600">Aucun inscrit</span>'}</div>
+                        <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30 hover:text-red-500 transition-all"><i class="fas fa-trash"></i></button></div>
+                        <div class="flex flex-wrap gap-1 mb-4">${presents.length > 0 ? presents.map(n => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold uppercase">${n}</span>`).join('') : '<span class="text-[8px] text-slate-600 uppercase italic">Aucun inscrit</span>'}</div>
                         <div class="flex gap-2">
-                            <button onclick="vote('${d.id}', 'yes', '${e.title}')" class="w-10 h-10 rounded-xl ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button>
-                            <button onclick="vote('${d.id}', 'no', '${e.title}')" class="w-10 h-10 rounded-xl ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button>
+                            <button onclick="vote('${d.id}', 'yes', '${e.title}')" class="w-12 h-12 rounded-2xl ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button>
+                            <button onclick="vote('${d.id}', 'no', '${e.title}')" class="w-12 h-12 rounded-2xl ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button>
                         </div></div>`;
                 });
             });
@@ -290,16 +295,19 @@
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
-                const m = d.data(); const isMe = m.user === userName;
+                const m = d.data(); const isMe = m.user === userName; const isUrgent = m.user === "URGENT";
                 box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
-                    <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase">${m.user}</span>
+                    <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
                     <div class="flex items-center gap-2">
                         <button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 p-2"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                        <div class="${m.user === 'INFO' ? 'bg-cyan-500/10 text-cyan-200 italic' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 rounded-2xl text-sm">${m.txt}</div>
+                        <div class="${isUrgent ? 'bg-red-600 text-white font-black animate-bounce shadow-lg shadow-red-500/50' : m.user === 'INFO' ? 'bg-cyan-500/10 text-cyan-200 italic' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 px-4 rounded-2xl text-sm border ${isUrgent ? 'border-red-400' : 'border-transparent'}">${m.txt}</div>
                     </div></div>`;
                 if(!isMe && m.time && !isFirstLoad) {
                     const diff = (Date.now() - m.time.toMillis()) / 1000;
-                    if(diff < 5) triggerFlash(m.user, m.txt);
+                    if(diff < 6) {
+                        triggerFlash(isUrgent ? "⚠️ ALERTE" : m.user, m.txt);
+                        if(isUrgent && "vibrate" in navigator) navigator.vibrate([200, 100, 200, 100, 500]);
+                    }
                 }
             });
             box.scrollTop = box.scrollHeight;
@@ -308,7 +316,7 @@
         onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
             document.getElementById('count-m').innerText = snap.size;
             const list = document.getElementById('list-members'); list.innerHTML = "";
-            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
+            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase tracking-widest">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
         });
 
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
@@ -319,7 +327,7 @@
 
         onSnapshot(query(collection(db, "archives"), orderBy("time", "desc")), snap => {
             const list = document.getElementById('list-archives'); list.innerHTML = "";
-            snap.forEach(d => { const a = d.data(); list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-slate-500 mb-4"><div class="flex justify-between items-start mb-2"><span class="text-cyan-500 font-black text-[9px] uppercase">${a.date}</span><button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div><h4 class="text-white font-black italic uppercase mb-2">${a.title}</h4><p class="text-xs text-slate-400 whitespace-pre-wrap">${a.content}</p></div>`; });
+            snap.forEach(d => { const a = d.data(); list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-slate-500 mb-4 shadow-lg"><div class="flex justify-between items-start mb-2"><span class="text-cyan-500 font-black text-[9px] uppercase tracking-widest">${a.date}</span><button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div><h4 class="text-white font-black italic uppercase mb-2">${a.title}</h4><p class="text-xs text-slate-400 whitespace-pre-wrap">${a.content}</p></div>`; });
         });
 
         document.getElementById('btn-send').addEventListener('click', async () => {
@@ -332,6 +340,7 @@
             location.reload();
         });
     </script>
+
     <script>
         function switchTab(id, btn) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
