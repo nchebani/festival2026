@@ -160,22 +160,7 @@
         let userName = "";
         let isFirstLoad = true;
 
-        const triggerNotify = (title, body) => {
-            if(isFirstLoad) return;
-            document.getElementById('push-title').innerText = title;
-            document.getElementById('push-body').innerText = body;
-            const alert = document.getElementById('push-alert');
-            alert.classList.add('show');
-            setTimeout(() => alert.classList.remove('show'), 4000);
-        };
-
-        async function requestPushPermission() {
-            try {
-                const token = await getToken(messaging, { vapidKey: 'YvWX12rJSCE1Fb9cbFpTkUjY_Nv1B1XEEMyVnI6hkA8' });
-                if (token) await setDoc(doc(db, "tokens", userName), { token, user: userName });
-            } catch (err) { console.log("Erreur notifications"); }
-        }
-
+        // AUTH & NAVIGATION
         document.getElementById('btn-to-name').addEventListener('click', () => {
             const code = document.getElementById('input-pass').value;
             if(code === "0193" || code === "0000") {
@@ -194,29 +179,61 @@
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
                 await setDoc(doc(db, "presence", userName), { name: userName, time: serverTimestamp() });
-                requestPushPermission();
                 setTimeout(() => isFirstLoad = false, 2000);
             }
         });
 
-        // --- SYNC ARCHIVES ---
-        onSnapshot(query(collection(db, "archives"), orderBy("time", "desc")), snap => {
-            const list = document.getElementById('list-archives'); list.innerHTML = "";
-            snap.forEach(d => {
-                const a = d.data();
-                list.innerHTML += `
-                    <div class="glass p-6 rounded-[2rem] border-l-4 border-slate-500 relative">
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-cyan-500 font-black text-[9px] uppercase tracking-tighter">${a.date || 'Séance'}</span>
-                            <button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button>
-                        </div>
-                        <h4 class="text-white font-black italic uppercase text-md mb-2">${a.title}</h4>
-                        <p class="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">${a.content}</p>
-                    </div>`;
+        // --- SYNC CALENDAR (AVEC LISTE DES NOMS) ---
+        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), sE => {
+            onSnapshot(collection(db, "votes"), sV => {
+                const list = document.getElementById('list-calendar'); 
+                list.innerHTML = "";
+                
+                sE.forEach(d => {
+                    const e = d.data(); 
+                    const votes = []; 
+                    sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
+                    
+                    const myVote = votes.find(v => v.userName === userName)?.status;
+                    const presents = votes.filter(v => v.status === 'yes').map(v => v.userName);
+                    const pC = presents.length;
+
+                    list.innerHTML += `
+                        <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 text-left">
+                            <div class="flex justify-between items-start mb-2">
+                                <div>
+                                    <span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span>
+                                    <h4 class="font-black text-white text-lg uppercase">${e.title}</h4>
+                                </div>
+                                <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20">
+                                    <i class="fas fa-trash text-xs"></i>
+                                </button>
+                            </div>
+
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                ${presents.length > 0 
+                                    ? presents.map(name => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold uppercase">${name}</span>`).join('')
+                                    : '<span class="text-[8px] text-slate-600 italic uppercase tracking-wider">Aucun inscrit</span>'
+                                }
+                            </div>
+
+                            <div class="flex justify-between items-center">
+                                <div class="flex gap-2">
+                                    <button onclick="vote('${d.id}', 'yes')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button onclick="vote('${d.id}', 'no')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${pC} PRÉSENT${pC > 1 ? 'S' : ''}</span>
+                            </div>
+                        </div>`;
+                });
             });
         });
 
-        // SYNC CHAT AVEC SUPPRESSION ADMIN
+        // --- SYNC CHAT ---
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
@@ -237,11 +254,23 @@
             box.scrollTop = box.scrollHeight;
         });
 
-        // (Reste du code de synchronisation)
+        // --- SYNC AUTRES ---
         onSnapshot(collection(db, "presence"), s => {
             document.getElementById('count-online').innerText = s.size;
             const l = document.getElementById('list-online'); l.innerHTML = "";
             s.forEach(d => l.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10 text-[10px]">${d.data().name}</span>`);
+        });
+
+        onSnapshot(query(collection(db, "archives"), orderBy("time", "desc")), snap => {
+            const list = document.getElementById('list-archives'); list.innerHTML = "";
+            snap.forEach(d => {
+                const a = d.data();
+                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-slate-500 relative mb-4">
+                    <div class="flex justify-between items-start mb-2"><span class="text-cyan-500 font-black text-[9px] uppercase">${a.date || 'Séance'}</span>
+                    <button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>
+                    <h4 class="text-white font-black italic uppercase text-md mb-2">${a.title}</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">${a.content}</p></div>`;
+            });
         });
 
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
@@ -251,32 +280,7 @@
                 const s = d.data();
                 list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center border-l-4 border-cyan-500">
                     <div><b class="text-xs uppercase text-white">${s.name}</b><p class="text-slate-500 text-[9px]">${s.bpm} BPM • <span class="text-cyan-500 font-bold">${s.key}</span></p></div>
-                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), sE => {
-            onSnapshot(collection(db, "votes"), sV => {
-                const list = document.getElementById('list-calendar'); list.innerHTML = "";
-                sE.forEach(d => {
-                    const e = d.data(); const votes = []; sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
-                    const myVote = votes.find(v => v.userName === userName)?.status;
-                    const pC = votes.filter(v => v.status === 'yes').length;
-                    list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 text-left">
-                        <div class="flex justify-between items-start mb-4">
-                            <div><span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span><h4 class="font-black text-white text-lg uppercase">${e.title}</h4></div>
-                            <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <div class="flex gap-2">
-                                <button onclick="vote('${d.id}', 'yes')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button>
-                                <button onclick="vote('${d.id}', 'no')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button>
-                            </div>
-                            <span class="text-[9px] font-bold text-slate-500 uppercase">${pC} LÀ</span>
-                        </div>
-                    </div>`;
-                });
+                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`;
             });
         });
 
@@ -286,7 +290,7 @@
             snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase text-white">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
         });
 
-        // ACTIONS
+        // ACTIONS GLOBALES
         window.vote = async (eventId, status) => { await setDoc(doc(db, "votes", `${eventId}_${userName}`), { eventId, userName, status }); };
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer cet élément ?")) await deleteDoc(doc(db, coll, id)); };
         
@@ -309,24 +313,23 @@
         };
 
         window.closeSongModal = () => document.getElementById('modal-song').classList.add('hidden');
-        
-        document.getElementById('btn-open-archive').addEventListener('click', () => {
-            document.getElementById('modal-archive').classList.remove('hidden');
-        });
 
         document.getElementById('btn-send').addEventListener('click', async () => {
             const i = document.getElementById('chat-input');
             if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
         });
+
         document.getElementById('btn-add-event').addEventListener('click', async () => {
             const t = prompt("Titre de la répet?"); if(t) await addDoc(collection(db, "calendar"), { title: t, date: prompt("Date (ex: 12 Mars)?") });
         });
+        
         document.getElementById('btn-add-member').addEventListener('click', async () => {
             const n = prompt("Nom?"); if(n) await addDoc(collection(db, "team"), { name: n, role: prompt("Instrument?") });
         });
-        document.getElementById('btn-add-song').addEventListener('click', () => {
-            document.getElementById('modal-song').classList.remove('hidden');
-        });
+
+        document.getElementById('btn-add-song').addEventListener('click', () => document.getElementById('modal-song').classList.remove('hidden'));
+        document.getElementById('btn-open-archive').addEventListener('click', () => document.getElementById('modal-archive').classList.remove('hidden'));
+        
         document.getElementById('logout-btn').addEventListener('click', async () => {
             if(userName) await deleteDoc(doc(db, "presence", userName));
             location.reload();
