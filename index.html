@@ -156,11 +156,11 @@
 
         document.getElementById('btn-to-name').addEventListener('click', () => {
             const code = document.getElementById('input-pass').value;
-            if(code === "1234" || code === "0000") {
-                if(code === "1234") document.body.classList.add('is-admin');
+            if(code === "0193" || code === "0000") {
+                if(code === "0193") document.body.classList.add('is-admin');
                 document.getElementById('page-login').classList.add('hidden');
                 document.getElementById('page-name').classList.remove('hidden');
-                document.getElementById('role-tag').innerText = (code === "1234") ? "ADMIN" : "MEMBRE";
+                document.getElementById('role-tag').innerText = (code === "0193") ? "ADMIN" : "MEMBRE";
             } else { alert("Code incorrect"); }
         });
 
