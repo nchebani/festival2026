@@ -17,6 +17,14 @@
         .hidden { display: none !important; }
         #push-alert { transform: translateY(-130%); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; }
         #push-alert.show { transform: translateY(20px); }
+        
+        /* Animation pour les membres en ligne */
+        .online-pulse { animation: pulse-cyan 2s infinite; }
+        @keyframes pulse-cyan {
+            0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(6, 182, 212, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0); }
+        }
     </style>
 </head>
 <body>
@@ -29,29 +37,37 @@
     <div id="page-login" class="page">
         <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/30 text-center">
             <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
-            <input type="tel" id="input-pass" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 text-white" placeholder="****">
+            <input type="tel" id="input-pass" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 text-white outline-none" placeholder="****">
             <button id="btn-to-name" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs">Vérifier</button>
         </div>
     </div>
 
     <div id="page-name" class="page hidden text-center">
         <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-white/10">
-            <input type="text" id="input-name" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 text-white" placeholder="Ton Prénom">
+            <input type="text" id="input-name" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 text-white outline-none" placeholder="Ton Prénom">
             <button id="btn-to-app" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs">Entrer</button>
         </div>
     </div>
 
     <div id="main-app" class="hidden min-h-screen">
         <header class="p-6 flex justify-between items-center sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-40 border-b border-white/5">
-            <div><h2 class="font-black italic text-xl">LIVE HUB <span class="text-cyan-500">2026</span></h2><p id="role-tag" class="text-[8px] font-bold text-cyan-500/50 uppercase tracking-widest"></p></div>
+            <div><h2 class="font-black italic text-xl uppercase">Live Hub <span class="text-cyan-500">2026</span></h2><p id="role-tag" class="text-[8px] font-bold text-cyan-500/50 uppercase tracking-widest"></p></div>
             <button id="logout-btn" class="w-10 h-10 glass rounded-full flex items-center justify-center text-red-500"><i class="fas fa-power-off"></i></button>
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
             <section id="tab-home" class="tab-content active text-center">
-                <div class="glass p-8 rounded-[3rem] mb-6"><h3 class="text-3xl font-black italic uppercase mb-2" id="display-name">---</h3>
-                <div class="mt-4 pt-4 border-t border-white/5"><p class="text-[9px] uppercase font-bold text-cyan-500 mb-3">En ligne (<span id="count-online">0</span>) :</p><div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px]"></div></div></div>
-                <div class="grid grid-cols-2 gap-4"><div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div><div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold">Team</span><b id="count-m" class="text-3xl font-black">0</b></div></div>
+                <div class="glass p-8 rounded-[3rem] mb-6">
+                    <h3 class="text-3xl font-black italic uppercase mb-2" id="display-name">---</h3>
+                    <div class="mt-4 pt-4 border-t border-white/5">
+                        <p class="text-[9px] uppercase font-bold text-cyan-500 mb-3 tracking-widest">En ligne (<span id="count-online">0</span>) :</p>
+                        <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px]"></div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div>
+                    <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1">Team</span><b id="count-m" class="text-3xl font-black">0</b></div>
+                </div>
             </section>
 
             <section id="tab-calendar" class="tab-content">
@@ -79,7 +95,7 @@
                 <div id="chat-box" class="h-[52vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div>
                 <div class="flex gap-2 p-2 glass rounded-[2.5rem] border border-white/10 shadow-2xl">
                     <input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Message...">
-                    <button id="btn-send" class="bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center"><i class="fas fa-paper-plane text-[10px]"></i></button>
+                    <button id="btn-send" class="bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-[10px]"></i></button>
                 </div>
             </section>
         </main>
@@ -149,7 +165,17 @@
             setTimeout(() => alert.classList.remove('show'), 5000);
         };
 
-        // NAVIGATION & AUTH
+        // --- SYSTEME DE PRÉSENCE RÉELLE (HEARTBEAT) ---
+        const updatePresence = async () => {
+            if (userName) {
+                await setDoc(doc(db, "presence", userName), { 
+                    name: userName, 
+                    lastSeen: Date.now() 
+                });
+            }
+        };
+
+        // CONNEXION
         document.getElementById('btn-to-name').addEventListener('click', () => {
             const code = document.getElementById('input-pass').value;
             if(code === "0193" || code === "0000") {
@@ -167,21 +193,29 @@
                 document.getElementById('page-name').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
-                await setDoc(doc(db, "presence", userName), { name: userName, time: serverTimestamp() });
-                setTimeout(() => isFirstLoad = false, 2000);
+                
+                // Envoi du premier battement et démarrage du cycle (30s)
+                await updatePresence();
+                setInterval(updatePresence, 30000);
+                
+                // Nettoyage rapide si on ferme l'onglet
+                window.addEventListener('unload', () => { if(userName) deleteDoc(doc(db, "presence", userName)); });
+
+                setTimeout(() => isFirstLoad = false, 1500);
             }
         });
 
-        // ACTIONS ADMIN
+        // ACTIONS ADMIN & MODALES
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         document.getElementById('btn-add-event').addEventListener('click', async () => {
-            const t = prompt("Titre de la répet?"); const d = prompt("Date?");
+            const t = prompt("Titre?"); const d = prompt("Date?");
             if(t) await addDoc(collection(db, "calendar"), { title: t, date: d });
         });
 
         document.getElementById('btn-add-member').addEventListener('click', async () => {
-            const n = prompt("Nom du membre?"); const r = prompt("Rôle / Instrument?");
+            const n = prompt("Nom?"); const r = prompt("Rôle?");
             if(n) await addDoc(collection(db, "team"), { name: n, role: r });
         });
 
@@ -192,8 +226,7 @@
             const k = document.getElementById('song-key').value;
             if(n) {
                 await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() });
-                document.getElementById('modal-song').classList.add('hidden');
-                document.getElementById('song-name').value = "";
+                closeModal('modal-song'); document.getElementById('song-name').value = "";
             }
         });
 
@@ -204,14 +237,31 @@
             const c = document.getElementById('arch-content').value;
             if(t && c) {
                 await addDoc(collection(db, "archives"), { title: t, date: d, content: c, time: serverTimestamp() });
-                document.getElementById('modal-archive').classList.add('hidden');
-                document.getElementById('arch-title').value = "";
+                closeModal('modal-archive'); document.getElementById('arch-title').value = "";
             }
         });
 
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+        // SYNC FIREBASE
+        onSnapshot(collection(db, "presence"), snap => {
+            const now = Date.now();
+            const limit = 120000; // 2 minutes
+            let count = 0;
+            const list = document.getElementById('list-online');
+            list.innerHTML = "";
+            
+            snap.forEach(d => {
+                const data = d.data();
+                if (now - data.lastSeen < limit) {
+                    count++;
+                    list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10 text-[10px] online-pulse font-bold uppercase">${data.name}</span>`;
+                } else {
+                    deleteDoc(doc(db, "presence", d.id)); // Nettoyage auto des vieux documents
+                }
+            });
+            document.getElementById('count-online').innerText = count;
+        });
 
-        // SYNC FIREBASE (PLANNING, CHAT, TEAM, SONGS, ARCHIVES)
+        // (Le reste de tes syncs : planning, chat, team, etc. reste inchangé et fonctionnel)
         onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), sE => {
             onSnapshot(collection(db, "votes"), sV => {
                 const list = document.getElementById('list-calendar'); list.innerHTML = "";
@@ -220,27 +270,21 @@
                     sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
                     const myVote = votes.find(v => v.userName === userName)?.status;
                     const presents = votes.filter(v => v.status === 'yes').map(v => v.userName);
-                    list.innerHTML += `
-                        <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4">
-                            <div class="flex justify-between items-start mb-2">
-                                <div><span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span><h4 class="font-black text-white text-lg uppercase">${e.title}</h4></div>
-                                <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button>
-                            </div>
-                            <div class="flex flex-wrap gap-1 mb-4">
-                                ${presents.length > 0 ? presents.map(name => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold uppercase">${name}</span>`).join('') : '<span class="text-[8px] text-slate-600 italic uppercase">Aucun inscrit</span>'}
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="vote('${d.id}', 'yes', '${e.title}')" class="w-10 h-10 rounded-xl ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button>
-                                <button onclick="vote('${d.id}', 'no', '${e.title}')" class="w-10 h-10 rounded-xl ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button>
-                            </div>
-                        </div>`;
+                    list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4">
+                        <div class="flex justify-between items-start mb-2"><div><span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span><h4 class="font-black text-white text-lg uppercase">${e.title}</h4></div>
+                        <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>
+                        <div class="flex flex-wrap gap-1 mb-4">${presents.length > 0 ? presents.map(n => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold">${n}</span>`).join('') : '<span class="text-[8px] text-slate-600">Aucun inscrit</span>'}</div>
+                        <div class="flex gap-2">
+                            <button onclick="vote('${d.id}', 'yes', '${e.title}')" class="w-10 h-10 rounded-xl ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button>
+                            <button onclick="vote('${d.id}', 'no', '${e.title}')" class="w-10 h-10 rounded-xl ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button>
+                        </div></div>`;
                 });
             });
         });
 
         window.vote = async (eventId, status, eventTitle) => {
             await setDoc(doc(db, "votes", `${eventId}_${userName}`), { eventId, userName, status, time: serverTimestamp() });
-            if(status === 'yes') await addDoc(collection(db, "chats"), { txt: `✅ ${userName} sera présent pour : ${eventTitle}`, user: "INFO", time: serverTimestamp() });
+            if(status === 'yes') await addDoc(collection(db, "chats"), { txt: `✅ ${userName} sera présent : ${eventTitle}`, user: "INFO", time: serverTimestamp() });
         };
 
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
@@ -252,8 +296,7 @@
                     <div class="flex items-center gap-2">
                         <button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 p-2"><i class="fas fa-trash-alt text-[10px]"></i></button>
                         <div class="${m.user === 'INFO' ? 'bg-cyan-500/10 text-cyan-200 italic' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 rounded-2xl text-sm">${m.txt}</div>
-                    </div>
-                </div>`;
+                    </div></div>`;
                 if(!isMe && m.time && !isFirstLoad) {
                     const diff = (Date.now() - m.time.toMillis()) / 1000;
                     if(diff < 5) triggerFlash(m.user, m.txt);
@@ -263,15 +306,15 @@
         });
 
         onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
-            const list = document.getElementById('list-members'); list.innerHTML = "";
             document.getElementById('count-m').innerText = snap.size;
-            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase text-white">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>`);
+            const list = document.getElementById('list-members'); list.innerHTML = "";
+            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
         });
 
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
-            const list = document.getElementById('list-songs'); list.innerHTML = "";
             document.getElementById('count-s').innerText = snap.size;
-            snap.forEach(d => { const s = d.data(); list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase text-white">${s.name}</b><p class="text-slate-500 text-[9px]">${s.bpm} BPM • ${s.key}</p></div><button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>`; });
+            const list = document.getElementById('list-songs'); list.innerHTML = "";
+            snap.forEach(d => { const s = d.data(); list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase">${s.name}</b><p class="text-slate-500 text-[9px]">${s.bpm} BPM • ${s.key}</p></div><button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`; });
         });
 
         onSnapshot(query(collection(db, "archives"), orderBy("time", "desc")), snap => {
@@ -279,19 +322,15 @@
             snap.forEach(d => { const a = d.data(); list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-slate-500 mb-4"><div class="flex justify-between items-start mb-2"><span class="text-cyan-500 font-black text-[9px] uppercase">${a.date}</span><button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div><h4 class="text-white font-black italic uppercase mb-2">${a.title}</h4><p class="text-xs text-slate-400 whitespace-pre-wrap">${a.content}</p></div>`; });
         });
 
-        onSnapshot(collection(db, "presence"), s => {
-            document.getElementById('count-online').innerText = s.size;
-            const l = document.getElementById('list-online'); l.innerHTML = "";
-            s.forEach(d => l.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10 text-[10px]">${d.data().name}</span>`);
-        });
-
         document.getElementById('btn-send').addEventListener('click', async () => {
             const i = document.getElementById('chat-input');
             if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
         });
 
-        document.getElementById('logout-btn').addEventListener('click', () => location.reload());
-
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            if(userName) await deleteDoc(doc(db, "presence", userName));
+            location.reload();
+        });
     </script>
     <script>
         function switchTab(id, btn) {
