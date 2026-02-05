@@ -63,6 +63,17 @@
 
         <main class="p-4 max-w-lg mx-auto">
             <section id="tab-home" class="tab-content active text-center">
+                <div id="next-event-timer" class="mb-6 hidden">
+                    <div class="glass p-5 rounded-[2.5rem] border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+                        <p id="timer-label" class="text-[8px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-3">Chargement date...</p>
+                        <div class="flex justify-center gap-6 text-white">
+                            <div><b id="timer-days" class="text-2xl font-black text-cyan-400">00</b><p class="text-[7px] uppercase opacity-40">Jours</p></div>
+                            <div><b id="timer-hours" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Heures</p></div>
+                            <div><b id="timer-mins" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Min</p></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="glass p-8 rounded-[3rem] mb-6 shadow-2xl">
                     <h3 class="text-3xl font-black italic uppercase mb-2 tracking-tighter" id="display-name">---</h3>
                     <div class="mt-4 pt-4 border-t border-white/5">
@@ -70,6 +81,18 @@
                         <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px]"></div>
                     </div>
                 </div>
+
+                <div class="glass p-5 rounded-[2.5rem] mb-6 flex items-center gap-4 border border-white/5 shadow-xl">
+                    <button id="audio-play" class="w-12 h-12 bg-cyan-600 rounded-full flex items-center justify-center text-white shadow-lg active:scale-90 transition-transform">
+                        <i class="fas fa-play ml-1"></i>
+                    </button>
+                    <div class="text-left flex-1 overflow-hidden">
+                        <p class="text-[10px] font-black uppercase text-white truncate">Dernière Démo Audio</p>
+                        <p class="text-[8px] text-slate-500 uppercase font-bold">Lecteur Hub 2026</p>
+                    </div>
+                    <audio id="main-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
+                </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div>
                     <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1">Team</span><b id="count-m" class="text-3xl font-black">0</b></div>
@@ -165,6 +188,50 @@
         let userName = "";
         let isFirstLoad = true;
 
+        // --- AUDIO PLAYER LOGIC ---
+        const audio = document.getElementById('main-audio');
+        const playBtn = document.getElementById('audio-play');
+        playBtn.onclick = () => {
+            if(audio.paused) {
+                audio.play();
+                playBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                playBtn.classList.replace('bg-cyan-600', 'bg-white/10');
+            } else {
+                audio.pause();
+                playBtn.innerHTML = '<i class="fas fa-play ml-1"></i>';
+                playBtn.classList.replace('bg-white/10', 'bg-cyan-600');
+            }
+        };
+
+        // --- TIMER LOGIC ---
+        let timerInterval;
+        const updateTimer = (dateStr, title) => {
+            const timerSection = document.getElementById('next-event-timer');
+            const label = document.getElementById('timer-label');
+            clearInterval(timerInterval);
+
+            // Tente d'analyser la date. Marche mieux avec AAAA-MM-JJ
+            // Si tu tapes "12 Fév", il faudra peut-être ajuster manuellement
+            const target = new Date(dateStr).getTime();
+            if(isNaN(target)) { timerSection.classList.add('hidden'); return; }
+
+            timerSection.classList.remove('hidden');
+            label.innerText = `J-SCORE : ${title}`;
+
+            timerInterval = setInterval(() => {
+                const now = new Date().getTime();
+                const diff = target - now;
+                if(diff <= 0) { 
+                    clearInterval(timerInterval);
+                    timerSection.classList.add('hidden');
+                    return;
+                }
+                document.getElementById('timer-days').innerText = Math.floor(diff / (86400000)).toString().padStart(2, '0');
+                document.getElementById('timer-hours').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2, '0');
+                document.getElementById('timer-mins').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
+            }, 1000);
+        };
+
         const triggerFlash = (title, body) => {
             if (isFirstLoad) return;
             const alert = document.getElementById('push-alert');
@@ -177,7 +244,7 @@
         const updatePresence = async () => { if (userName) await setDoc(doc(db, "presence", userName), { name: userName, lastSeen: Date.now() }); };
 
         // --- AUTH ---
-        document.getElementById('btn-to-name').addEventListener('click', () => {
+        document.getElementById('btn-to-name').onclick = () => {
             const code = document.getElementById('input-pass').value;
             if(code === "0193" || code === "0000") {
                 if(code === "0193") document.body.classList.add('is-admin');
@@ -185,9 +252,9 @@
                 document.getElementById('page-name').classList.remove('hidden');
                 document.getElementById('role-tag').innerText = (code === "0193") ? "ADMIN" : "MEMBRE";
             } else { alert("Code incorrect"); }
-        });
+        };
 
-        document.getElementById('btn-to-app').addEventListener('click', async () => {
+        document.getElementById('btn-to-app').onclick = async () => {
             const name = document.getElementById('input-name').value.trim();
             if(name.length >= 2) {
                 userName = name;
@@ -197,25 +264,22 @@
                 await updatePresence(); setInterval(updatePresence, 30000);
                 setTimeout(() => isFirstLoad = false, 2000);
             }
-        });
+        };
 
-        // --- ACTIONS ADMIN (FIXED) ---
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
-        // Événements d'ouverture
         document.getElementById('btn-add-event').onclick = async () => {
-            const t = prompt("Titre de la répèt ?"); const d = prompt("Date (ex: 12 Fév) ?");
+            const t = prompt("Titre ?"); const d = prompt("Date (AAAA-MM-JJ) ?");
             if(t && d) await addDoc(collection(db, "calendar"), { title: t, date: d });
         };
         document.getElementById('btn-add-member').onclick = async () => {
-            const n = prompt("Nom du membre ?"); const r = prompt("Rôle ?");
+            const n = prompt("Nom ?"); const r = prompt("Rôle ?");
             if(n && r) await addDoc(collection(db, "team"), { name: n, role: r });
         };
         document.getElementById('btn-add-song').onclick = () => document.getElementById('modal-song').classList.remove('hidden');
         document.getElementById('btn-open-archive').onclick = () => document.getElementById('modal-archive').classList.remove('hidden');
 
-        // Événements de sauvegarde modales
         document.getElementById('btn-save-song').onclick = async () => {
             const n = document.getElementById('song-name').value;
             const b = document.getElementById('song-bpm').value;
@@ -240,7 +304,6 @@
             if(msg) await addDoc(collection(db, "chats"), { txt: `🚨 URGENT : ${msg}`, user: "URGENT", time: serverTimestamp() });
         };
 
-        // --- SYNC REALTIME ---
         onSnapshot(collection(db, "presence"), snap => {
             const now = Date.now(); let count = 0; const list = document.getElementById('list-online'); list.innerHTML = "";
             snap.forEach(d => { if (now - d.data().lastSeen < 120000) { count++; list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] online-pulse font-black uppercase">${d.data().name}</span>`; } });
@@ -250,8 +313,11 @@
         onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), sE => {
             onSnapshot(collection(db, "votes"), sV => {
                 const list = document.getElementById('list-calendar'); list.innerHTML = "";
+                let futureDates = [];
                 sE.forEach(d => {
-                    const e = d.data(); const votes = []; sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
+                    const e = d.data();
+                    if(new Date(e.date) >= new Date().setHours(0,0,0,0)) futureDates.push(e);
+                    const votes = []; sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
                     const myVote = votes.find(v => v.userName === userName)?.status;
                     const presents = votes.filter(v => v.status === 'yes').map(v => v.userName);
                     list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 shadow-xl">
@@ -260,6 +326,8 @@
                         <div class="flex flex-wrap gap-1 mb-4">${presents.length > 0 ? presents.map(n => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold uppercase">${n}</span>`).join('') : '<span class="text-[8px] text-slate-600 uppercase italic">Aucun inscrit</span>'}</div>
                         <div class="flex gap-2"><button onclick="vote('${d.id}', 'yes', '${e.title}')" class="w-12 h-12 rounded-2xl ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button><button onclick="vote('${d.id}', 'no', '${e.title}')" class="w-12 h-12 rounded-2xl ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button></div></div>`;
                 });
+                // Update Timer with closest date
+                if(futureDates.length > 0) updateTimer(futureDates[0].date, futureDates[0].title);
             });
         });
 
