@@ -3,33 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE HUB 2026 - NOTIFICATIONS</title>
+    <title>LIVE HUB 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        body { background: #050505; color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; }
+        body { background: #050505; color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; overflow: hidden; }
         .glass { background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
         .admin-only { display: none !important; }
         .is-admin .admin-only { display: flex !important; }
-        .tab-content { display: none; padding-bottom: 140px; }
+        .tab-content { display: none; padding-bottom: 140px; height: 100vh; overflow-y: auto; }
         .active { display: block; }
         .page { position: fixed; inset: 0; z-index: 100; background: #050505; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .hidden { display: none !important; }
         
-        #push-alert { transform: translateY(-120%); transition: all 0.5s ease; z-index: 9999; }
+        #push-alert { transform: translateY(-130%); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; }
         #push-alert.show { transform: translateY(20px); }
     </style>
 </head>
 <body>
 
     <div id="push-alert" class="fixed top-0 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass p-4 rounded-3xl border-l-4 border-cyan-500 shadow-2xl flex items-center gap-3">
-        <div class="bg-cyan-500/20 w-10 h-10 rounded-full flex items-center justify-center text-cyan-500"><i class="fas fa-bell text-sm"></i></div>
-        <div class="flex-1"><p id="push-title" class="text-[10px] font-black uppercase text-cyan-500">Live Hub</p><p id="push-body" class="text-xs text-white">Nouveau message...</p></div>
+        <div class="bg-cyan-500/20 w-10 h-10 rounded-full flex items-center justify-center text-cyan-500 animate-pulse"><i class="fas fa-bell text-sm"></i></div>
+        <div class="flex-1">
+            <p id="push-title" class="text-[10px] font-black uppercase text-cyan-500 tracking-tighter">Live Hub Update</p>
+            <p id="push-body" class="text-xs text-white leading-tight font-medium">Nouveau message...</p>
+        </div>
     </div>
 
     <div id="page-login" class="page">
         <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/30 text-center">
             <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
+            <p class="text-[10px] text-slate-500 uppercase font-bold mb-8">Access Control</p>
             <input type="tel" id="input-pass" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 text-white outline-none" placeholder="****">
             <button id="btn-to-name" class="w-full bg-cyan-600 text-white font-black py-5 rounded-2xl uppercase text-xs">Vérifier</button>
         </div>
@@ -45,7 +49,7 @@
     <div id="main-app" class="hidden min-h-screen">
         <header class="p-6 flex justify-between items-center sticky top-0 bg-[#050505]/90 backdrop-blur-xl z-40 border-b border-white/5">
             <div>
-                <h2 class="font-black italic text-xl">LIVE HUB <span class="text-cyan-500">2026</span></h2>
+                <h2 class="font-black italic text-xl uppercase tracking-tighter">Live Hub <span class="text-cyan-500">2026</span></h2>
                 <p id="role-tag" class="text-[8px] font-bold text-cyan-500/50 uppercase tracking-widest"></p>
             </div>
             <button id="logout-btn" class="w-10 h-10 glass rounded-full flex items-center justify-center text-red-500"><i class="fas fa-power-off text-sm"></i></button>
@@ -71,24 +75,6 @@
                 <div id="list-calendar" class="space-y-6"></div>
             </section>
 
-            <section id="tab-archives" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2">
-                    <h3 class="text-2xl font-black italic uppercase">Archives</h3>
-                    <button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button>
-                </div>
-                <div id="list-archives" class="space-y-4"></div>
-            </section>
-
-            <section id="tab-team" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
-                <div id="list-members" class="space-y-3"></div>
-            </section>
-
-            <section id="tab-setlist" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
-                <div id="list-songs" class="space-y-3"></div>
-            </section>
-
             <section id="tab-chat" class="tab-content">
                 <h3 class="text-2xl font-black italic mb-6 uppercase px-2">Team Feed</h3>
                 <div id="chat-box" class="h-[52vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div>
@@ -96,6 +82,19 @@
                     <input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Message...">
                     <button id="btn-send" class="bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-[10px]"></i></button>
                 </div>
+            </section>
+
+            <section id="tab-archives" class="tab-content">
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Archives</h3><button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div id="list-archives" class="space-y-4"></div>
+            </section>
+            <section id="tab-team" class="tab-content">
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div id="list-members" class="space-y-3"></div>
+            </section>
+            <section id="tab-setlist" class="tab-content">
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
+                <div id="list-songs" class="space-y-3"></div>
             </section>
         </main>
 
@@ -111,28 +110,12 @@
         </nav>
     </div>
 
-    <div id="modal-archive" class="page hidden bg-black/80 z-[200]">
-        <div class="glass p-8 rounded-[2rem] w-full max-w-sm">
-            <h3 class="text-xl font-black mb-6 uppercase italic text-cyan-500 text-center">Nouveau Résumé</h3>
-            <input type="text" id="arch-date" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none text-white" placeholder="Date (ex: 12 Février)">
-            <input type="text" id="arch-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none text-white" placeholder="Titre de la séance">
-            <textarea id="arch-content" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 outline-none text-white h-32 text-sm" placeholder="Ce qu'on a fait..."></textarea>
-            <div class="flex gap-2">
-                <button onclick="document.getElementById('modal-archive').classList.add('hidden')" class="flex-1 bg-white/5 py-4 rounded-xl uppercase text-[10px] font-bold">Annuler</button>
-                <button onclick="saveArchive()" class="flex-1 bg-cyan-600 py-4 rounded-xl uppercase text-[10px] font-bold">Publier</button>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-song" class="page hidden bg-black/80 z-[200]">
         <div class="glass p-8 rounded-[2rem] w-full max-w-sm text-center">
-            <h3 class="text-xl font-black mb-6 uppercase italic text-cyan-500">Ajouter un morceau</h3>
+            <h3 class="text-xl font-black mb-6 uppercase italic text-cyan-500">Ajouter Song</h3>
             <input type="text" id="song-name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none text-white" placeholder="Titre">
             <input type="number" id="song-bpm" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none text-white" placeholder="BPM">
-            <select id="song-key" class="w-full bg-zinc-900 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none">
-                <option value="N/A">Clé</option>
-                <option value="Am">Am</option><option value="C Major">C Major</option><option value="Em">Em</option><option value="G Major">G Major</option>
-            </select>
+            <input type="text" id="song-key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 outline-none text-white" placeholder="Clé">
             <div class="flex gap-2">
                 <button onclick="closeSongModal()" class="flex-1 bg-white/5 py-4 rounded-xl uppercase text-[10px] font-bold">Annuler</button>
                 <button onclick="saveNewSong()" class="flex-1 bg-cyan-600 py-4 rounded-xl uppercase text-[10px] font-bold">Sauver</button>
@@ -142,8 +125,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc, limit } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
@@ -156,11 +138,20 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const messaging = getMessaging(app);
         let userName = "";
         let isFirstLoad = true;
 
-        // AUTH & NAVIGATION
+        // --- SYSTÈME DE NOTIFICATION FLASH ---
+        const triggerFlash = (title, body) => {
+            if (isFirstLoad) return; 
+            const alert = document.getElementById('push-alert');
+            document.getElementById('push-title').innerText = title;
+            document.getElementById('push-body').innerText = body;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        };
+
+        // LOGIN & NAME
         document.getElementById('btn-to-name').addEventListener('click', () => {
             const code = document.getElementById('input-pass').value;
             if(code === "0193" || code === "0000") {
@@ -179,159 +170,112 @@
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
                 await setDoc(doc(db, "presence", userName), { name: userName, time: serverTimestamp() });
-                setTimeout(() => isFirstLoad = false, 2000);
+                // Désactivation du premier chargement après 2s pour éviter le spam de notifs existantes
+                setTimeout(() => { isFirstLoad = false; }, 2000);
             }
         });
 
-        // --- SYNC CALENDAR (AVEC LISTE DES NOMS) ---
+        // --- SYNC CALENDAR ---
         onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), sE => {
             onSnapshot(collection(db, "votes"), sV => {
                 const list = document.getElementById('list-calendar'); 
                 list.innerHTML = "";
-                
                 sE.forEach(d => {
-                    const e = d.data(); 
-                    const votes = []; 
+                    const e = d.data();
+                    const votes = [];
                     sV.forEach(v => { if(v.data().eventId === d.id) votes.push(v.data()); });
-                    
                     const myVote = votes.find(v => v.userName === userName)?.status;
                     const presents = votes.filter(v => v.status === 'yes').map(v => v.userName);
-                    const pC = presents.length;
-
+                    
                     list.innerHTML += `
-                        <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 text-left">
+                        <div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4">
                             <div class="flex justify-between items-start mb-2">
-                                <div>
-                                    <span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span>
-                                    <h4 class="font-black text-white text-lg uppercase">${e.title}</h4>
-                                </div>
-                                <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20">
-                                    <i class="fas fa-trash text-xs"></i>
-                                </button>
+                                <div><span class="text-cyan-500 font-black text-xs uppercase">${e.date}</span><h4 class="font-black text-white text-lg uppercase">${e.title}</h4></div>
+                                <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
                             </div>
-
                             <div class="flex flex-wrap gap-1 mb-4">
-                                ${presents.length > 0 
-                                    ? presents.map(name => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold uppercase">${name}</span>`).join('')
-                                    : '<span class="text-[8px] text-slate-600 italic uppercase tracking-wider">Aucun inscrit</span>'
-                                }
+                                ${presents.length > 0 ? presents.map(name => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold uppercase">${name}</span>`).join('') : '<span class="text-[8px] text-slate-600 italic uppercase">Aucun inscrit</span>'}
                             </div>
-
                             <div class="flex justify-between items-center">
                                 <div class="flex gap-2">
-                                    <button onclick="vote('${d.id}', 'yes')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}">
-                                        <i class="fas fa-check"></i>
-                                    </button>
-                                    <button onclick="vote('${d.id}', 'no')" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}">
-                                        <i class="fas fa-times"></i>
-                                    </button>
+                                    <button onclick="vote('${d.id}', 'yes', '${e.title}', ${presents.length})" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button>
+                                    <button onclick="vote('${d.id}', 'no', '${e.title}', 0)" class="w-10 h-10 rounded-xl flex items-center justify-center ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button>
                                 </div>
-                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">${pC} PRÉSENT${pC > 1 ? 'S' : ''}</span>
+                                <span class="text-[9px] font-black text-slate-400 uppercase">${presents.length} DISPO</span>
                             </div>
                         </div>`;
                 });
             });
         });
 
-        // --- SYNC CHAT ---
+        // --- VOTE + NOTIFICATION ---
+        window.vote = async (eventId, status, eventTitle, count) => {
+            const oldVote = doc(db, "votes", `${eventId}_${userName}`);
+            await setDoc(oldVote, { eventId, userName, status, time: serverTimestamp() });
+            
+            if(status === 'yes') {
+                const msg = `📢 ${userName} vient de valider sa présence pour la répet : ${eventTitle} ! N'oubliez pas d'indiquer si vous êtes présents !`;
+                await addDoc(collection(db, "chats"), { txt: msg, user: "SYSTEM", time: serverTimestamp() });
+            }
+        };
+
+        // --- SYNC CHAT + FLASH NOTIFS ---
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
-                const m = d.data(); const isMe = m.user === userName;
+                const m = d.data();
+                const isMe = m.user === userName;
+                const isSystem = m.user === "SYSTEM";
+                
                 box.innerHTML += `
                     <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
                         <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase">${m.user}</span>
-                        <div class="flex items-center gap-2 max-w-[90%]">
-                            <button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 hover:text-red-500 p-2">
-                                <i class="fas fa-trash-alt text-[10px]"></i>
-                            </button>
-                            <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 rounded-2xl max-w-full text-sm text-white">
-                                ${m.txt}
-                            </div>
+                        <div class="${isSystem ? 'bg-cyan-500/10 border border-cyan-500/30 italic text-cyan-200' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 rounded-2xl max-w-[90%] text-sm">
+                            ${m.txt}
                         </div>
                     </div>`;
+
+                // Déclencher flash si c'est un nouveau message pas écrit par moi
+                if(!isMe && m.time && !isFirstLoad) {
+                    const diff = (Date.now() - m.time.toMillis()) / 1000;
+                    if(diff < 5) triggerFlash(m.user === "SYSTEM" ? "Live Hub 2026" : m.user, m.txt);
+                }
             });
             box.scrollTop = box.scrollHeight;
         });
 
-        // --- SYNC AUTRES ---
+        // --- SYNC PRESENCE, SONGS, TEAM, ARCHIVES ---
         onSnapshot(collection(db, "presence"), s => {
             document.getElementById('count-online').innerText = s.size;
             const l = document.getElementById('list-online'); l.innerHTML = "";
             s.forEach(d => l.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 border border-cyan-500/10 text-[10px]">${d.data().name}</span>`);
         });
-
-        onSnapshot(query(collection(db, "archives"), orderBy("time", "desc")), snap => {
-            const list = document.getElementById('list-archives'); list.innerHTML = "";
-            snap.forEach(d => {
-                const a = d.data();
-                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-slate-500 relative mb-4">
-                    <div class="flex justify-between items-start mb-2"><span class="text-cyan-500 font-black text-[9px] uppercase">${a.date || 'Séance'}</span>
-                    <button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>
-                    <h4 class="text-white font-black italic uppercase text-md mb-2">${a.title}</h4>
-                    <p class="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">${a.content}</p></div>`;
-            });
-        });
-
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
-            const list = document.getElementById('list-songs'); list.innerHTML = "";
             document.getElementById('count-s').innerText = snap.size;
-            snap.forEach(d => {
-                const s = d.data();
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center border-l-4 border-cyan-500">
-                    <div><b class="text-xs uppercase text-white">${s.name}</b><p class="text-slate-500 text-[9px]">${s.bpm} BPM • <span class="text-cyan-500 font-bold">${s.key}</span></p></div>
-                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`;
-            });
+            const l = document.getElementById('list-songs'); l.innerHTML = "";
+            snap.forEach(d => { const s = d.data(); l.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase text-white">${s.name}</b><p class="text-[9px] text-slate-500">${s.bpm} BPM • ${s.key}</p></div><button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>`; });
         });
-
         onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
-            const list = document.getElementById('list-members'); list.innerHTML = "";
             document.getElementById('count-m').innerText = snap.size;
-            snap.forEach(d => list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase text-white">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button></div>`);
+            const l = document.getElementById('list-members'); l.innerHTML = "";
+            snap.forEach(d => l.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center"><div><b class="text-xs uppercase text-white">${d.data().name}</b><p class="text-cyan-500 text-[8px] font-black uppercase">${d.data().role}</p></div><button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button></div>`);
         });
 
         // ACTIONS GLOBALES
-        window.vote = async (eventId, status) => { await setDoc(doc(db, "votes", `${eventId}_${userName}`), { eventId, userName, status }); };
-        window.deleteItem = async (coll, id) => { if(confirm("Supprimer cet élément ?")) await deleteDoc(doc(db, coll, id)); };
-        
-        window.saveArchive = async () => {
-            const t = document.getElementById('arch-title').value;
-            const d = document.getElementById('arch-date').value;
-            const c = document.getElementById('arch-content').value;
-            if(t && c) {
-                await addDoc(collection(db, "archives"), { title: t, date: d, content: c, time: serverTimestamp() });
-                document.getElementById('modal-archive').classList.add('hidden');
-                document.getElementById('arch-title').value = ""; document.getElementById('arch-content').value = "";
-            }
-        };
-
-        window.saveNewSong = async () => {
-            const n = document.getElementById('song-name').value;
-            const b = document.getElementById('song-bpm').value;
-            const k = document.getElementById('song-key').value;
-            if(n) { await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() }); closeSongModal(); }
-        };
-
-        window.closeSongModal = () => document.getElementById('modal-song').classList.add('hidden');
-
+        window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
         document.getElementById('btn-send').addEventListener('click', async () => {
             const i = document.getElementById('chat-input');
-            if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
+            if(i.value.trim()) { 
+                await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); 
+                i.value = ""; 
+            }
         });
-
         document.getElementById('btn-add-event').addEventListener('click', async () => {
-            const t = prompt("Titre de la répet?"); if(t) await addDoc(collection(db, "calendar"), { title: t, date: prompt("Date (ex: 12 Mars)?") });
+            const t = prompt("Nom de l'évent ?"); const d = prompt("Date ?");
+            if(t) await addDoc(collection(db, "calendar"), { title: t, date: d });
         });
-        
-        document.getElementById('btn-add-member').addEventListener('click', async () => {
-            const n = prompt("Nom?"); if(n) await addDoc(collection(db, "team"), { name: n, role: prompt("Instrument?") });
-        });
-
-        document.getElementById('btn-add-song').addEventListener('click', () => document.getElementById('modal-song').classList.remove('hidden'));
-        document.getElementById('btn-open-archive').addEventListener('click', () => document.getElementById('modal-archive').classList.remove('hidden'));
-        
         document.getElementById('logout-btn').addEventListener('click', async () => {
-            if(userName) await deleteDoc(doc(db, "presence", userName));
+            if(userName) await deleteDoc(doc(doc(db, "presence", userName)));
             location.reload();
         });
 
