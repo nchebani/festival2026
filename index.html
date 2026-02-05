@@ -71,6 +71,14 @@
                 <div id="list-calendar" class="space-y-6"></div>
             </section>
 
+            <section id="tab-archives" class="tab-content">
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h3 class="text-2xl font-black italic uppercase">Archives</h3>
+                    <button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button>
+                </div>
+                <div id="list-archives" class="space-y-4"></div>
+            </section>
+
             <section id="tab-team" class="tab-content">
                 <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg">+</button></div>
                 <div id="list-members" class="space-y-3"></div>
@@ -95,11 +103,25 @@
             <div class="glass rounded-[2.5rem] flex justify-around p-3 border border-white/10 shadow-2xl">
                 <button onclick="switchTab('home', this)" class="nav-btn text-cyan-500 p-3"><i class="fas fa-home text-lg"></i></button>
                 <button onclick="switchTab('calendar', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-calendar-alt text-lg"></i></button>
+                <button onclick="switchTab('archives', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-box-archive text-lg"></i></button>
                 <button onclick="switchTab('team', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-users text-lg"></i></button>
                 <button onclick="switchTab('setlist', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-music text-lg"></i></button>
                 <button onclick="switchTab('chat', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-comment-alt text-lg"></i></button>
             </div>
         </nav>
+    </div>
+
+    <div id="modal-archive" class="page hidden bg-black/80 z-[200]">
+        <div class="glass p-8 rounded-[2rem] w-full max-w-sm">
+            <h3 class="text-xl font-black mb-6 uppercase italic text-cyan-500 text-center">Nouveau Résumé</h3>
+            <input type="text" id="arch-date" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none text-white" placeholder="Date (ex: 12 Février)">
+            <input type="text" id="arch-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 outline-none text-white" placeholder="Titre de la séance">
+            <textarea id="arch-content" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 outline-none text-white h-32 text-sm" placeholder="Ce qu'on a fait..."></textarea>
+            <div class="flex gap-2">
+                <button onclick="document.getElementById('modal-archive').classList.add('hidden')" class="flex-1 bg-white/5 py-4 rounded-xl uppercase text-[10px] font-bold">Annuler</button>
+                <button onclick="saveArchive()" class="flex-1 bg-cyan-600 py-4 rounded-xl uppercase text-[10px] font-bold">Publier</button>
+            </div>
+        </div>
     </div>
 
     <div id="modal-song" class="page hidden bg-black/80 z-[200]">
@@ -177,6 +199,23 @@
             }
         });
 
+        // --- SYNC ARCHIVES ---
+        onSnapshot(query(collection(db, "archives"), orderBy("time", "desc")), snap => {
+            const list = document.getElementById('list-archives'); list.innerHTML = "";
+            snap.forEach(d => {
+                const a = d.data();
+                list.innerHTML += `
+                    <div class="glass p-6 rounded-[2rem] border-l-4 border-slate-500 relative">
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-cyan-500 font-black text-[9px] uppercase tracking-tighter">${a.date || 'Séance'}</span>
+                            <button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash"></i></button>
+                        </div>
+                        <h4 class="text-white font-black italic uppercase text-md mb-2">${a.title}</h4>
+                        <p class="text-xs text-slate-400 leading-relaxed whitespace-pre-wrap">${a.content}</p>
+                    </div>`;
+            });
+        });
+
         // SYNC CHAT AVEC SUPPRESSION ADMIN
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
@@ -250,13 +289,31 @@
         // ACTIONS
         window.vote = async (eventId, status) => { await setDoc(doc(db, "votes", `${eventId}_${userName}`), { eventId, userName, status }); };
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer cet élément ?")) await deleteDoc(doc(db, coll, id)); };
+        
+        window.saveArchive = async () => {
+            const t = document.getElementById('arch-title').value;
+            const d = document.getElementById('arch-date').value;
+            const c = document.getElementById('arch-content').value;
+            if(t && c) {
+                await addDoc(collection(db, "archives"), { title: t, date: d, content: c, time: serverTimestamp() });
+                document.getElementById('modal-archive').classList.add('hidden');
+                document.getElementById('arch-title').value = ""; document.getElementById('arch-content').value = "";
+            }
+        };
+
         window.saveNewSong = async () => {
             const n = document.getElementById('song-name').value;
             const b = document.getElementById('song-bpm').value;
             const k = document.getElementById('song-key').value;
             if(n) { await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() }); closeSongModal(); }
         };
+
         window.closeSongModal = () => document.getElementById('modal-song').classList.add('hidden');
+        
+        document.getElementById('btn-open-archive').addEventListener('click', () => {
+            document.getElementById('modal-archive').classList.remove('hidden');
+        });
+
         document.getElementById('btn-send').addEventListener('click', async () => {
             const i = document.getElementById('chat-input');
             if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
@@ -266,6 +323,9 @@
         });
         document.getElementById('btn-add-member').addEventListener('click', async () => {
             const n = prompt("Nom?"); if(n) await addDoc(collection(db, "team"), { name: n, role: prompt("Instrument?") });
+        });
+        document.getElementById('btn-add-song').addEventListener('click', () => {
+            document.getElementById('modal-song').classList.remove('hidden');
         });
         document.getElementById('logout-btn').addEventListener('click', async () => {
             if(userName) await deleteDoc(doc(db, "presence", userName));
