@@ -62,6 +62,7 @@
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
+            
             <section id="tab-home" class="tab-content active text-center">
                 <div id="next-event-timer" class="mb-6 hidden">
                     <div class="glass p-5 rounded-[2.5rem] border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
@@ -88,7 +89,7 @@
                     </button>
                     <div class="text-left flex-1 overflow-hidden">
                         <p class="text-[10px] font-black uppercase text-white truncate">Dernière Démo Audio</p>
-                        <p class="text-[8px] text-slate-500 uppercase font-bold">Lecteur Hub 2026</p>
+                        <p class="text-[8px] text-slate-500 uppercase font-bold">Audio Player • 2026</p>
                     </div>
                     <audio id="main-audio" src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"></audio>
                 </div>
@@ -188,7 +189,7 @@
         let userName = "";
         let isFirstLoad = true;
 
-        // --- AUDIO PLAYER LOGIC ---
+        // --- LECTEUR AUDIO ---
         const audio = document.getElementById('main-audio');
         const playBtn = document.getElementById('audio-play');
         playBtn.onclick = () => {
@@ -203,22 +204,20 @@
             }
         };
 
-        // --- TIMER LOGIC ---
+        // --- COMPTE À REBOURS ---
         let timerInterval;
-        const updateTimer = (dateStr, title) => {
+        function updateTimer(dateStr, title) {
             const timerSection = document.getElementById('next-event-timer');
             const label = document.getElementById('timer-label');
             clearInterval(timerInterval);
 
-            // Tente d'analyser la date. Marche mieux avec AAAA-MM-JJ
-            // Si tu tapes "12 Fév", il faudra peut-être ajuster manuellement
             const target = new Date(dateStr).getTime();
             if(isNaN(target)) { timerSection.classList.add('hidden'); return; }
 
             timerSection.classList.remove('hidden');
-            label.innerText = `J-SCORE : ${title}`;
+            label.innerText = `PROCHAIN EVENT : ${title}`;
 
-            timerInterval = setInterval(() => {
+            function refresh() {
                 const now = new Date().getTime();
                 const diff = target - now;
                 if(diff <= 0) { 
@@ -226,11 +225,13 @@
                     timerSection.classList.add('hidden');
                     return;
                 }
-                document.getElementById('timer-days').innerText = Math.floor(diff / (86400000)).toString().padStart(2, '0');
+                document.getElementById('timer-days').innerText = Math.floor(diff / 86400000).toString().padStart(2, '0');
                 document.getElementById('timer-hours').innerText = Math.floor((diff % 86400000) / 3600000).toString().padStart(2, '0');
                 document.getElementById('timer-mins').innerText = Math.floor((diff % 3600000) / 60000).toString().padStart(2, '0');
-            }, 1000);
-        };
+            }
+            timerInterval = setInterval(refresh, 1000);
+            refresh();
+        }
 
         const triggerFlash = (title, body) => {
             if (isFirstLoad) return;
@@ -270,7 +271,8 @@
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         document.getElementById('btn-add-event').onclick = async () => {
-            const t = prompt("Titre ?"); const d = prompt("Date (AAAA-MM-JJ) ?");
+            const t = prompt("Titre de l'event ?"); 
+            const d = prompt("Date précise (AAAA-MM-JJ) ?", new Date().toISOString().split('T')[0]);
             if(t && d) await addDoc(collection(db, "calendar"), { title: t, date: d });
         };
         document.getElementById('btn-add-member').onclick = async () => {
@@ -304,6 +306,7 @@
             if(msg) await addDoc(collection(db, "chats"), { txt: `🚨 URGENT : ${msg}`, user: "URGENT", time: serverTimestamp() });
         };
 
+        // --- SYNC ---
         onSnapshot(collection(db, "presence"), snap => {
             const now = Date.now(); let count = 0; const list = document.getElementById('list-online'); list.innerHTML = "";
             snap.forEach(d => { if (now - d.data().lastSeen < 120000) { count++; list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[10px] online-pulse font-black uppercase">${d.data().name}</span>`; } });
@@ -326,7 +329,6 @@
                         <div class="flex flex-wrap gap-1 mb-4">${presents.length > 0 ? presents.map(n => `<span class="bg-cyan-500/10 text-cyan-400 text-[8px] px-2 py-0.5 rounded border border-cyan-500/20 font-bold uppercase">${n}</span>`).join('') : '<span class="text-[8px] text-slate-600 uppercase italic">Aucun inscrit</span>'}</div>
                         <div class="flex gap-2"><button onclick="vote('${d.id}', 'yes', '${e.title}')" class="w-12 h-12 rounded-2xl ${myVote === 'yes' ? 'bg-green-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-check"></i></button><button onclick="vote('${d.id}', 'no', '${e.title}')" class="w-12 h-12 rounded-2xl ${myVote === 'no' ? 'bg-red-500 text-white' : 'bg-white/5 text-slate-500'}"><i class="fas fa-times"></i></button></div></div>`;
                 });
-                // Update Timer with closest date
                 if(futureDates.length > 0) updateTimer(futureDates[0].date, futureDates[0].title);
             });
         });
