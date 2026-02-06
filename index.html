@@ -147,7 +147,7 @@
     </div>
 
     <div id="modal-song" class="page hidden bg-black/80 z-[200]">
-        <div class="glass p-8 rounded-[2rem] w-full max-w-sm">
+        <div class="glass p-8 rounded-[2rem] w-full max-sm">
             <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 text-center italic">Nouveau Morceau</h3>
             <input type="text" id="song-name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Titre">
             <input type="number" id="song-bpm" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="BPM">
@@ -190,6 +190,16 @@
         let userName = "";
         let isFirstLoad = true;
         const daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
+
+        // --- FONCTION FLASH (NOTIFICATION) ---
+        const triggerFlash = (title, body) => {
+            if (isFirstLoad) return;
+            const alert = document.getElementById('push-alert');
+            document.getElementById('push-title').innerText = title;
+            document.getElementById('push-body').innerText = body;
+            alert.classList.add('show');
+            setTimeout(() => alert.classList.remove('show'), 5000);
+        };
 
         // --- AUTH ---
         document.getElementById('btn-to-name').onclick = () => {
@@ -324,14 +334,32 @@
             });
         });
 
+        // --- CHAT AVEC FLASH ET BOUNCE ---
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
-                const m = d.data(); const isMe = m.user === userName;
+                const m = d.data(); 
+                const isMe = m.user === userName;
+                const isUrgent = m.user === "URGENT" || m.txt.includes("🚨");
+
                 box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
                     <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
-                    <div class="flex items-center gap-2"><button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 p-2"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                    <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 px-4 rounded-2xl text-sm border border-white/5">${m.txt}</div></div></div>`;
+                    <div class="flex items-center gap-2">
+                        <button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 p-2"><i class="fas fa-trash-alt text-[10px]"></i></button>
+                        <div class="${isUrgent ? 'bg-red-600 text-white font-black animate-bounce border-red-400' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 px-4 rounded-2xl text-sm border border-white/5 shadow-lg">
+                            ${m.txt}
+                        </div>
+                    </div>
+                </div>`;
+
+                // Déclenchement du flash si c'est un nouveau message d'un autre
+                if(!isMe && m.time && !isFirstLoad) {
+                    const msgTime = m.time.toMillis();
+                    const now = Date.now();
+                    if((now - msgTime) / 1000 < 8) { // moins de 8 secondes
+                        triggerFlash(m.user, m.txt);
+                    }
+                }
             });
             box.scrollTop = box.scrollHeight;
         });
@@ -345,6 +373,11 @@
         document.getElementById('btn-send').onclick = async () => {
             const i = document.getElementById('chat-input');
             if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
+        };
+
+        document.getElementById('btn-urgent').onclick = async () => {
+            const msg = prompt("MESSAGE D'URGENCE :");
+            if(msg) await addDoc(collection(db, "chats"), { txt: `🚨 URGENT : ${msg}`, user: "URGENT", time: serverTimestamp() });
         };
 
         document.getElementById('logout-btn').onclick = () => location.reload();
