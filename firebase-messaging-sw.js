@@ -1,8 +1,6 @@
-// firebase-messaging-sw.js
-
 // Importation des scripts Firebase (Version Compat pour SW)
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-sw.js');
-importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-sw.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging-compat.js');
 
 // Initialisation de Firebase dans le Service Worker
 firebase.initializeApp({
@@ -17,17 +15,16 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 /**
- * Gère l'affichage des notifications quand l'application est en arrière-plan
- * ou que l'onglet est fermé.
+ * Gère l'affichage des notifications quand l'application est fermée ou en arrière-plan.
  */
 messaging.onBackgroundMessage((payload) => {
     console.log('Message reçu en arrière-plan:', payload);
 
     const notificationTitle = payload.notification.title || "Nouveau message !";
     const notificationOptions = {
-        body: payload.notification.body || "Vous avez reçu un nouveau message sur Live Hub.",
-        icon: './icon.png', // Le '.' est crucial pour GitHub Pages
-        badge: './icon.png' // Petit icône dans la barre de notification Android
+        body: payload.notification.body || "Nouveau message sur Live Hub.",
+        icon: './favicon.ico', // Assure-toi d'avoir une icône ou change ce lien
+        badge: './favicon.ico'
     };
 
     return self.registration.showNotification(notificationTitle, notificationOptions);
