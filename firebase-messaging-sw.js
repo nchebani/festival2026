@@ -10,13 +10,13 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Cette fonction gère l'affichage quand l'app est fermée
 messaging.onBackgroundMessage((payload) => {
-  console.log('Message reçu en arrière-plan:', payload);
-  const notificationTitle = payload.notification.title;
+  console.log('Push reçu en arrière-plan:', payload);
+  const notificationTitle = payload.notification.title || "Nouveau message !";
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/icon.png' // Ajoute un logo ici
+    icon: 'https://cdn-icons-png.flaticon.com/512/3119/3119338.png',
+    badge: 'https://cdn-icons-png.flaticon.com/512/3119/3119338.png'
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
