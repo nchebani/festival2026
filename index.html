@@ -63,7 +63,6 @@
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
-            
             <section id="tab-home" class="tab-content active text-center">
                 <div id="next-event-timer" class="mb-6 hidden">
                     <div class="glass p-5 rounded-[2.5rem] border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
@@ -79,6 +78,7 @@
                 <div class="glass p-8 rounded-[3rem] mb-6 shadow-2xl">
                     <h3 class="text-3xl font-black italic uppercase mb-2 tracking-tighter" id="display-name">---</h3>
                     <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px] mt-4"></div>
+                    <div class="mt-4 text-[9px] uppercase font-bold text-slate-500 italic">En ligne : <span id="count-online">0</span></div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
@@ -175,6 +175,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
@@ -187,11 +188,36 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const messaging = getMessaging(app);
+
         let userName = "";
         let isFirstLoad = true;
         const daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
-        // --- FONCTION FLASH (NOTIFICATION) ---
+        // --- GESTION DES NOTIFICATIONS PUSH ---
+        async function setupPushNotifications() {
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    const token = await getToken(messaging, { 
+                        vapidKey: "BI2tYO6MKM27z75dl6Uyeg-VEkdTQa4TU-W7G8Svtr4KGi6zwBphOmngSVq4mkpo55Ga1iQYRuTn3nJDDDqjgk" 
+                    });
+                    
+                    if (token) {
+                        await setDoc(doc(db, "team_tokens", userName), {
+                            token: token,
+                            name: userName,
+                            lastUpdate: serverTimestamp()
+                        });
+                        console.log("Token enregistré pour", userName);
+                    }
+                }
+            } catch (err) {
+                console.error("Erreur Push:", err);
+            }
+        }
+
+        // --- FONCTION FLASH (NOTIFICATION IN-APP) ---
         const triggerFlash = (title, body) => {
             if (isFirstLoad) return;
             const alert = document.getElementById('push-alert');
@@ -219,19 +245,22 @@
                 document.getElementById('page-name').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
+                
+                // Active le Push
+                setupPushNotifications();
+
                 await setDoc(doc(db, "presence", userName), { name: userName, lastSeen: Date.now() });
                 setInterval(async () => { if(userName) await setDoc(doc(db, "presence", userName), { name: userName, lastSeen: Date.now() }); }, 30000);
                 setTimeout(() => isFirstLoad = false, 2000);
             }
         };
 
-        // --- ACTIONS ADMIN ---
+        // --- ACTIONS ADMIN & MODALES ---
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         document.getElementById('btn-add-event').onclick = async () => {
-            const t = prompt("Titre de l'event ?"); 
-            const d = prompt("Date (AAAA-MM-JJ) ?", new Date().toISOString().split('T')[0]);
+            const t = prompt("Titre ?"); const d = prompt("Date (AAAA-MM-JJ) ?", new Date().toISOString().split('T')[0]);
             if(t && d) await addDoc(collection(db, "calendar"), { title: t, date: d });
         };
 
@@ -298,7 +327,7 @@
             else { await updateDoc(ref, { [day]: arrayUnion(userName) }); }
         };
 
-        // --- SYNC GÉNÉRALE ---
+        // --- SYNC GÉNÉRALE (Archives, Calendar, Songs, Team) ---
         onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
             const list = document.getElementById('list-calendar'); list.innerHTML = "";
             snap.forEach(d => {
@@ -310,88 +339,11 @@
             });
         });
 
-        onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
-            document.getElementById('count-s').innerText = snap.size;
-            const list = document.getElementById('list-songs'); list.innerHTML = "";
+        onSnapshot(query(collection(db, "archives"), orderBy("time", "desc")), snap => {
+            const list = document.getElementById('list-archives'); list.innerHTML = "";
             snap.forEach(d => {
-                const s = d.data();
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div><b class="text-xs uppercase italic">${s.name}</b><p class="text-slate-500 text-[9px] font-bold uppercase">${s.bpm || '--'} BPM • ${s.key || '--'}</p></div>
-                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
-            document.getElementById('count-m').innerText = snap.size;
-            const list = document.getElementById('list-members'); list.innerHTML = "";
-            snap.forEach(d => {
-                const m = d.data();
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div><b class="text-xs uppercase italic">${m.name}</b><p class="text-cyan-500 text-[8px] font-black uppercase tracking-widest">${m.role || 'Membre'}</p></div>
-                    <button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
-                </div>`;
-            });
-        });
-
-        // --- CHAT AVEC FLASH ET BOUNCE ---
-        onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
-            const box = document.getElementById('chat-box'); box.innerHTML = "";
-            snap.forEach(d => {
-                const m = d.data(); 
-                const isMe = m.user === userName;
-                const isUrgent = m.user === "URGENT" || m.txt.includes("🚨");
-
-                box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
-                    <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 p-2"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                        <div class="${isUrgent ? 'bg-red-600 text-white font-black animate-bounce border-red-400' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 px-4 rounded-2xl text-sm border border-white/5 shadow-lg">
-                            ${m.txt}
-                        </div>
-                    </div>
-                </div>`;
-
-                // Déclenchement du flash si c'est un nouveau message d'un autre
-                if(!isMe && m.time && !isFirstLoad) {
-                    const msgTime = m.time.toMillis();
-                    const now = Date.now();
-                    if((now - msgTime) / 1000 < 8) { // moins de 8 secondes
-                        triggerFlash(m.user, m.txt);
-                    }
-                }
-            });
-            box.scrollTop = box.scrollHeight;
-        });
-
-        onSnapshot(collection(db, "presence"), snap => {
-            const list = document.getElementById('list-online'); list.innerHTML = ""; let count = 0;
-            snap.forEach(d => { if (Date.now() - d.data().lastSeen < 120000) { count++; list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] online-pulse font-black uppercase">● ${d.data().name}</span>`; } });
-            document.getElementById('count-online').innerText = count;
-        });
-
-        document.getElementById('btn-send').onclick = async () => {
-            const i = document.getElementById('chat-input');
-            if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
-        };
-
-        document.getElementById('btn-urgent').onclick = async () => {
-            const msg = prompt("MESSAGE D'URGENCE :");
-            if(msg) await addDoc(collection(db, "chats"), { txt: `🚨 URGENT : ${msg}`, user: "URGENT", time: serverTimestamp() });
-        };
-
-        document.getElementById('logout-btn').onclick = () => location.reload();
-    </script>
-
-    <script>
-        function switchTab(id, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(l => l.classList.replace('text-cyan-500', 'text-slate-500'));
-            btn.classList.replace('text-slate-500', 'text-cyan-500');
-        }
-    </script>
-</body>
-</html>
-
-
+                const a = d.data();
+                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border border-white/5 mb-4">
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-cyan-500 font-black text-[9px] uppercase italic">${a.date}</span>
+                        <button onclick="window.deleteItem('archives', '${d.id}')" class="admin-only text-
