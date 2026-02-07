@@ -178,7 +178,6 @@
         const messaging = getMessaging(app);
 
         let userName = "";
-        let isFirstLoad = true;
         const daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
         // --- GESTION DES NOTIFICATIONS ---
@@ -186,20 +185,25 @@
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
+                    // Force l'enregistrement du Service Worker pour GitHub Pages
+                    const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
+                    
                     const token = await getToken(messaging, { 
-                        vapidKey: "BI2tY06MKM27z75dI6Uyeg-VEkdTQa4TU-W7G8Svtr4KGi6zwBphOmnGSvq4mkpo55Ga1iQYRucTn3nJDDDqjgk" 
+                        vapidKey: "BI2tY06MKM27z75dI6Uyeg-VEkdTQa4TU-W7G8Svtr4KGi6zwBphOmnGSvq4mkpo55Ga1iQYRucTn3nJDDDqjgk",
+                        serviceWorkerRegistration: registration 
                     });
+
                     if (token && userName) {
                         await setDoc(doc(db, "team_tokens", userName), {
                             token: token,
                             name: userName,
                             lastActive: serverTimestamp()
                         }, { merge: true });
-                        console.log("Token Push enregistré.");
+                        console.log("Push Token OK");
                     }
                 }
             } catch (err) {
-                console.log("Erreur notifications:", err);
+                console.error("Erreur notifications:", err);
             }
         }
 
@@ -234,16 +238,14 @@
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
 
-                // Demander les notifs dès l'entrée
                 requestNotifications();
 
                 await setDoc(doc(db, "presence", userName), { name: userName, lastSeen: Date.now() });
                 setInterval(async () => { if(userName) await setDoc(doc(db, "presence", userName), { name: userName, lastSeen: Date.now() }); }, 30000);
-                setTimeout(() => isFirstLoad = false, 2000);
             }
         };
 
-        // --- ACTIONS ADMIN & SYNC (Tout ton reste de code ici) ---
+        // --- LOGIQUE METIER & SYNC ---
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
@@ -268,7 +270,7 @@
             if(n) {
                 await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() });
                 closeModal('modal-song'); 
-                document.getElementById('song-name').value = ""; document.getElementById('song-bpm').value = ""; document.getElementById('song-key').value = "";
+                document.getElementById('song-name').value = "";
             }
         };
 
@@ -279,7 +281,7 @@
             if(t && c) {
                 await addDoc(collection(db, "archives"), { title: t, date: d, content: c, time: serverTimestamp() });
                 closeModal('modal-archive'); 
-                document.getElementById('arch-title').value = ""; document.getElementById('arch-date').value = ""; document.getElementById('arch-content').value = "";
+                document.getElementById('arch-title').value = "";
             }
         };
 
@@ -291,18 +293,17 @@
             }
         };
 
+        // Snapshot Dispos
         onSnapshot(doc(db, "dispos", "current_week"), (snapshot) => {
             const zone = document.getElementById('dispo-zone');
             if (snapshot.exists() && snapshot.data().active) {
                 const data = snapshot.data(); zone.classList.remove('hidden');
                 document.getElementById('dispo-label').innerText = data.label;
-                const btnCont = document.getElementById('dispo-buttons');
-                btnCont.innerHTML = daysOfWeek.map(day => {
+                document.getElementById('dispo-buttons').innerHTML = daysOfWeek.map(day => {
                     const isSelected = data[day] && data[day].includes(userName);
                     return `<button onclick="toggleDispo('${day}', ${isSelected})" class="day-btn glass p-2 rounded-xl text-[9px] font-bold border border-white/5 uppercase ${isSelected ? 'selected' : ''}">${day.slice(0,3)}</button>`;
                 }).join('');
-                const resCont = document.getElementById('dispo-results');
-                resCont.innerHTML = daysOfWeek.map(day => {
+                document.getElementById('dispo-results').innerHTML = daysOfWeek.map(day => {
                     const users = data[day] || []; if(users.length === 0) return '';
                     return `<div class="flex items-center gap-3"><span class="text-[8px] font-black text-amber-500 w-8 uppercase">${day.slice(0,3)}</span><div class="flex flex-wrap gap-1">${users.map(u => `<span class="bg-white/5 text-[8px] px-2 py-1 rounded-lg border border-white/5 font-bold">${u}</span>`).join('')}</div></div>`;
                 }).join('');
@@ -311,52 +312,17 @@
 
         window.toggleDispo = async (day, isSelected) => {
             const ref = doc(db, "dispos", "current_week");
-            if (isSelected) { await updateDoc(ref, { [day]: arrayRemove(userName) }); } 
-            else { await updateDoc(ref, { [day]: arrayUnion(userName) }); }
+            if (isSelected) await updateDoc(ref, { [day]: arrayRemove(userName) }); 
+            else await updateDoc(ref, { [day]: arrayUnion(userName) });
         };
 
-        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
-            const list = document.getElementById('list-calendar'); list.innerHTML = "";
-            snap.forEach(d => {
-                const e = d.data();
-                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 shadow-xl flex justify-between items-center">
-                    <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
-                    <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
-            document.getElementById('count-s').innerText = snap.size;
-            const list = document.getElementById('list-songs'); list.innerHTML = "";
-            snap.forEach(d => {
-                const s = d.data();
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div><b class="text-xs uppercase italic">${s.name}</b><p class="text-slate-500 text-[9px] font-bold uppercase">${s.bpm || '--'} BPM • ${s.key || '--'}</p></div>
-                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
-            document.getElementById('count-m').innerText = snap.size;
-            const list = document.getElementById('list-members'); list.innerHTML = "";
-            snap.forEach(d => {
-                const m = d.data();
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div><b class="text-xs uppercase italic">${m.name}</b><p class="text-cyan-500 text-[8px] font-black uppercase tracking-widest">${m.role || 'Membre'}</p></div>
-                    <button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
-                </div>`;
-            });
-        });
-
+        // Snapshot Chat
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
                 const m = d.data(); 
                 const isMe = m.user === userName;
                 const isUrgent = m.user === "URGENT" || m.txt.includes("🚨");
-
                 box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
                     <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
                     <div class="flex items-center gap-2">
@@ -368,6 +334,18 @@
                 </div>`;
             });
             box.scrollTop = box.scrollHeight;
+        });
+
+        // Autres snapshots (Calendar, Songs, Team, Presence)
+        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
+            const list = document.getElementById('list-calendar'); list.innerHTML = "";
+            snap.forEach(d => {
+                const e = d.data();
+                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 flex justify-between items-center">
+                    <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
+                    <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
+                </div>`;
+            });
         });
 
         onSnapshot(collection(db, "presence"), snap => {
