@@ -201,6 +201,36 @@
             setTimeout(() => alert.classList.remove('show'), 5000);
         };
 
+        import { getMessaging, getToken } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
+
+const messaging = getMessaging(app);
+
+async function requestNotifications() {
+    try {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            const token = await getToken(messaging, { 
+                vapidKey: 'TON_VAPID_KEY_DE_LA_CONSOLE_FIREBASE' 
+            });
+            if (token) {
+                // On enregistre le token dans Firestore sous le profil du membre
+                await updateDoc(doc(db, "team_tokens", userName), {
+                    token: token,
+                    updatedAt: serverTimestamp()
+                });
+                console.log("Notifications activées !");
+            }
+        }
+    } catch (err) {
+        console.log("Erreur notifications:", err);
+    }
+}
+
+// Appeler cette fonction après le login réussi
+document.getElementById('btn-to-app').addEventListener('click', () => {
+    setTimeout(requestNotifications, 2000); 
+});
+
         // --- AUTH ---
         document.getElementById('btn-to-name').onclick = () => {
             const code = document.getElementById('input-pass').value;
