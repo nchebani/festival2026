@@ -63,11 +63,24 @@
         </header>
 
         <main class="p-4 max-w-lg mx-auto">
+            
             <section id="tab-home" class="tab-content active text-center">
+                <div id="next-event-timer" class="mb-6 hidden">
+                    <div class="glass p-5 rounded-[2.5rem] border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
+                        <p id="timer-label" class="text-[8px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-3 italic">Chargement date...</p>
+                        <div class="flex justify-center gap-6 text-white">
+                            <div><b id="timer-days" class="text-2xl font-black text-cyan-400">00</b><p class="text-[7px] uppercase opacity-40">Jours</p></div>
+                            <div><b id="timer-hours" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Heures</p></div>
+                            <div><b id="timer-mins" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Min</p></div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="glass p-8 rounded-[3rem] mb-6 shadow-2xl">
                     <h3 class="text-3xl font-black italic uppercase mb-2 tracking-tighter" id="display-name">---</h3>
                     <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px] mt-4"></div>
                 </div>
+
                 <div class="grid grid-cols-2 gap-4">
                     <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div>
                     <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Team</span><b id="count-m" class="text-3xl font-black">0</b></div>
@@ -76,7 +89,7 @@
 
             <section id="tab-calendar" class="tab-content">
                 <div class="flex justify-between items-center mb-6 px-2">
-                    <h3 class="text-2xl font-black italic uppercase">Planning</h3>
+                    <h3 class="text-2xl font-black italic uppercase italic">Planning</h3>
                     <div class="flex gap-2">
                         <button id="btn-request-dispo" class="admin-only bg-amber-500/20 text-amber-500 border border-amber-500/30 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Demander Dispos</button>
                         <button id="btn-add-event" class="admin-only bg-cyan-600 w-10 h-10 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button>
@@ -94,23 +107,23 @@
             </section>
 
             <section id="tab-archives" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Archives</h3><button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase italic">Archives</h3><button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
                 <div id="list-archives" class="space-y-4"></div>
             </section>
 
             <section id="tab-team" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase italic">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
                 <div id="list-members" class="space-y-3"></div>
             </section>
 
             <section id="tab-setlist" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
+                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase italic">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
                 <div id="list-songs" class="space-y-3"></div>
             </section>
 
             <section id="tab-chat" class="tab-content">
                 <div class="flex justify-between items-center mb-6 px-2">
-                    <h3 class="text-2xl font-black italic uppercase">Team Feed</h3>
+                    <h3 class="text-2xl font-black italic uppercase italic">Team Feed</h3>
                     <button id="btn-urgent" class="admin-only bg-red-600/20 border border-red-500 text-red-500 font-bold px-4 py-2 rounded-xl text-[10px] uppercase animate-pulse">Urgence</button>
                 </div>
                 <div id="chat-box" class="h-[52vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div>
@@ -162,7 +175,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
@@ -175,43 +187,13 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const messaging = getMessaging(app);
-
         let userName = "";
+        let isFirstLoad = true;
         const daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
-        // --- GESTION DES NOTIFICATIONS ---
-        async function requestNotifications() {
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    // Force l'enregistrement du Service Worker pour GitHub Pages
-                    const registration = await navigator.serviceWorker.register('./firebase-messaging-sw.js');
-                    
-                    const token = await getToken(messaging, { 
-                        vapidKey: "BI2tY06MKM27z75dI6Uyeg-VEkdTQa4TU-W7G8Svtr4KGi6zwBphOmnGSvq4mkpo55Ga1iQYRucTn3nJDDDqjgk",
-                        serviceWorkerRegistration: registration 
-                    });
-
-                    if (token && userName) {
-                        await setDoc(doc(db, "team_tokens", userName), {
-                            token: token,
-                            name: userName,
-                            lastActive: serverTimestamp()
-                        }, { merge: true });
-                        console.log("Push Token OK");
-                    }
-                }
-            } catch (err) {
-                console.error("Erreur notifications:", err);
-            }
-        }
-
-        onMessage(messaging, (payload) => {
-            triggerFlash(payload.notification.title, payload.notification.body);
-        });
-
+        // --- FONCTION FLASH (NOTIFICATION) ---
         const triggerFlash = (title, body) => {
+            if (isFirstLoad) return;
             const alert = document.getElementById('push-alert');
             document.getElementById('push-title').innerText = title;
             document.getElementById('push-body').innerText = body;
@@ -237,15 +219,13 @@
                 document.getElementById('page-name').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 document.getElementById('display-name').innerText = userName;
-
-                requestNotifications();
-
                 await setDoc(doc(db, "presence", userName), { name: userName, lastSeen: Date.now() });
                 setInterval(async () => { if(userName) await setDoc(doc(db, "presence", userName), { name: userName, lastSeen: Date.now() }); }, 30000);
+                setTimeout(() => isFirstLoad = false, 2000);
             }
         };
 
-        // --- LOGIQUE METIER & SYNC ---
+        // --- ACTIONS ADMIN ---
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
@@ -270,7 +250,7 @@
             if(n) {
                 await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() });
                 closeModal('modal-song'); 
-                document.getElementById('song-name').value = "";
+                document.getElementById('song-name').value = ""; document.getElementById('song-bpm').value = ""; document.getElementById('song-key').value = "";
             }
         };
 
@@ -281,10 +261,11 @@
             if(t && c) {
                 await addDoc(collection(db, "archives"), { title: t, date: d, content: c, time: serverTimestamp() });
                 closeModal('modal-archive'); 
-                document.getElementById('arch-title').value = "";
+                document.getElementById('arch-title').value = ""; document.getElementById('arch-date').value = ""; document.getElementById('arch-content').value = "";
             }
         };
 
+        // --- DISPONIBILITÉS ---
         document.getElementById('btn-request-dispo').onclick = async () => {
             const weekLabel = prompt("Semaine concernée ?", "Prochaine semaine");
             if(weekLabel) {
@@ -293,17 +274,18 @@
             }
         };
 
-        // Snapshot Dispos
         onSnapshot(doc(db, "dispos", "current_week"), (snapshot) => {
             const zone = document.getElementById('dispo-zone');
             if (snapshot.exists() && snapshot.data().active) {
                 const data = snapshot.data(); zone.classList.remove('hidden');
                 document.getElementById('dispo-label').innerText = data.label;
-                document.getElementById('dispo-buttons').innerHTML = daysOfWeek.map(day => {
+                const btnCont = document.getElementById('dispo-buttons');
+                btnCont.innerHTML = daysOfWeek.map(day => {
                     const isSelected = data[day] && data[day].includes(userName);
                     return `<button onclick="toggleDispo('${day}', ${isSelected})" class="day-btn glass p-2 rounded-xl text-[9px] font-bold border border-white/5 uppercase ${isSelected ? 'selected' : ''}">${day.slice(0,3)}</button>`;
                 }).join('');
-                document.getElementById('dispo-results').innerHTML = daysOfWeek.map(day => {
+                const resCont = document.getElementById('dispo-results');
+                resCont.innerHTML = daysOfWeek.map(day => {
                     const users = data[day] || []; if(users.length === 0) return '';
                     return `<div class="flex items-center gap-3"><span class="text-[8px] font-black text-amber-500 w-8 uppercase">${day.slice(0,3)}</span><div class="flex flex-wrap gap-1">${users.map(u => `<span class="bg-white/5 text-[8px] px-2 py-1 rounded-lg border border-white/5 font-bold">${u}</span>`).join('')}</div></div>`;
                 }).join('');
@@ -312,17 +294,54 @@
 
         window.toggleDispo = async (day, isSelected) => {
             const ref = doc(db, "dispos", "current_week");
-            if (isSelected) await updateDoc(ref, { [day]: arrayRemove(userName) }); 
-            else await updateDoc(ref, { [day]: arrayUnion(userName) });
+            if (isSelected) { await updateDoc(ref, { [day]: arrayRemove(userName) }); } 
+            else { await updateDoc(ref, { [day]: arrayUnion(userName) }); }
         };
 
-        // Snapshot Chat
+        // --- SYNC GÉNÉRALE ---
+        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
+            const list = document.getElementById('list-calendar'); list.innerHTML = "";
+            snap.forEach(d => {
+                const e = d.data();
+                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 shadow-xl flex justify-between items-center">
+                    <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
+                    <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
+                </div>`;
+            });
+        });
+
+        onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
+            document.getElementById('count-s').innerText = snap.size;
+            const list = document.getElementById('list-songs'); list.innerHTML = "";
+            snap.forEach(d => {
+                const s = d.data();
+                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
+                    <div><b class="text-xs uppercase italic">${s.name}</b><p class="text-slate-500 text-[9px] font-bold uppercase">${s.bpm || '--'} BPM • ${s.key || '--'}</p></div>
+                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
+                </div>`;
+            });
+        });
+
+        onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
+            document.getElementById('count-m').innerText = snap.size;
+            const list = document.getElementById('list-members'); list.innerHTML = "";
+            snap.forEach(d => {
+                const m = d.data();
+                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
+                    <div><b class="text-xs uppercase italic">${m.name}</b><p class="text-cyan-500 text-[8px] font-black uppercase tracking-widest">${m.role || 'Membre'}</p></div>
+                    <button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
+                </div>`;
+            });
+        });
+
+        // --- CHAT AVEC FLASH ET BOUNCE ---
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
                 const m = d.data(); 
                 const isMe = m.user === userName;
                 const isUrgent = m.user === "URGENT" || m.txt.includes("🚨");
+
                 box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
                     <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
                     <div class="flex items-center gap-2">
@@ -332,25 +351,23 @@
                         </div>
                     </div>
                 </div>`;
+
+                // Déclenchement du flash si c'est un nouveau message d'un autre
+                if(!isMe && m.time && !isFirstLoad) {
+                    const msgTime = m.time.toMillis();
+                    const now = Date.now();
+                    if((now - msgTime) / 1000 < 8) { // moins de 8 secondes
+                        triggerFlash(m.user, m.txt);
+                    }
+                }
             });
             box.scrollTop = box.scrollHeight;
         });
 
-        // Autres snapshots (Calendar, Songs, Team, Presence)
-        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
-            const list = document.getElementById('list-calendar'); list.innerHTML = "";
-            snap.forEach(d => {
-                const e = d.data();
-                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 flex justify-between items-center">
-                    <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
-                    <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
-                </div>`;
-            });
-        });
-
         onSnapshot(collection(db, "presence"), snap => {
-            const list = document.getElementById('list-online'); list.innerHTML = "";
-            snap.forEach(d => { if (Date.now() - d.data().lastSeen < 120000) { list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] online-pulse font-black uppercase">● ${d.data().name}</span>`; } });
+            const list = document.getElementById('list-online'); list.innerHTML = ""; let count = 0;
+            snap.forEach(d => { if (Date.now() - d.data().lastSeen < 120000) { count++; list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] online-pulse font-black uppercase">● ${d.data().name}</span>`; } });
+            document.getElementById('count-online').innerText = count;
         });
 
         document.getElementById('btn-send').onclick = async () => {
@@ -376,3 +393,5 @@
     </script>
 </body>
 </html>
+
+
