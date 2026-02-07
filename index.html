@@ -136,7 +136,7 @@
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
                     const token = await getToken(messaging, { 
-                        vapidKey: "YvWX12rJSCE1Fb9cbFpTkUjY_Nv1B1XEEMyVnI6hkA8" 
+                        vapidKey: "BI2tY06MKM27z75dI6Uyeg-VEkdTQa4TU-W7G8Svtr4KGi6zwBphOmnGSvq4mkpo55Ga1iQYRucTn3nJDDDqjgk" 
                     });
                     if (token && userName) {
                         await setDoc(doc(db, "team_tokens", userName), {
