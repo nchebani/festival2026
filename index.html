@@ -210,7 +210,7 @@ async function requestNotifications() {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
             const token = await getToken(messaging, { 
-                vapidKey: 'TON_VAPID_KEY_DE_LA_CONSOLE_FIREBASE' 
+                vapidKey: YvWX12rJSCE1Fb9cbFpTkUjY_Nv1B1XEEMyVnI6hkA8
             });
             if (token) {
                 // On enregistre le token dans Firestore sous le profil du membre
