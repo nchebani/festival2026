@@ -10,11 +10,14 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
+// Gère l'affichage de la notification quand l'app est fermée
 messaging.onBackgroundMessage((payload) => {
-    const notificationTitle = payload.notification.title || "Live Hub 2026";
+    console.log('Message reçu en arrière-plan:', payload);
+    const notificationTitle = payload.notification.title;
     const notificationOptions = {
         body: payload.notification.body,
-        icon: 'https://festival2026.github.io/icon.png' // Remplace par ton icône si tu en as une
+        icon: 'https://cdn-icons-png.flaticon.com/512/5968/5968705.png' // Tu pourras changer l'icône
     };
+
     self.registration.showNotification(notificationTitle, notificationOptions);
 });
