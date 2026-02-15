@@ -66,11 +66,11 @@
             
             <section id="tab-home" class="tab-content active text-center">
                 <div id="next-event-timer" class="mb-6 hidden">
-                    <div class="glass p-5 rounded-[2.5rem] border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-                        <p id="timer-label" class="text-[8px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-3 italic">Chargement date...</p>
+                    <div class="glass p-5 rounded-[2.5rem] border border-cyan-500/30">
+                        <p id="timer-label" class="text-[8px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-3 italic">PROCHAIN LIVE</p>
                         <div class="flex justify-center gap-6 text-white">
                             <div><b id="timer-days" class="text-2xl font-black text-cyan-400">00</b><p class="text-[7px] uppercase opacity-40">Jours</p></div>
-                            <div><b id="timer-hours" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Heures</p></div>
+                            <div><b id="timer-hours" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Hrs</p></div>
                             <div><b id="timer-mins" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Min</p></div>
                         </div>
                     </div>
@@ -91,24 +91,18 @@
                 <div class="flex justify-between items-center mb-6 px-2">
                     <h3 class="text-2xl font-black italic uppercase">Planning</h3>
                     <div class="flex gap-2">
-                        <button id="btn-request-dispo" class="admin-only bg-amber-500/20 text-amber-500 border border-amber-500/30 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Demander Dispos</button>
+                        <button id="btn-request-dispo" class="admin-only bg-amber-500/20 text-amber-500 border border-amber-500/30 px-4 py-2 rounded-xl text-[10px] font-black uppercase">Sondage</button>
                         <button id="btn-add-event" class="admin-only bg-cyan-600 w-10 h-10 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button>
                     </div>
                 </div>
                 <div id="dispo-zone" class="mb-8 hidden">
                     <div class="glass p-6 rounded-[2.5rem] border-l-4 border-amber-500 relative">
-                        <button onclick="window.deleteItem('dispos', 'current_week')" class="admin-only absolute top-4 right-4 text-red-500/30"><i class="fas fa-times"></i></button>
                         <h4 id="dispo-label" class="text-amber-500 font-black text-xs uppercase mb-4 italic">Disponibilités</h4>
                         <div class="grid grid-cols-4 gap-2 mb-4" id="dispo-buttons"></div>
                         <div id="dispo-results" class="space-y-3 pt-4 border-t border-white/5"></div>
                     </div>
                 </div>
                 <div id="list-calendar" class="space-y-6"></div>
-            </section>
-
-            <section id="tab-archives" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Archives</h3><button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
-                <div id="list-archives" class="space-y-4"></div>
             </section>
 
             <section id="tab-docs" class="tab-content">
@@ -120,23 +114,29 @@
             </section>
 
             <section id="tab-team" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h3 class="text-2xl font-black italic uppercase">Membres</h3>
+                    <button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button>
+                </div>
                 <div id="list-members" class="space-y-3"></div>
             </section>
 
             <section id="tab-setlist" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Songs</h3><button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
+                <div class="flex justify-between items-center mb-6 px-2">
+                    <h3 class="text-2xl font-black italic uppercase">Songs</h3>
+                    <button id="btn-add-song" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button>
+                </div>
                 <div id="list-songs" class="space-y-3"></div>
             </section>
 
             <section id="tab-chat" class="tab-content">
                 <div class="flex justify-between items-center mb-6 px-2">
                     <h3 class="text-2xl font-black italic uppercase">Team Feed</h3>
-                    <button id="btn-urgent" class="admin-only bg-red-600/20 border border-red-500 text-red-500 font-bold px-4 py-2 rounded-xl text-[10px] uppercase animate-pulse">Urgence</button>
+                    <button id="btn-urgent" class="admin-only bg-red-600/20 border border-red-500 text-red-500 font-bold px-4 py-2 rounded-xl text-[10px] uppercase">Urgence</button>
                 </div>
                 <div id="chat-box" class="h-[52vh] overflow-y-auto mb-4 space-y-4 pr-2 flex flex-col"></div>
-                <div class="flex gap-2 p-2 glass rounded-[2.5rem] border border-white/10 shadow-2xl">
-                    <input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Écris un message...">
+                <div class="flex gap-2 p-2 glass rounded-[2.5rem] border border-white/10">
+                    <input type="text" id="chat-input" class="flex-1 bg-transparent px-4 outline-none text-sm text-white" placeholder="Message...">
                     <button id="btn-send" class="bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-paper-plane text-[10px]"></i></button>
                 </div>
             </section>
@@ -146,7 +146,6 @@
             <div class="glass rounded-[2.5rem] flex justify-around p-3 border border-white/10 shadow-2xl">
                 <button onclick="switchTab('home', this)" class="nav-btn text-cyan-500 p-3"><i class="fas fa-home text-lg"></i></button>
                 <button onclick="switchTab('calendar', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-calendar-alt text-lg"></i></button>
-                <button onclick="switchTab('archives', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-box-archive text-lg"></i></button>
                 <button onclick="switchTab('docs', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-file-pdf text-lg"></i></button>
                 <button onclick="switchTab('team', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-users text-lg"></i></button>
                 <button onclick="switchTab('setlist', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-music text-lg"></i></button>
@@ -162,21 +161,8 @@
             <input type="number" id="song-bpm" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="BPM">
             <input type="text" id="song-key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none" placeholder="Clé (ex: Am)">
             <div class="flex gap-2">
-                <button onclick="closeModal('modal-song')" class="flex-1 bg-white/5 py-4 rounded-xl uppercase text-[10px] font-bold">Annuler</button>
-                <button id="btn-save-song" class="flex-1 bg-cyan-600 py-4 rounded-xl uppercase text-[10px] font-bold">Sauver</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-archive" class="page hidden bg-black/80 z-[200]">
-        <div class="glass p-8 rounded-[2rem] w-full max-w-sm text-center">
-            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500">Nouveau Résumé</h3>
-            <input type="text" id="arch-date" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Date">
-            <input type="text" id="arch-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Titre">
-            <textarea id="arch-content" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none h-32" placeholder="Contenu..."></textarea>
-            <div class="flex gap-2">
-                <button onclick="closeModal('modal-archive')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold uppercase text-[10px]">Annuler</button>
-                <button id="btn-save-arch" class="flex-1 bg-cyan-600 py-4 rounded-xl font-bold uppercase text-[10px]">Publier</button>
+                <button onclick="closeModal('modal-song')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold uppercase text-[10px]">Annuler</button>
+                <button id="btn-save-song" class="flex-1 bg-cyan-600 py-4 rounded-xl font-bold uppercase text-[10px]">Sauver</button>
             </div>
         </div>
     </div>
@@ -188,15 +174,14 @@
             <select id="doc-type" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none appearance-none">
                 <option value="pdf" class="bg-black text-white">Partition (PDF)</option>
                 <option value="audio" class="bg-black text-white">Audio (MP3/WAV)</option>
-                <option value="other" class="bg-black text-white">Autre</option>
             </select>
             <input type="file" id="doc-input-file" class="hidden">
-            <button onclick="document.getElementById('doc-input-file').click()" class="w-full border-2 border-dashed border-white/10 p-8 rounded-2xl mb-6 text-slate-500 hover:border-cyan-500 transition-all text-xs font-bold uppercase">Choisir le fichier</button>
+            <button onclick="document.getElementById('doc-input-file').click()" class="w-full border-2 border-dashed border-white/10 p-8 rounded-2xl mb-6 text-slate-500 text-xs font-bold uppercase">Choisir le fichier</button>
             <div class="flex gap-2">
                 <button onclick="closeModal('modal-doc')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold uppercase text-[10px]">Annuler</button>
                 <button id="btn-upload-doc" class="flex-1 bg-cyan-600 py-4 rounded-xl font-bold uppercase text-[10px]">Envoyer</button>
             </div>
-            <p id="upload-status" class="text-[8px] mt-4 text-cyan-500 uppercase font-black tracking-widest"></p>
+            <p id="upload-status" class="text-[8px] mt-4 text-cyan-500 uppercase font-black"></p>
         </div>
     </div>
 
@@ -222,16 +207,6 @@
         let isFirstLoad = true;
         const daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
-        // --- FONCTION FLASH (NOTIFICATION) ---
-        const triggerFlash = (title, body) => {
-            if (isFirstLoad) return;
-            const alert = document.getElementById('push-alert');
-            document.getElementById('push-title').innerText = title;
-            document.getElementById('push-body').innerText = body;
-            alert.classList.add('show');
-            setTimeout(() => alert.classList.remove('show'), 5000);
-        };
-
         // --- AUTH ---
         document.getElementById('btn-to-name').onclick = () => {
             const code = document.getElementById('input-pass').value;
@@ -256,12 +231,45 @@
             }
         };
 
+        // --- TIMER DYNAMIQUE ---
+        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
+            const list = document.getElementById('list-calendar'); 
+            list.innerHTML = "";
+            let nextEvent = null;
+            const now = new Date();
+
+            snap.forEach(d => {
+                const e = d.data();
+                const eventDate = new Date(e.date);
+                if(!nextEvent && eventDate >= now) nextEvent = eventDate;
+
+                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 flex justify-between items-center">
+                    <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
+                    <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
+                </div>`;
+            });
+
+            if(nextEvent) {
+                document.getElementById('next-event-timer').classList.remove('hidden');
+                updateTimer(nextEvent);
+                setInterval(() => updateTimer(nextEvent), 60000);
+            }
+        });
+
+        function updateTimer(date) {
+            const diff = date - new Date();
+            if(diff <= 0) return;
+            document.getElementById('timer-days').innerText = Math.floor(diff / (1000 * 60 * 60 * 24)).toString().padStart(2, '0');
+            document.getElementById('timer-hours').innerText = Math.floor((diff / (1000 * 60 * 60)) % 24).toString().padStart(2, '0');
+            document.getElementById('timer-mins').innerText = Math.floor((diff / 1000 / 60) % 60).toString().padStart(2, '0');
+        }
+
         // --- ACTIONS ADMIN ---
         window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         document.getElementById('btn-add-event').onclick = async () => {
-            const t = prompt("Titre de l'event ?"); 
+            const t = prompt("Nom de l'event ?"); 
             const d = prompt("Date (AAAA-MM-JJ) ?", new Date().toISOString().split('T')[0]);
             if(t && d) await addDoc(collection(db, "calendar"), { title: t, date: d });
         };
@@ -272,7 +280,6 @@
         };
 
         document.getElementById('btn-add-song').onclick = () => document.getElementById('modal-song').classList.remove('hidden');
-        document.getElementById('btn-open-archive').onclick = () => document.getElementById('modal-archive').classList.remove('hidden');
         document.getElementById('btn-open-doc').onclick = () => document.getElementById('modal-doc').classList.remove('hidden');
 
         document.getElementById('btn-save-song').onclick = async () => {
@@ -281,121 +288,12 @@
             const k = document.getElementById('song-key').value;
             if(n) {
                 await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() });
-                closeModal('modal-song'); 
-                document.getElementById('song-name').value = ""; document.getElementById('song-bpm').value = ""; document.getElementById('song-key').value = "";
+                closeModal('modal-song');
+                document.getElementById('song-name').value = "";
             }
         };
 
-        document.getElementById('btn-save-arch').onclick = async () => {
-            const t = document.getElementById('arch-title').value;
-            const d = document.getElementById('arch-date').value;
-            const c = document.getElementById('arch-content').value;
-            if(t && c) {
-                await addDoc(collection(db, "archives"), { title: t, date: d, content: c, time: serverTimestamp() });
-                closeModal('modal-archive'); 
-                document.getElementById('arch-title').value = ""; document.getElementById('arch-date').value = ""; document.getElementById('arch-content').value = "";
-            }
-        };
-
-        // --- GESTION UPLOAD DOCUMENTS ---
-        document.getElementById('btn-upload-doc').onclick = async () => {
-            const title = document.getElementById('doc-title').value;
-            const file = document.getElementById('doc-input-file').files[0];
-            const type = document.getElementById('doc-type').value;
-            const status = document.getElementById('upload-status');
-
-            if(!title || !file) return alert("Nom et fichier requis !");
-
-            try {
-                status.innerText = "Upload en cours...";
-                const fileRef = ref(storage, `docs/${Date.now()}_${file.name}`);
-                await uploadBytes(fileRef, file);
-                const downloadURL = await getDownloadURL(fileRef);
-
-                await addDoc(collection(db, "documents"), {
-                    title: title,
-                    url: downloadURL,
-                    type: type,
-                    fileName: file.name,
-                    time: serverTimestamp()
-                });
-
-                status.innerText = "Terminé !";
-                setTimeout(() => {
-                    closeModal('modal-doc');
-                    document.getElementById('doc-title').value = "";
-                    document.getElementById('doc-input-file').value = "";
-                    status.innerText = "";
-                }, 1000);
-            } catch (error) {
-                alert("Erreur upload");
-                status.innerText = "Erreur.";
-            }
-        };
-
-        // --- DISPONIBILITÉS ---
-        document.getElementById('btn-request-dispo').onclick = async () => {
-            const weekLabel = prompt("Semaine concernée ?", "Prochaine semaine");
-            if(weekLabel) {
-                await setDoc(doc(db, "dispos", "current_week"), { label: weekLabel, active: true, created: serverTimestamp() });
-                await addDoc(collection(db, "chats"), { txt: `📅 Sondage Dispos : ${weekLabel}`, user: "HUB", time: serverTimestamp() });
-            }
-        };
-
-        onSnapshot(doc(db, "dispos", "current_week"), (snapshot) => {
-            const zone = document.getElementById('dispo-zone');
-            if (snapshot.exists() && snapshot.data().active) {
-                const data = snapshot.data(); zone.classList.remove('hidden');
-                document.getElementById('dispo-label').innerText = data.label;
-                const btnCont = document.getElementById('dispo-buttons');
-                btnCont.innerHTML = daysOfWeek.map(day => {
-                    const isSelected = data[day] && data[day].includes(userName);
-                    return `<button onclick="toggleDispo('${day}', ${isSelected})" class="day-btn glass p-2 rounded-xl text-[9px] font-bold border border-white/5 uppercase ${isSelected ? 'selected' : ''}">${day.slice(0,3)}</button>`;
-                }).join('');
-                const resCont = document.getElementById('dispo-results');
-                resCont.innerHTML = daysOfWeek.map(day => {
-                    const users = data[day] || []; if(users.length === 0) return '';
-                    return `<div class="flex items-center gap-3"><span class="text-[8px] font-black text-amber-500 w-8 uppercase">${day.slice(0,3)}</span><div class="flex flex-wrap gap-1">${users.map(u => `<span class="bg-white/5 text-[8px] px-2 py-1 rounded-lg border border-white/5 font-bold">${u}</span>`).join('')}</div></div>`;
-                }).join('');
-            } else { zone.classList.add('hidden'); }
-        });
-
-        window.toggleDispo = async (day, isSelected) => {
-            const ref = doc(db, "dispos", "current_week");
-            if (isSelected) { await updateDoc(ref, { [day]: arrayRemove(userName) }); } 
-            else { await updateDoc(ref, { [day]: arrayUnion(userName) }); }
-        };
-
-        // --- SYNC GÉNÉRALE ---
-        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
-            const list = document.getElementById('list-calendar'); list.innerHTML = "";
-            snap.forEach(d => {
-                const e = d.data();
-                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 shadow-xl flex justify-between items-center">
-                    <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
-                    <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "documents"), orderBy("time", "desc")), snap => {
-            const list = document.getElementById('list-docs'); list.innerHTML = "";
-            snap.forEach(d => {
-                const docData = d.data();
-                const icon = docData.type === 'pdf' ? 'fa-file-pdf text-red-400' : (docData.type === 'audio' ? 'fa-music text-amber-400' : 'fa-file text-slate-400');
-                list.innerHTML += `<div class="glass p-5 rounded-3xl flex justify-between items-center border border-white/5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas ${icon} text-lg"></i></div>
-                        <div><b class="text-[11px] uppercase italic text-white">${docData.title}</b><p class="text-[8px] text-slate-500 font-black uppercase tracking-widest">${docData.type}</p></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="${docData.url}" target="_blank" class="w-10 h-10 glass rounded-full flex items-center justify-center text-cyan-400 border border-cyan-400/20"><i class="fas fa-external-link-alt text-xs"></i></a>
-                        <button onclick="window.deleteItem('documents', '${d.id}')" class="admin-only text-red-500/20 w-10 h-10"><i class="fas fa-trash text-xs"></i></button>
-                    </div>
-                </div>`;
-            });
-        });
-
+        // --- SYNC TEAM & SONGS ---
         onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
             document.getElementById('count-s').innerText = snap.size;
             const list = document.getElementById('list-songs'); list.innerHTML = "";
@@ -420,34 +318,78 @@
             });
         });
 
+        // --- DISPOS ---
+        document.getElementById('btn-request-dispo').onclick = async () => {
+            const weekLabel = prompt("Semaine ?", "Sondage");
+            if(weekLabel) await setDoc(doc(db, "dispos", "current_week"), { label: weekLabel, active: true });
+        };
+
+        onSnapshot(doc(db, "dispos", "current_week"), (snapshot) => {
+            const zone = document.getElementById('dispo-zone');
+            if (snapshot.exists() && snapshot.data().active) {
+                const data = snapshot.data(); zone.classList.remove('hidden');
+                document.getElementById('dispo-label').innerText = data.label;
+                document.getElementById('dispo-buttons').innerHTML = daysOfWeek.map(day => {
+                    const isSelected = data[day] && data[day].includes(userName);
+                    return `<button onclick="toggleDispo('${day}', ${isSelected})" class="day-btn glass p-2 rounded-xl text-[9px] font-bold uppercase ${isSelected ? 'selected' : ''}">${day.slice(0,3)}</button>`;
+                }).join('');
+                document.getElementById('dispo-results').innerHTML = daysOfWeek.map(day => {
+                    const users = data[day] || []; if(users.length === 0) return '';
+                    return `<div class="flex items-center gap-3"><span class="text-[8px] font-black text-amber-500 w-8">${day.slice(0,3)}</span><div class="flex flex-wrap gap-1">${users.map(u => `<span class="bg-white/5 text-[8px] px-2 py-1 rounded-lg font-bold">${u}</span>`).join('')}</div></div>`;
+                }).join('');
+            } else { zone.classList.add('hidden'); }
+        });
+
+        window.toggleDispo = async (day, isSelected) => {
+            const ref = doc(db, "dispos", "current_week");
+            if (isSelected) await updateDoc(ref, { [day]: arrayRemove(userName) }); 
+            else await updateDoc(ref, { [day]: arrayUnion(userName) });
+        };
+
+        // --- DOCUMENTS ---
+        document.getElementById('btn-upload-doc').onclick = async () => {
+            const title = document.getElementById('doc-title').value;
+            const file = document.getElementById('doc-input-file').files[0];
+            const type = document.getElementById('doc-type').value;
+            if(!title || !file) return alert("Manque infos");
+            try {
+                document.getElementById('upload-status').innerText = "Upload...";
+                const fileRef = ref(storage, `docs/${Date.now()}_${file.name}`);
+                await uploadBytes(fileRef, file);
+                const url = await getDownloadURL(fileRef);
+                await addDoc(collection(db, "documents"), { title, url, type, time: serverTimestamp() });
+                closeModal('modal-doc');
+            } catch (e) { alert("Erreur"); }
+        };
+
+        onSnapshot(query(collection(db, "documents"), orderBy("time", "desc")), snap => {
+            const list = document.getElementById('list-docs'); list.innerHTML = "";
+            snap.forEach(d => {
+                const docData = d.data();
+                const icon = docData.type === 'pdf' ? 'fa-file-pdf text-red-400' : 'fa-music text-amber-400';
+                list.innerHTML += `<div class="glass p-5 rounded-3xl flex justify-between items-center mb-2">
+                    <div class="flex items-center gap-4"><i class="fas ${icon} text-lg"></i><b class="text-[11px] uppercase italic text-white">${docData.title}</b></div>
+                    <div class="flex gap-2">
+                        <a href="${docData.url}" target="_blank" class="w-10 h-10 glass rounded-full flex items-center justify-center text-cyan-400"><i class="fas fa-external-link-alt text-xs"></i></a>
+                        <button onclick="window.deleteItem('documents', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                </div>`;
+            });
+        });
+
+        // --- CHAT ---
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
-                const m = d.data(); 
-                const isMe = m.user === userName;
-                const isUrgent = m.user === "URGENT" || m.txt.includes("🚨");
-
+                const m = d.data(); const isMe = m.user === userName;
                 box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
                     <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 p-2"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                        <div class="${isUrgent ? 'bg-red-600 text-white font-black animate-bounce border-red-400' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 px-4 rounded-2xl text-sm border border-white/5 shadow-lg">
-                            ${m.txt}
-                        </div>
+                    <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 px-4 rounded-2xl text-sm border border-white/5 shadow-lg text-white">
+                        ${m.txt}
                     </div>
                 </div>`;
-
-                if(!isMe && m.time && !isFirstLoad) {
-                    const msgTime = m.time.toMillis();
-                    if((Date.now() - msgTime) / 1000 < 8) triggerFlash(m.user, m.txt);
-                }
             });
             box.scrollTop = box.scrollHeight;
-        });
-
-        onSnapshot(collection(db, "presence"), snap => {
-            const list = document.getElementById('list-online'); list.innerHTML = "";
-            snap.forEach(d => { if (Date.now() - d.data().lastSeen < 120000) { list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] online-pulse font-black uppercase">● ${d.data().name}</span>`; } });
         });
 
         document.getElementById('btn-send').onclick = async () => {
@@ -455,10 +397,10 @@
             if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
         };
 
-        document.getElementById('btn-urgent').onclick = async () => {
-            const msg = prompt("MESSAGE D'URGENCE :");
-            if(msg) await addDoc(collection(db, "chats"), { txt: `🚨 URGENT : ${msg}`, user: "URGENT", time: serverTimestamp() });
-        };
+        onSnapshot(collection(db, "presence"), snap => {
+            const list = document.getElementById('list-online'); list.innerHTML = "";
+            snap.forEach(d => { if (Date.now() - d.data().lastSeen < 120000) { list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] online-pulse font-black uppercase">● ${d.data().name}</span>`; } });
+        });
 
         document.getElementById('logout-btn').onclick = () => location.reload();
     </script>
