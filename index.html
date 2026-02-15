@@ -6,17 +6,36 @@
     <title>LIVE HUB 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
     <style>
-        body { background: #050505; color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; overflow-x: hidden; }
-        .glass { background: rgba(20, 20, 25, 0.8); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.08); }
+        /* Sécurité si le CDN Tailwind échoue */
+        :root { --hub-cyan: #06b6d4; --hub-dark: #050505; }
+        body { background: var(--hub-dark); color: #e2e8f0; font-family: 'Inter', sans-serif; margin: 0; }
+        
+        /* Styles Glassmorphism */
+        .glass { 
+            background: rgba(20, 20, 25, 0.8); 
+            backdrop-filter: blur(12px); 
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.08); 
+        }
+        
+        /* Gestion Admin */
         .admin-only { display: none !important; }
         .is-admin .admin-only { display: flex !important; }
+        
+        /* Navigation & Tabs */
         .tab-content { display: none; padding-bottom: 140px; height: 100vh; overflow-y: auto; }
-        .active { display: block; }
+        .tab-content.active { display: block; }
+        
+        /* Modals & Pages */
         .page { position: fixed; inset: 0; z-index: 100; background: #050505; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .hidden { display: none !important; }
+        
+        /* Animations */
         #push-alert { transform: translateY(-130%); transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 9999; }
         #push-alert.show { transform: translateY(20px); }
+        
         .online-pulse { animation: pulse-cyan 2s infinite; }
         @keyframes pulse-cyan {
             0% { box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.4); }
@@ -26,7 +45,7 @@
         .day-btn.selected { background: #0891b2 !important; color: white; border-color: #22d3ee; }
     </style>
 </head>
-<body>
+<body class="bg-[#050505]">
 
     <div id="push-alert" class="fixed top-0 left-1/2 -translate-x-1/2 w-[90%] max-w-sm glass p-4 rounded-3xl border-l-4 border-cyan-500 shadow-2xl flex items-center gap-3">
         <div class="bg-cyan-500/20 w-10 h-10 rounded-full flex items-center justify-center text-cyan-500"><i class="fas fa-bell"></i></div>
@@ -65,25 +84,14 @@
         <main class="p-4 max-w-lg mx-auto">
             
             <section id="tab-home" class="tab-content active text-center">
-                <div id="next-event-timer" class="mb-6 hidden">
-                    <div class="glass p-5 rounded-[2.5rem] border border-cyan-500/30 shadow-[0_0_20px_rgba(6,182,212,0.15)]">
-                        <p id="timer-label" class="text-[8px] font-black text-cyan-500 uppercase tracking-[0.2em] mb-3 italic">Chargement date...</p>
-                        <div class="flex justify-center gap-6 text-white">
-                            <div><b id="timer-days" class="text-2xl font-black text-cyan-400">00</b><p class="text-[7px] uppercase opacity-40">Jours</p></div>
-                            <div><b id="timer-hours" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Heures</p></div>
-                            <div><b id="timer-mins" class="text-2xl font-black">00</b><p class="text-[7px] uppercase opacity-40">Min</p></div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="glass p-8 rounded-[3rem] mb-6 shadow-2xl">
                     <h3 class="text-3xl font-black italic uppercase mb-2 tracking-tighter" id="display-name">---</h3>
                     <div id="list-online" class="flex flex-wrap justify-center gap-2 text-[10px] mt-4"></div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div>
-                    <div class="glass p-6 rounded-3xl"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Team</span><b id="count-m" class="text-3xl font-black">0</b></div>
+                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Songs</span><b id="count-s" class="text-3xl font-black">0</b></div>
+                    <div class="glass p-6 rounded-3xl text-center"><span class="text-[9px] text-slate-500 block uppercase font-bold mb-1 italic">Team</span><b id="count-m" class="text-3xl font-black">0</b></div>
                 </div>
             </section>
 
@@ -106,22 +114,12 @@
                 <div id="list-calendar" class="space-y-6"></div>
             </section>
 
-            <section id="tab-archives" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Archives</h3><button id="btn-open-archive" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
-                <div id="list-archives" class="space-y-4"></div>
-            </section>
-
             <section id="tab-docs" class="tab-content">
                 <div class="flex justify-between items-center mb-6 px-2">
                     <h3 class="text-2xl font-black italic uppercase">Ressources</h3>
                     <button id="btn-open-doc" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-cloud-upload-alt"></i></button>
                 </div>
                 <div id="list-docs" class="space-y-3"></div>
-            </section>
-
-            <section id="tab-team" class="tab-content">
-                <div class="flex justify-between items-center mb-6 px-2"><h3 class="text-2xl font-black italic uppercase">Membres</h3><button id="btn-add-member" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-plus"></i></button></div>
-                <div id="list-members" class="space-y-3"></div>
             </section>
 
             <section id="tab-setlist" class="tab-content">
@@ -146,48 +144,20 @@
             <div class="glass rounded-[2.5rem] flex justify-around p-3 border border-white/10 shadow-2xl">
                 <button onclick="switchTab('home', this)" class="nav-btn text-cyan-500 p-3"><i class="fas fa-home text-lg"></i></button>
                 <button onclick="switchTab('calendar', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-calendar-alt text-lg"></i></button>
-                <button onclick="switchTab('archives', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-box-archive text-lg"></i></button>
                 <button onclick="switchTab('docs', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-file-pdf text-lg"></i></button>
-                <button onclick="switchTab('team', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-users text-lg"></i></button>
                 <button onclick="switchTab('setlist', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-music text-lg"></i></button>
                 <button onclick="switchTab('chat', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-comment-alt text-lg"></i></button>
             </div>
         </nav>
     </div>
 
-    <div id="modal-song" class="page hidden bg-black/80 z-[200]">
-        <div class="glass p-8 rounded-[2rem] w-full max-sm">
-            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 text-center italic">Nouveau Morceau</h3>
-            <input type="text" id="song-name" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Titre">
-            <input type="number" id="song-bpm" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="BPM">
-            <input type="text" id="song-key" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none" placeholder="Clé (ex: Am)">
-            <div class="flex gap-2">
-                <button onclick="closeModal('modal-song')" class="flex-1 bg-white/5 py-4 rounded-xl uppercase text-[10px] font-bold">Annuler</button>
-                <button id="btn-save-song" class="flex-1 bg-cyan-600 py-4 rounded-xl uppercase text-[10px] font-bold">Sauver</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="modal-archive" class="page hidden bg-black/80 z-[200]">
-        <div class="glass p-8 rounded-[2rem] w-full max-w-sm text-center">
-            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500">Nouveau Résumé</h3>
-            <input type="text" id="arch-date" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Date">
-            <input type="text" id="arch-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Titre">
-            <textarea id="arch-content" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-6 text-white outline-none h-32" placeholder="Contenu..."></textarea>
-            <div class="flex gap-2">
-                <button onclick="closeModal('modal-archive')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold uppercase text-[10px]">Annuler</button>
-                <button id="btn-save-arch" class="flex-1 bg-cyan-600 py-4 rounded-xl font-bold uppercase text-[10px]">Publier</button>
-            </div>
-        </div>
-    </div>
-
     <div id="modal-doc" class="page hidden bg-black/80 z-[200]">
         <div class="glass p-8 rounded-[2rem] w-full max-w-sm text-center">
             <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 italic">Ajouter Fichier</h3>
             <input type="text" id="doc-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Nom du fichier">
-            <select id="doc-type" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none appearance-none">
+            <select id="doc-type" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none">
                 <option value="pdf" class="bg-black text-white">Partition (PDF)</option>
-                <option value="audio" class="bg-black text-white">Audio (MP3/WAV)</option>
+                <option value="audio" class="bg-black text-white">Audio (MP3)</option>
                 <option value="other" class="bg-black text-white">Autre</option>
             </select>
             <input type="file" id="doc-input-file" class="hidden">
@@ -201,6 +171,7 @@
     </div>
 
     <script type="module">
+        // Importation Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot, query, orderBy, serverTimestamp, setDoc, updateDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
@@ -222,14 +193,12 @@
         let isFirstLoad = true;
         const daysOfWeek = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
 
-        // --- FONCTION FLASH (NOTIFICATION) ---
-        const triggerFlash = (title, body) => {
-            if (isFirstLoad) return;
-            const alert = document.getElementById('push-alert');
-            document.getElementById('push-title').innerText = title;
-            document.getElementById('push-body').innerText = body;
-            alert.classList.add('show');
-            setTimeout(() => alert.classList.remove('show'), 5000);
+        // --- NAVIGATION TABS ---
+        window.switchTab = (id, btn) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.getElementById('tab-' + id).classList.add('active');
+            document.querySelectorAll('.nav-btn').forEach(l => l.classList.replace('text-cyan-500', 'text-slate-500'));
+            btn.classList.replace('text-slate-500', 'text-cyan-500');
         };
 
         // --- AUTH ---
@@ -256,90 +225,43 @@
             }
         };
 
-        // --- ACTIONS ADMIN ---
-        window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-
-        document.getElementById('btn-add-event').onclick = async () => {
-            const t = prompt("Titre de l'event ?"); 
-            const d = prompt("Date (AAAA-MM-JJ) ?", new Date().toISOString().split('T')[0]);
-            if(t && d) await addDoc(collection(db, "calendar"), { title: t, date: d });
-        };
-
-        document.getElementById('btn-add-member').onclick = async () => {
-            const n = prompt("Nom ?"); const r = prompt("Rôle ?");
-            if(n && r) await addDoc(collection(db, "team"), { name: n, role: r });
-        };
-
-        document.getElementById('btn-add-song').onclick = () => document.getElementById('modal-song').classList.remove('hidden');
-        document.getElementById('btn-open-archive').onclick = () => document.getElementById('modal-archive').classList.remove('hidden');
-        document.getElementById('btn-open-doc').onclick = () => document.getElementById('modal-doc').classList.remove('hidden');
-
-        document.getElementById('btn-save-song').onclick = async () => {
-            const n = document.getElementById('song-name').value;
-            const b = document.getElementById('song-bpm').value;
-            const k = document.getElementById('song-key').value;
-            if(n) {
-                await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() });
-                closeModal('modal-song'); 
-                document.getElementById('song-name').value = ""; document.getElementById('song-bpm').value = ""; document.getElementById('song-key').value = "";
-            }
-        };
-
-        document.getElementById('btn-save-arch').onclick = async () => {
-            const t = document.getElementById('arch-title').value;
-            const d = document.getElementById('arch-date').value;
-            const c = document.getElementById('arch-content').value;
-            if(t && c) {
-                await addDoc(collection(db, "archives"), { title: t, date: d, content: c, time: serverTimestamp() });
-                closeModal('modal-archive'); 
-                document.getElementById('arch-title').value = ""; document.getElementById('arch-date').value = ""; document.getElementById('arch-content').value = "";
-            }
-        };
-
-        // --- GESTION UPLOAD DOCUMENTS ---
+        // --- GESTION DOCUMENTS ---
         document.getElementById('btn-upload-doc').onclick = async () => {
             const title = document.getElementById('doc-title').value;
             const file = document.getElementById('doc-input-file').files[0];
             const type = document.getElementById('doc-type').value;
-            const status = document.getElementById('upload-status');
-
-            if(!title || !file) return alert("Nom et fichier requis !");
+            if(!title || !file) return alert("Remplis tout !");
 
             try {
-                status.innerText = "Upload en cours...";
+                document.getElementById('upload-status').innerText = "Envoi...";
                 const fileRef = ref(storage, `docs/${Date.now()}_${file.name}`);
                 await uploadBytes(fileRef, file);
-                const downloadURL = await getDownloadURL(fileRef);
-
-                await addDoc(collection(db, "documents"), {
-                    title: title,
-                    url: downloadURL,
-                    type: type,
-                    fileName: file.name,
-                    time: serverTimestamp()
-                });
-
-                status.innerText = "Terminé !";
-                setTimeout(() => {
-                    closeModal('modal-doc');
-                    document.getElementById('doc-title').value = "";
-                    document.getElementById('doc-input-file').value = "";
-                    status.innerText = "";
-                }, 1000);
-            } catch (error) {
-                alert("Erreur upload");
-                status.innerText = "Erreur.";
-            }
+                const url = await getDownloadURL(fileRef);
+                await addDoc(collection(db, "documents"), { title, url, type, time: serverTimestamp() });
+                document.getElementById('modal-doc').classList.add('hidden');
+                document.getElementById('upload-status').innerText = "";
+            } catch (e) { alert("Erreur upload"); }
         };
 
-        // --- DISPONIBILITÉS ---
+        onSnapshot(query(collection(db, "documents"), orderBy("time", "desc")), snap => {
+            const list = document.getElementById('list-docs'); list.innerHTML = "";
+            snap.forEach(d => {
+                const data = d.data();
+                const icon = data.type === 'pdf' ? 'fa-file-pdf text-red-400' : 'fa-music text-amber-400';
+                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
+                    <div class="flex items-center gap-3"><i class="fas ${icon}"></i><b class="text-xs uppercase italic">${data.title}</b></div>
+                    <div class="flex gap-2">
+                        <a href="${data.url}" target="_blank" class="w-8 h-8 glass rounded-full flex items-center justify-center text-cyan-400"><i class="fas fa-external-link-alt text-xs"></i></a>
+                        <button onclick="window.deleteItem('documents', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash text-xs"></i></button>
+                    </div>
+                </div>`;
+            });
+        });
+
+        // --- DISPOS ---
         document.getElementById('btn-request-dispo').onclick = async () => {
-            const weekLabel = prompt("Semaine concernée ?", "Prochaine semaine");
-            if(weekLabel) {
-                await setDoc(doc(db, "dispos", "current_week"), { label: weekLabel, active: true, created: serverTimestamp() });
-                await addDoc(collection(db, "chats"), { txt: `📅 Sondage Dispos : ${weekLabel}`, user: "HUB", time: serverTimestamp() });
-            }
+            const label = prompt("Quelle semaine ?");
+            if(label) await setDoc(doc(db, "dispos", "current_week"), { label, active: true });
         };
 
         onSnapshot(doc(db, "dispos", "current_week"), (snapshot) => {
@@ -347,107 +269,29 @@
             if (snapshot.exists() && snapshot.data().active) {
                 const data = snapshot.data(); zone.classList.remove('hidden');
                 document.getElementById('dispo-label').innerText = data.label;
-                const btnCont = document.getElementById('dispo-buttons');
-                btnCont.innerHTML = daysOfWeek.map(day => {
-                    const isSelected = data[day] && data[day].includes(userName);
-                    return `<button onclick="toggleDispo('${day}', ${isSelected})" class="day-btn glass p-2 rounded-xl text-[9px] font-bold border border-white/5 uppercase ${isSelected ? 'selected' : ''}">${day.slice(0,3)}</button>`;
-                }).join('');
-                const resCont = document.getElementById('dispo-results');
-                resCont.innerHTML = daysOfWeek.map(day => {
-                    const users = data[day] || []; if(users.length === 0) return '';
-                    return `<div class="flex items-center gap-3"><span class="text-[8px] font-black text-amber-500 w-8 uppercase">${day.slice(0,3)}</span><div class="flex flex-wrap gap-1">${users.map(u => `<span class="bg-white/5 text-[8px] px-2 py-1 rounded-lg border border-white/5 font-bold">${u}</span>`).join('')}</div></div>`;
+                document.getElementById('dispo-buttons').innerHTML = daysOfWeek.map(day => {
+                    const isSel = data[day] && data[day].includes(userName);
+                    return `<button onclick="toggleDispo('${day}', ${isSel})" class="day-btn glass p-2 rounded-xl text-[9px] font-bold ${isSel?'selected':''}">${day.slice(0,3)}</button>`;
                 }).join('');
             } else { zone.classList.add('hidden'); }
         });
 
-        window.toggleDispo = async (day, isSelected) => {
+        window.toggleDispo = async (day, isSel) => {
             const ref = doc(db, "dispos", "current_week");
-            if (isSelected) { await updateDoc(ref, { [day]: arrayRemove(userName) }); } 
-            else { await updateDoc(ref, { [day]: arrayUnion(userName) }); }
+            await updateDoc(ref, { [day]: isSel ? arrayRemove(userName) : arrayUnion(userName) });
         };
 
-        // --- SYNC GÉNÉRALE ---
-        onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
-            const list = document.getElementById('list-calendar'); list.innerHTML = "";
-            snap.forEach(d => {
-                const e = d.data();
-                list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 shadow-xl flex justify-between items-center">
-                    <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
-                    <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "documents"), orderBy("time", "desc")), snap => {
-            const list = document.getElementById('list-docs'); list.innerHTML = "";
-            snap.forEach(d => {
-                const docData = d.data();
-                const icon = docData.type === 'pdf' ? 'fa-file-pdf text-red-400' : (docData.type === 'audio' ? 'fa-music text-amber-400' : 'fa-file text-slate-400');
-                list.innerHTML += `<div class="glass p-5 rounded-3xl flex justify-between items-center border border-white/5">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center"><i class="fas ${icon} text-lg"></i></div>
-                        <div><b class="text-[11px] uppercase italic text-white">${docData.title}</b><p class="text-[8px] text-slate-500 font-black uppercase tracking-widest">${docData.type}</p></div>
-                    </div>
-                    <div class="flex gap-2">
-                        <a href="${docData.url}" target="_blank" class="w-10 h-10 glass rounded-full flex items-center justify-center text-cyan-400 border border-cyan-400/20"><i class="fas fa-external-link-alt text-xs"></i></a>
-                        <button onclick="window.deleteItem('documents', '${d.id}')" class="admin-only text-red-500/20 w-10 h-10"><i class="fas fa-trash text-xs"></i></button>
-                    </div>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "songs"), orderBy("time", "asc")), snap => {
-            document.getElementById('count-s').innerText = snap.size;
-            const list = document.getElementById('list-songs'); list.innerHTML = "";
-            snap.forEach(d => {
-                const s = d.data();
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div><b class="text-xs uppercase italic">${s.name}</b><p class="text-slate-500 text-[9px] font-bold uppercase">${s.bpm || '--'} BPM • ${s.key || '--'}</p></div>
-                    <button onclick="window.deleteItem('songs', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
-                </div>`;
-            });
-        });
-
-        onSnapshot(query(collection(db, "team"), orderBy("name", "asc")), snap => {
-            document.getElementById('count-m').innerText = snap.size;
-            const list = document.getElementById('list-members'); list.innerHTML = "";
-            snap.forEach(d => {
-                const m = d.data();
-                list.innerHTML += `<div class="glass p-4 rounded-2xl flex justify-between items-center">
-                    <div><b class="text-xs uppercase italic">${m.name}</b><p class="text-cyan-500 text-[8px] font-black uppercase tracking-widest">${m.role || 'Membre'}</p></div>
-                    <button onclick="window.deleteItem('team', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
-                </div>`;
-            });
-        });
-
+        // --- SYNC CHAT & AUTRES ---
         onSnapshot(query(collection(db, "chats"), orderBy("time", "asc")), snap => {
             const box = document.getElementById('chat-box'); box.innerHTML = "";
             snap.forEach(d => {
-                const m = d.data(); 
-                const isMe = m.user === userName;
-                const isUrgent = m.user === "URGENT" || m.txt.includes("🚨");
-
-                box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
-                    <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
-                    <div class="flex items-center gap-2">
-                        <button onclick="window.deleteItem('chats', '${d.id}')" class="admin-only text-red-500/20 p-2"><i class="fas fa-trash-alt text-[10px]"></i></button>
-                        <div class="${isUrgent ? 'bg-red-600 text-white font-black animate-bounce border-red-400' : isMe ? 'bg-cyan-600 text-white' : 'bg-white/10 text-white'} p-3 px-4 rounded-2xl text-sm border border-white/5 shadow-lg">
-                            ${m.txt}
-                        </div>
-                    </div>
+                const m = d.data(); const isMe = m.user === userName;
+                box.innerHTML += `<div class="flex flex-col ${isMe?'items-end':'items-start'} mb-2">
+                    <span class="text-[7px] text-slate-500 mb-1 px-2 uppercase font-bold">${m.user}</span>
+                    <div class="${isMe?'bg-cyan-600':'bg-white/10'} p-3 rounded-2xl text-sm shadow-lg">${m.txt}</div>
                 </div>`;
-
-                if(!isMe && m.time && !isFirstLoad) {
-                    const msgTime = m.time.toMillis();
-                    if((Date.now() - msgTime) / 1000 < 8) triggerFlash(m.user, m.txt);
-                }
             });
             box.scrollTop = box.scrollHeight;
-        });
-
-        onSnapshot(collection(db, "presence"), snap => {
-            const list = document.getElementById('list-online'); list.innerHTML = "";
-            snap.forEach(d => { if (Date.now() - d.data().lastSeen < 120000) { list.innerHTML += `<span class="px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-400 text-[9px] online-pulse font-black uppercase">● ${d.data().name}</span>`; } });
         });
 
         document.getElementById('btn-send').onclick = async () => {
@@ -455,21 +299,10 @@
             if(i.value.trim()) { await addDoc(collection(db, "chats"), { txt: i.value, user: userName, time: serverTimestamp() }); i.value = ""; }
         };
 
-        document.getElementById('btn-urgent').onclick = async () => {
-            const msg = prompt("MESSAGE D'URGENCE :");
-            if(msg) await addDoc(collection(db, "chats"), { txt: `🚨 URGENT : ${msg}`, user: "URGENT", time: serverTimestamp() });
-        };
-
+        // Fonctions globales
+        window.deleteItem = async (coll, id) => { if(confirm("Supprimer ?")) await deleteDoc(doc(db, coll, id)); };
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
         document.getElementById('logout-btn').onclick = () => location.reload();
-    </script>
-
-    <script>
-        function switchTab(id, btn) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-' + id).classList.add('active');
-            document.querySelectorAll('.nav-btn').forEach(l => l.classList.replace('text-cyan-500', 'text-slate-500'));
-            btn.classList.replace('text-slate-500', 'text-cyan-500');
-        }
     </script>
 </body>
 </html>
