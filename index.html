@@ -37,7 +37,7 @@
     </div>
 
     <div id="page-login" class="page">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-cyan-500/30 text-center shadow-2xl">
+        <div class="glass p-10 rounded-[3rem] w-full max-sm border border-cyan-500/30 text-center shadow-2xl">
             <h1 class="text-4xl font-black italic text-cyan-500 mb-2">LIVE HUB</h1>
             <p class="text-[10px] uppercase tracking-widest text-slate-500 mb-8 font-bold">Accès Groupe 2026</p>
             <input type="tel" id="input-pass" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-2xl mb-5 text-white outline-none focus:border-cyan-500 transition-all" placeholder="****">
@@ -46,7 +46,7 @@
     </div>
 
     <div id="page-name" class="page hidden text-center">
-        <div class="glass p-10 rounded-[3rem] w-full max-w-sm border border-white/10 shadow-2xl">
+        <div class="glass p-10 rounded-[3rem] w-full max-sm border border-white/10 shadow-2xl">
             <p class="text-[10px] uppercase font-bold text-cyan-500 mb-4 tracking-widest italic">Bienvenue</p>
             <input type="text" id="input-name" class="w-full bg-white/5 border border-white/10 p-5 rounded-2xl text-center text-xl mb-5 text-white outline-none focus:border-white/30 transition-all" placeholder="Ton Prénom">
             <button id="btn-to-app" class="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs hover:bg-slate-200 transition-all shadow-lg italic">Entrer dans le Hub</button>
@@ -107,10 +107,10 @@
 
             <section id="tab-docs" class="tab-content">
                 <div class="flex justify-between items-center mb-6 px-2">
-                    <h3 class="text-2xl font-black italic uppercase">Ressources</h3>
-                    <button id="btn-open-doc" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg"><i class="fas fa-cloud-upload-alt"></i></button>
+                    <h3 class="text-2xl font-black italic uppercase">Cloud Fichiers</h3>
+                    <button id="btn-open-doc" class="admin-only bg-cyan-600 w-12 h-12 rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90"><i class="fas fa-cloud-upload-alt"></i></button>
                 </div>
-                <div id="list-docs" class="space-y-3"></div>
+                <div id="list-docs" class="space-y-3 px-2"></div>
             </section>
 
             <section id="tab-team" class="tab-content">
@@ -143,10 +143,10 @@
         </main>
 
         <nav class="fixed bottom-6 left-1/2 -translate-x-1/2 w-[94%] max-w-sm z-50">
-            <div class="glass rounded-[2.5rem] flex justify-around p-3 border border-white/10 shadow-2xl">
+            <div class="glass rounded-[2.5rem] flex justify-around p-2 border border-white/10 shadow-2xl">
                 <button onclick="switchTab('home', this)" class="nav-btn text-cyan-500 p-3"><i class="fas fa-home text-lg"></i></button>
                 <button onclick="switchTab('calendar', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-calendar-alt text-lg"></i></button>
-                <button onclick="switchTab('docs', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-file-pdf text-lg"></i></button>
+                <button onclick="switchTab('docs', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-folder-open text-lg"></i></button>
                 <button onclick="switchTab('team', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-users text-lg"></i></button>
                 <button onclick="switchTab('setlist', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-music text-lg"></i></button>
                 <button onclick="switchTab('chat', this)" class="nav-btn text-slate-500 p-3"><i class="fas fa-comment-alt text-lg"></i></button>
@@ -169,17 +169,19 @@
 
     <div id="modal-doc" class="page hidden bg-black/80 z-[200]">
         <div class="glass p-8 rounded-[2rem] w-full max-w-sm text-center">
-            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 italic">Ajouter Fichier</h3>
-            <input type="text" id="doc-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Nom du fichier">
+            <h3 class="text-xl font-black mb-6 uppercase text-cyan-500 italic">Importer Fichier</h3>
+            <input type="text" id="doc-title" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none" placeholder="Nom d'affichage">
             <select id="doc-type" class="w-full bg-white/5 border border-white/10 p-4 rounded-xl mb-4 text-white outline-none appearance-none">
-                <option value="pdf" class="bg-black text-white">Partition (PDF)</option>
-                <option value="audio" class="bg-black text-white">Audio (MP3/WAV)</option>
+                <option value="audio" class="bg-black text-white">Audio (MP3 / WAV)</option>
+                <option value="pdf" class="bg-black text-white">Document (PDF)</option>
+                <option value="excel" class="bg-black text-white">Tableur (Excel / CSV)</option>
+                <option value="other" class="bg-black text-white">Autre</option>
             </select>
             <input type="file" id="doc-input-file" class="hidden">
-            <button onclick="document.getElementById('doc-input-file').click()" class="w-full border-2 border-dashed border-white/10 p-8 rounded-2xl mb-6 text-slate-500 text-xs font-bold uppercase">Choisir le fichier</button>
+            <button onclick="document.getElementById('doc-input-file').click()" class="w-full border-2 border-dashed border-white/10 p-8 rounded-2xl mb-6 text-slate-500 text-xs font-bold uppercase hover:border-cyan-500/50">Cliquer pour choisir</button>
             <div class="flex gap-2">
                 <button onclick="closeModal('modal-doc')" class="flex-1 bg-white/5 py-4 rounded-xl font-bold uppercase text-[10px]">Annuler</button>
-                <button id="btn-upload-doc" class="flex-1 bg-cyan-600 py-4 rounded-xl font-bold uppercase text-[10px]">Envoyer</button>
+                <button id="btn-upload-doc" class="flex-1 bg-cyan-600 py-4 rounded-xl font-bold uppercase text-[10px]">Lancer l'import</button>
             </div>
             <p id="upload-status" class="text-[8px] mt-4 text-cyan-500 uppercase font-black"></p>
         </div>
@@ -231,29 +233,19 @@
             }
         };
 
-        // --- TIMER DYNAMIQUE ---
+        // --- TIMER ---
         onSnapshot(query(collection(db, "calendar"), orderBy("date", "asc")), snap => {
-            const list = document.getElementById('list-calendar'); 
-            list.innerHTML = "";
-            let nextEvent = null;
-            const now = new Date();
-
+            const list = document.getElementById('list-calendar'); list.innerHTML = "";
+            let nextEvent = null; const now = new Date();
             snap.forEach(d => {
-                const e = d.data();
-                const eventDate = new Date(e.date);
+                const e = d.data(); const eventDate = new Date(e.date);
                 if(!nextEvent && eventDate >= now) nextEvent = eventDate;
-
                 list.innerHTML += `<div class="glass p-6 rounded-[2rem] border-l-4 border-cyan-500 mb-4 flex justify-between items-center">
                     <div><span class="text-cyan-500 font-black text-xs uppercase italic">${e.date}</span><h4 class="font-black text-white text-lg uppercase italic">${e.title}</h4></div>
                     <button onclick="window.deleteItem('calendar', '${d.id}')" class="admin-only text-red-500/30"><i class="fas fa-trash"></i></button>
                 </div>`;
             });
-
-            if(nextEvent) {
-                document.getElementById('next-event-timer').classList.remove('hidden');
-                updateTimer(nextEvent);
-                setInterval(() => updateTimer(nextEvent), 60000);
-            }
+            if(nextEvent) { document.getElementById('next-event-timer').classList.remove('hidden'); updateTimer(nextEvent); }
         });
 
         function updateTimer(date) {
@@ -269,8 +261,7 @@
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         document.getElementById('btn-add-event').onclick = async () => {
-            const t = prompt("Nom de l'event ?"); 
-            const d = prompt("Date (AAAA-MM-JJ) ?", new Date().toISOString().split('T')[0]);
+            const t = prompt("Nom ?"); const d = prompt("Date (AAAA-MM-JJ) ?", new Date().toISOString().split('T')[0]);
             if(t && d) await addDoc(collection(db, "calendar"), { title: t, date: d });
         };
 
@@ -286,11 +277,7 @@
             const n = document.getElementById('song-name').value;
             const b = document.getElementById('song-bpm').value;
             const k = document.getElementById('song-key').value;
-            if(n) {
-                await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() });
-                closeModal('modal-song');
-                document.getElementById('song-name').value = "";
-            }
+            if(n) { await addDoc(collection(db, "songs"), { name: n, bpm: b, key: k, time: serverTimestamp() }); closeModal('modal-song'); }
         };
 
         // --- SYNC TEAM & SONGS ---
@@ -346,45 +333,42 @@
             else await updateDoc(ref, { [day]: arrayUnion(userName) });
         };
 
-        // --- DOCUMENTS (CORRECTIONS APPORTÉES ICI) ---
+        // --- IMPORT / EXPORT CLOUD (DOCUMENTS) ---
         document.getElementById('btn-upload-doc').onclick = async () => {
             const title = document.getElementById('doc-title').value;
             const file = document.getElementById('doc-input-file').files[0];
             const type = document.getElementById('doc-type').value;
-            const statusLabel = document.getElementById('upload-status');
+            const status = document.getElementById('upload-status');
             
-            if(!title || !file) return alert("Manque infos");
+            if(!title || !file) return alert("Sélectionne un fichier et un nom !");
             
             try {
-                statusLabel.innerText = "CONNEXION...";
-                // Correction : Utilisation d'un chemin unique et stockage du fichier réel
-                const fileRef = ref(storage, `docs/${Date.now()}_${file.name}`);
+                status.innerText = "IMPORT EN COURS...";
+                const fileRef = ref(storage, `cloud/${Date.now()}_${file.name}`);
                 
-                statusLabel.innerText = "UPLOAD EN COURS...";
-                const result = await uploadBytes(fileRef, file);
+                // Upload du fichier réel
+                const uploadTask = await uploadBytes(fileRef, file);
+                const url = await getDownloadURL(uploadTask.ref);
                 
-                statusLabel.innerText = "LIEN GENERE...";
-                const url = await getDownloadURL(result.ref);
-                
-                statusLabel.innerText = "FINALISATION...";
+                // Enregistrement de l'URL dans la base de données
                 await addDoc(collection(db, "documents"), { 
                     title: title, 
                     url: url, 
                     type: type, 
+                    fileName: file.name,
                     time: serverTimestamp() 
                 });
                 
-                statusLabel.innerText = "SUCCÈS !";
+                status.innerText = "IMPORT RÉUSSI !";
                 setTimeout(() => {
                     closeModal('modal-doc');
-                    statusLabel.innerText = "";
+                    status.innerText = "";
                     document.getElementById('doc-title').value = "";
                 }, 1000);
-
             } catch (e) { 
                 console.error(e);
-                alert("Erreur d'upload : Vérifie tes règles Storage dans Firebase."); 
-                statusLabel.innerText = "ÉCHEC";
+                alert("Erreur d'importation. Vérifie tes droits Storage.");
+                status.innerText = "ERREUR"; 
             }
         };
 
@@ -392,12 +376,22 @@
             const list = document.getElementById('list-docs'); list.innerHTML = "";
             snap.forEach(d => {
                 const docData = d.data();
-                const icon = docData.type === 'pdf' ? 'fa-file-pdf text-red-400' : 'fa-music text-amber-400';
-                list.innerHTML += `<div class="glass p-5 rounded-3xl flex justify-between items-center mb-2">
-                    <div class="flex items-center gap-4"><i class="fas ${icon} text-lg"></i><b class="text-[11px] uppercase italic text-white">${docData.title}</b></div>
+                let icon = 'fa-file-alt text-cyan-400';
+                if(docData.type === 'pdf') icon = 'fa-file-pdf text-red-500';
+                if(docData.type === 'audio') icon = 'fa-music text-amber-500';
+                if(docData.type === 'excel') icon = 'fa-file-excel text-green-500';
+
+                list.innerHTML += `<div class="glass p-5 rounded-3xl flex justify-between items-center mb-2 animate-in fade-in">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-2xl bg-white/5 flex items-center justify-center"><i class="fas ${icon} text-lg"></i></div>
+                        <div>
+                            <b class="text-[11px] uppercase italic text-white block">${docData.title}</b>
+                            <span class="text-[7px] text-slate-500 uppercase font-bold tracking-widest">${docData.type}</span>
+                        </div>
+                    </div>
                     <div class="flex gap-2">
-                        <a href="${docData.url}" target="_blank" class="w-10 h-10 glass rounded-full flex items-center justify-center text-cyan-400"><i class="fas fa-external-link-alt text-xs"></i></a>
-                        <button onclick="window.deleteItem('documents', '${d.id}')" class="admin-only text-red-500/20"><i class="fas fa-trash text-xs"></i></button>
+                        <a href="${docData.url}" target="_blank" class="w-10 h-10 glass rounded-full flex items-center justify-center text-cyan-400 hover:bg-cyan-500/20"><i class="fas fa-download text-xs"></i></a>
+                        <button onclick="window.deleteItem('documents', '${d.id}')" class="admin-only w-10 h-10 flex items-center justify-center text-red-500/20 hover:text-red-500"><i class="fas fa-trash text-xs"></i></button>
                     </div>
                 </div>`;
             });
@@ -410,9 +404,7 @@
                 const m = d.data(); const isMe = m.user === userName;
                 box.innerHTML += `<div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
                     <span class="text-[7px] text-slate-600 mb-1 px-2 uppercase font-bold">${m.user}</span>
-                    <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 px-4 rounded-2xl text-sm border border-white/5 shadow-lg text-white">
-                        ${m.txt}
-                    </div>
+                    <div class="${isMe ? 'bg-cyan-600' : 'bg-white/10'} p-3 px-4 rounded-2xl text-sm border border-white/5 shadow-lg text-white">${m.txt}</div>
                 </div>`;
             });
             box.scrollTop = box.scrollHeight;
