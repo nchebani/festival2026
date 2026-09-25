@@ -1283,58 +1283,171 @@
       </div>
     </div>
   </div>
+  <!-- Firebase (Firestore) — stockage temps réel partagé -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <!-- STREAMING_CHUNK:Javascript Application Engine & State management... -->
   <script>
+    /* ================= FIREBASE (FIRESTORE) SETUP ================= */
+    const firebaseConfig = {
+      apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
+      authDomain: "live-hub-2026.firebaseapp.com",
+      projectId: "live-hub-2026",
+      storageBucket: "live-hub-2026.firebasestorage.app",
+      messagingSenderId: "56918867184",
+      appId: "1:56918867184:web:7667d75288d14a565e9635",
+      measurementId: "G-MNHRC2MSBH"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const FieldValue = firebase.firestore.FieldValue;
+    const songsCol = db.collection('songs');
+    const chantiersCol = db.collection('chantiers');
+    const eventsCol = db.collection('events');
+    const documentsCol = db.collection('documents');
+    const chatCol = db.collection('chat');
+    const usersCol = db.collection('users');
+    const setlistDocRef = db.collection('appState').doc('setlist');
+
     /* ================= APP STATE MANAGEMENT ================= */
+    // currentUser.role is kept live in sync with the matching document in the
+    // 'users' Firestore collection (matched by email) — see initFirebaseSync().
     let currentUser = {
       name: 'N. Chebani',
       email: 'nchebani@gmail.com',
       role: 'admin' // 'admin' or 'user'
     };
-    let songsData = [
-      { id: 1, title: '01. Prelude / Eil', key: 'Am', bpm: 120, duration: '04:15', mixPct: 100, guitar: 'Prise OK', clavier: 'Prise OK', voix: '3/3 Posées', status: 'Masterisé', fileUrl: '' },
-      { id: 2, title: '02. Lumière dans l\'Ombre', key: 'D', bpm: 95, duration: '03:48', mixPct: 75, guitar: 'Prise OK', clavier: 'Prise OK', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' },
-      { id: 3, title: '03. Horizon Eliyah', key: 'Em', bpm: 128, duration: '05:10', mixPct: 30, guitar: 'Re-take', clavier: 'Prise OK', voix: 'À enregistrer', status: 'Maquette', fileUrl: '' },
-      { id: 4, title: '04. Souffle Nouveau', key: 'G', bpm: 110, duration: '04:02', mixPct: 60, guitar: 'Prise OK', clavier: 'Re-take', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' }
-    ];
+    // These arrays are populated in real time from Firestore via onSnapshot
+    // listeners (see initFirebaseSync below) — they are no longer edited directly.
+    let songsData = [];
+    let chantiersData = [];
+    let documentsData = [];
+    let eventsData = [];
+    let chatData = [];
+    let usersData = [];
+    let setlistOrder = [];
+    // Activity feed stays local to this session (not persisted to Firestore)
     let activitiesData = [
       { id: 1, author: 'Lucas (Guitare)', text: 'a mis à jour la prise de guitare sur "Lumière dans l\'Ombre"', time: 'Aujourd\'hui à 14:20', icon: 'fa-guitar' },
       { id: 2, author: 'N. Chebani (Admin)', text: 'a ajusté le mixage global à 75% sur le Titre 02', time: 'Hier à 18:45', icon: 'fa-sliders' },
       { id: 3, author: 'Sarah (Voix)', text: 'a posé la seconde harmonie vocale sur "Souffle Nouveau"', time: '25 Sept. à 11:30', icon: 'fa-microphone' }
     ];
-    let chantiersData = [
+    // Tracks whether a modal is in "edit" mode (holds the id being edited) or "add" mode (null)
+    let editingSongId = null;
+    let editingEventId = null;
+    // Audio Player State
+    let audioObj = new Audio();
+    let currentPlayingTrackId = null;
+    let isPlaying = false;
+
+    /* Default data used ONLY once, to seed Firestore the very first time a
+       collection is found empty (fresh project). After that, everything lives
+       in Firestore and these are never used again. */
+    const DEFAULT_SONGS = [
+      { id: 1, title: '01. Prelude / Eil', key: 'Am', bpm: 120, duration: '04:15', mixPct: 100, guitar: 'Prise OK', clavier: 'Prise OK', voix: '3/3 Posées', status: 'Masterisé', fileUrl: '' },
+      { id: 2, title: '02. Lumière dans l\'Ombre', key: 'D', bpm: 95, duration: '03:48', mixPct: 75, guitar: 'Prise OK', clavier: 'Prise OK', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' },
+      { id: 3, title: '03. Horizon Eliyah', key: 'Em', bpm: 128, duration: '05:10', mixPct: 30, guitar: 'Re-take', clavier: 'Prise OK', voix: 'À enregistrer', status: 'Maquette', fileUrl: '' },
+      { id: 4, title: '04. Souffle Nouveau', key: 'G', bpm: 110, duration: '04:02', mixPct: 60, guitar: 'Prise OK', clavier: 'Re-take', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' }
+    ];
+    const DEFAULT_CHANTIERS = [
       { id: 1, title: 'Validation du master stéréo des 4 premiers titres', type: 'hebdo', urgent: 'urgent', assign: 'N. Chebani', done: false },
       { id: 2, title: 'Shooting photo officiel pour la pochette de l\'album', type: 'mensuel', urgent: 'urgent', assign: 'Équipe Visuel', done: false },
       { id: 3, title: 'Préparation du kit de communication et dossier de presse', type: 'mensuel', urgent: 'normal', assign: 'Sarah & Lucas', done: true },
       { id: 4, title: 'Raccord des effets claviers et synthés pour le live', type: 'hebdo', urgent: 'normal', assign: 'Claviériste', done: false }
     ];
-    let documentsData = [
+    const DEFAULT_DOCUMENTS = [
       { id: 1, title: 'Fiche_Technique_Eliyah_2026.pdf', type: 'pdf', desc: 'Patch scène 1 Guitare, 1 Clavier, 3 Micro Voix', icon: 'fa-file-pdf', color: '#E11D48' },
       { id: 2, title: 'Maquette_Live_Master_Wave.wav', type: 'wav', desc: 'Fichier audio non compressé 24bit / 48kHz', icon: 'fa-file-audio', color: '#0284C7' },
       { id: 3, title: 'Extrait_Concert_Teaser.mp4', type: 'video', desc: 'Captation vidéo multicam HD', icon: 'fa-file-video', color: '#7C3AED' }
     ];
-    let eventsData = [
+    const DEFAULT_EVENTS = [
       { id: 1, title: 'Répétition Générale Acoustique', date: 'Mardi 29 Septembre — 20h00', location: 'Studio Nantes' },
       { id: 2, title: 'Concert Live Officiel', date: 'Samedi 12 Octobre — 21h00', location: 'Salle de Spectacle • Setlist 45min' }
     ];
-    // Order (and selection) of tracks in the official live setlist — independent from the repertoire order
-    let setlistOrder = songsData.map(s => s.id);
-    // Tracks whether a modal is in "edit" mode (holds the id being edited) or "add" mode (null)
-    let editingSongId = null;
-    let editingEventId = null;
-    let chatData = [
-      { id: 1, author: 'Lucas (Guitare)', text: 'Salut l\'équipe ! J\'ai re-déposé la prise de solo sur le Titre 02. Dites-moi ce que vous en pensez !', time: '14:20', isMe: false },
-      { id: 2, author: 'N. Chebani', text: 'Top ! Je l\'intègre dans le mix immédiatement.', time: '14:25', isMe: true }
+    const DEFAULT_SETLIST_ORDER = DEFAULT_SONGS.map(s => s.id);
+    const DEFAULT_USERS = [
+      { name: 'N. Chebani', email: 'nchebani@gmail.com', role: 'admin' },
+      { name: 'Lucas Guitare', email: 'lucas@eliyah.band', role: 'user' },
+      { name: 'Sarah Voix', email: 'sarah@eliyah.band', role: 'user' }
     ];
-    // Audio Player State
-    let audioObj = new Audio();
-    let currentPlayingTrackId = null;
-    let isPlaying = false;
+
+    /* ================= FIRESTORE SYNC ================= */
+    function seedCollectionIfEmpty(colRef, defaultItems, useAutoId = false) {
+      colRef.limit(1).get().then(snap => {
+        if (snap.empty && defaultItems.length > 0) {
+          const batch = db.batch();
+          defaultItems.forEach(item => {
+            const ref = useAutoId ? colRef.doc() : colRef.doc(String(item.id));
+            batch.set(ref, item);
+          });
+          batch.commit().catch(err => console.error('Erreur de seed Firestore :', err));
+        }
+      }).catch(err => console.error('Erreur de lecture Firestore :', err));
+    }
+    function seedSetlistIfEmpty() {
+      setlistDocRef.get().then(doc => {
+        if (!doc.exists) setlistDocRef.set({ order: DEFAULT_SETLIST_ORDER });
+      }).catch(err => console.error('Erreur de lecture Firestore (setlist) :', err));
+    }
+    function initFirebaseSync() {
+      seedCollectionIfEmpty(songsCol, DEFAULT_SONGS);
+      seedCollectionIfEmpty(chantiersCol, DEFAULT_CHANTIERS);
+      seedCollectionIfEmpty(documentsCol, DEFAULT_DOCUMENTS);
+      seedCollectionIfEmpty(eventsCol, DEFAULT_EVENTS);
+      seedCollectionIfEmpty(usersCol, DEFAULT_USERS, true);
+      seedSetlistIfEmpty();
+
+      songsCol.onSnapshot(snap => {
+        songsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderAll();
+        renderCharts();
+      }, err => console.error('Firestore (songs) :', err));
+
+      chantiersCol.onSnapshot(snap => {
+        chantiersData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderAll();
+      }, err => console.error('Firestore (chantiers) :', err));
+
+      documentsCol.onSnapshot(snap => {
+        documentsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderDocsGrid();
+      }, err => console.error('Firestore (documents) :', err));
+
+      eventsCol.onSnapshot(snap => {
+        eventsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderEventsList();
+        renderSetlist();
+      }, err => console.error('Firestore (events) :', err));
+
+      chatCol.onSnapshot(snap => {
+        chatData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderChat();
+      }, err => console.error('Firestore (chat) :', err));
+
+      setlistDocRef.onSnapshot(doc => {
+        setlistOrder = (doc.exists && Array.isArray(doc.data().order)) ? doc.data().order : [];
+        renderSetlist();
+      }, err => console.error('Firestore (setlist) :', err));
+
+      usersCol.onSnapshot(snap => {
+        usersData = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+        renderAdminUsers();
+        // Keep this session's role in sync with what's set in Firestore for this email
+        const myProfile = usersData.find(u => u.email === currentUser.email);
+        if (myProfile && myProfile.role !== currentUser.role) {
+          currentUser.role = myProfile.role;
+          updateRoleBadge();
+          renderAll();
+        }
+      }, err => console.error('Firestore (users) :', err));
+    }
+
     /* ================= INITIALIZATION & NAVIGATION ================= */
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
       initCharts();
-      
+      initFirebaseSync();
+
       // Connection Notification Modal Trigger
       setTimeout(() => {
         renderConnNotification();
@@ -1383,12 +1496,23 @@
         document.getElementById('view-subtitle').textContent = titles[viewId].sub;
       }
     }
-    function toggleUserRole() {
-      currentUser.role = currentUser.role === 'admin' ? 'user' : 'admin';
+    function updateRoleBadge() {
       const roleDisplay = document.getElementById('user-role-display');
       roleDisplay.textContent = currentUser.role === 'admin' ? 'ADMINISTRATEUR' : 'MEMBRE GROUPE';
       roleDisplay.className = 'role-badge ' + (currentUser.role === 'admin' ? 'admin' : '');
-      alert(`Rôle utilisateur basculé en : ${currentUser.role.toUpperCase()}`);
+    }
+    function toggleUserRole() {
+      const newRole = currentUser.role === 'admin' ? 'user' : 'admin';
+      const myProfile = usersData.find(u => u.email === currentUser.email);
+      if (myProfile) {
+        usersCol.doc(myProfile.docId).update({ role: newRole });
+      } else {
+        usersCol.add({ name: currentUser.name, email: currentUser.email, role: newRole });
+      }
+      // Optimistic local update for instant feedback; the users listener above
+      // will confirm/sync it a moment later from Firestore.
+      currentUser.role = newRole;
+      updateRoleBadge();
       renderAll();
     }
     /* ================= RENDER FUNCTIONS ================= */
@@ -1530,22 +1654,22 @@
       const id = parseInt(document.getElementById('edit-mix-song-id').value);
       const song = songsData.find(s => s.id === id);
       if (song) {
-        song.mixPct = parseInt(document.getElementById('edit-mix-pct').value) || 0;
-        song.guitar = document.getElementById('edit-mix-guitar').value;
-        song.clavier = document.getElementById('edit-mix-clavier').value;
-        song.voix = document.getElementById('edit-mix-voix').value;
-        song.status = document.getElementById('edit-mix-status').value;
-        // Log Activity
+        const mixPct = parseInt(document.getElementById('edit-mix-pct').value) || 0;
+        const guitar = document.getElementById('edit-mix-guitar').value;
+        const clavier = document.getElementById('edit-mix-clavier').value;
+        const voix = document.getElementById('edit-mix-voix').value;
+        const status = document.getElementById('edit-mix-status').value;
+        songsCol.doc(String(id)).update({ mixPct, guitar, clavier, voix, status });
+        // Log Activity (kept local to this session, not persisted)
         activitiesData.unshift({
           id: Date.now(),
           author: `${currentUser.name} (${currentUser.role.toUpperCase()})`,
-          text: `a mis à jour le mix de "${song.title}" à ${song.mixPct}%`,
+          text: `a mis à jour le mix de "${song.title}" à ${mixPct}%`,
           time: 'À l\'instant',
           icon: 'fa-sliders'
         });
         closeModal('modal-edit-mix');
-        renderAll();
-        renderCharts();
+        renderActivityFeed();
       }
     }
     /* STREAMING_CHUNK:Rendering Songs & Audio Library Table... */
@@ -1611,11 +1735,13 @@
       if (el) el.textContent = mins + ' min';
     }
     function renderSetlist() {
-      // Keep setlistOrder in sync in case songs were deleted from the repertoire
-      setlistOrder = setlistOrder.filter(id => songsData.some(s => s.id === id));
       const container = document.getElementById('setlist-items-container');
+      if (!container) return;
+      // Only display entries that still have a matching song (stale ids are cleaned
+      // up automatically next time the setlist is written to, e.g. on next move/add).
+      const validOrder = setlistOrder.filter(id => songsData.some(s => s.id === id));
       const isAdmin = currentUser.role === 'admin';
-      container.innerHTML = setlistOrder.map((id, idx) => {
+      container.innerHTML = validOrder.map((id, idx) => {
         const s = songsData.find(sg => sg.id === id);
         if (!s) return '';
         return `
@@ -1632,7 +1758,7 @@
             ${isAdmin ? `
               <div style="display:flex; gap:4px;">
                 <button class="btn btn-secondary btn-sm" title="Monter" onclick="moveSetlistItem(${s.id}, -1)" ${idx === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
-                <button class="btn btn-secondary btn-sm" title="Descendre" onclick="moveSetlistItem(${s.id}, 1)" ${idx === setlistOrder.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+                <button class="btn btn-secondary btn-sm" title="Descendre" onclick="moveSetlistItem(${s.id}, 1)" ${idx === validOrder.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
                 <button class="btn btn-danger btn-sm" title="Retirer du Setlist" onclick="removeFromSetlist(${s.id})"><i class="fa-solid fa-xmark"></i></button>
               </div>
             ` : ''}
@@ -1641,7 +1767,7 @@
       `;
       }).join('');
       if (isAdmin) {
-        const available = songsData.filter(s => !setlistOrder.includes(s.id));
+        const available = songsData.filter(s => !validOrder.includes(s.id));
         container.innerHTML += `
           <div class="feed-item" style="align-items:center; gap:8px;">
             ${available.length > 0 ? `
@@ -1659,23 +1785,23 @@
       const idx = setlistOrder.indexOf(id);
       const newIdx = idx + direction;
       if (idx === -1 || newIdx < 0 || newIdx >= setlistOrder.length) return;
-      [setlistOrder[idx], setlistOrder[newIdx]] = [setlistOrder[newIdx], setlistOrder[idx]];
-      renderSetlist();
+      const newOrder = [...setlistOrder];
+      [newOrder[idx], newOrder[newIdx]] = [newOrder[newIdx], newOrder[idx]];
+      setlistDocRef.set({ order: newOrder }, { merge: true });
     }
     function removeFromSetlist(id) {
-      setlistOrder = setlistOrder.filter(sid => sid !== id);
-      renderSetlist();
+      setlistDocRef.set({ order: setlistOrder.filter(sid => sid !== id) }, { merge: true });
     }
     function addToSetlist() {
       const select = document.getElementById('setlist-add-select');
       if (!select || !select.value) return;
-      setlistOrder.push(parseInt(select.value));
-      renderSetlist();
+      const id = parseInt(select.value);
+      setlistDocRef.set({ order: [...setlistOrder, id] }, { merge: true });
     }
     function renderChat() {
       const container = document.getElementById('chat-messages-box');
       container.innerHTML = chatData.map(c => `
-        <div class="chat-bubble ${c.isMe ? 'sent' : 'received'}">
+        <div class="chat-bubble ${c.author === currentUser.name ? 'sent' : 'received'}">
           <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${c.author}</div>
           <div>${c.text}</div>
           <div class="meta">
@@ -1690,15 +1816,14 @@
       const input = document.getElementById('chat-text-input');
       const text = input.value.trim();
       if (!text) return;
-      chatData.push({
-        id: Date.now(),
+      const id = Date.now();
+      chatCol.doc(String(id)).set({
+        id: id,
         author: currentUser.name,
         text: text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isMe: true
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       });
       input.value = '';
-      renderChat();
     }
     function renderDocsGrid() {
       const container = document.getElementById('docs-grid-container');
@@ -1720,61 +1845,59 @@
     }
     function renderAdminUsers() {
       const tbody = document.getElementById('admin-users-table');
-      const users = [
-        { id: 1, name: 'N. Chebani', email: 'nchebani@gmail.com', role: 'admin' },
-        { id: 2, name: 'Lucas Guitare', email: 'lucas@eliyah.band', role: 'user' },
-        { id: 3, name: 'Sarah Voix', email: 'sarah@eliyah.band', role: 'user' }
-      ];
-      tbody.innerHTML = users.map(u => `
+      if (!tbody) return;
+      tbody.innerHTML = usersData.map(u => `
         <tr>
           <td><strong>${u.name}</strong></td>
           <td>${u.email}</td>
           <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${u.role.toUpperCase()}</span></td>
           <td>
-            <select class="chat-input" style="padding:4px 8px; font-size:12px;" onchange="alert('Rôle mis à jour pour ' + '${u.name}')">
+            <select class="chat-input" style="padding:4px 8px; font-size:12px;" onchange="updateUserRole('${u.docId}', this.value)">
               <option value="user" ${u.role === 'user' ? 'selected' : ''}>Membre Groupe</option>
               <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Administrateur</option>
             </select>
           </td>
-          <td><button class="btn btn-danger btn-sm" onclick="alert('Action réservée au Super Admin')"><i class="fa-solid fa-user-xmark"></i> Retirer</button></td>
+          <td><button class="btn btn-danger btn-sm" onclick="removeUser('${u.docId}')"><i class="fa-solid fa-user-xmark"></i> Retirer</button></td>
         </tr>
       `).join('');
+    }
+    function updateUserRole(docId, newRole) {
+      usersCol.doc(docId).update({ role: newRole });
+    }
+    function removeUser(docId) {
+      if (confirm('Retirer ce membre du groupe ?')) {
+        usersCol.doc(docId).delete();
+      }
     }
     /* STREAMING_CHUNK:CRUD Actions & Media Downloads Logic... */
     function toggleChantierDone(id) {
       const chantier = chantiersData.find(c => c.id === id);
       if (chantier) {
-        chantier.done = !chantier.done;
-        renderAll();
+        chantiersCol.doc(String(id)).update({ done: !chantier.done });
       }
     }
     function deleteChantier(id) {
       if (confirm('Êtes-vous sûr de vouloir supprimer ce chantier ?')) {
-        chantiersData = chantiersData.filter(c => c.id !== id);
-        renderAll();
+        chantiersCol.doc(String(id)).delete();
       }
     }
     function deleteSong(id) {
       if (confirm('Êtes-vous sûr de vouloir supprimer ce morceau du répertoire ?')) {
-        songsData = songsData.filter(s => s.id !== id);
-        renderAll();
-        renderCharts();
+        songsCol.doc(String(id)).delete();
+        setlistDocRef.set({ order: FieldValue.arrayRemove(id) }, { merge: true });
       }
     }
     function deleteEvent(id) {
       if (confirm('Supprimer cet événement de l\'agenda ?')) {
-        eventsData = eventsData.filter(e => e.id !== id);
-        renderAll();
+        eventsCol.doc(String(id)).delete();
       }
     }
     function deleteChatMessage(id) {
-      chatData = chatData.filter(c => c.id !== id);
-      renderChat();
+      chatCol.doc(String(id)).delete();
     }
     function deleteDocument(id) {
       if (confirm('Supprimer ce document du kit média ?')) {
-        documentsData = documentsData.filter(d => d.id !== id);
-        renderDocsGrid();
+        documentsCol.doc(String(id)).delete();
       }
     }
     function openAddSongModal() {
@@ -1807,16 +1930,13 @@
       const duration = document.getElementById('new-song-duration').value.trim();
       if (!title) return alert('Veuillez saisir un titre !');
       if (editingSongId !== null) {
-        const s = songsData.find(sg => sg.id === editingSongId);
-        if (s) {
-          s.title = title;
-          s.key = key;
-          s.bpm = bpm;
-          if (duration) s.duration = duration;
-        }
+        const updates = { title: title, key: key, bpm: bpm };
+        if (duration) updates.duration = duration;
+        songsCol.doc(String(editingSongId)).update(updates);
       } else {
-        songsData.push({
-          id: Date.now(),
+        const id = Date.now();
+        songsCol.doc(String(id)).set({
+          id: id,
           title: title,
           key: key,
           bpm: bpm,
@@ -1828,12 +1948,10 @@
           status: 'Maquette',
           fileUrl: ''
         });
-        setlistOrder.push(songsData[songsData.length - 1].id);
+        setlistDocRef.set({ order: FieldValue.arrayUnion(id) }, { merge: true });
       }
       editingSongId = null;
       closeModal('modal-add-song');
-      renderAll();
-      renderCharts();
     }
     function addNewChantier() {
       const title = document.getElementById('new-chantier-title').value.trim();
@@ -1841,8 +1959,9 @@
       const urgent = document.getElementById('new-chantier-urgent').value;
       const assign = document.getElementById('new-chantier-assign').value.trim() || 'Groupe';
       if (!title) return alert('Saisir le titre du chantier');
-      chantiersData.push({
-        id: Date.now(),
+      const id = Date.now();
+      chantiersCol.doc(String(id)).set({
+        id: id,
         title: title,
         type: type,
         urgent: urgent,
@@ -1850,7 +1969,6 @@
         done: false
       });
       closeModal('modal-add-chantier');
-      renderAll();
     }
     function addNewDocument() {
       const title = document.getElementById('new-doc-title').value.trim();
@@ -1861,8 +1979,9 @@
         wav: { icon: 'fa-file-audio', color: '#0284C7', desc: 'Fichier Audio Master HD' },
         video: { icon: 'fa-file-video', color: '#7C3AED', desc: 'Vidéo HD Live' }
       };
-      documentsData.push({
-        id: Date.now(),
+      const id = Date.now();
+      documentsCol.doc(String(id)).set({
+        id: id,
         title: title,
         type: type,
         desc: typeDetails[type].desc,
@@ -1870,7 +1989,6 @@
         color: typeDetails[type].color
       });
       closeModal('modal-add-doc');
-      renderDocsGrid();
     }
     function openAddEventModal() {
       editingEventId = null;
@@ -1899,18 +2017,13 @@
       const loc = document.getElementById('new-event-location').value.trim();
       if (!title || !date) return alert('Saisir titre et date !');
       if (editingEventId !== null) {
-        const e = eventsData.find(ev => ev.id === editingEventId);
-        if (e) {
-          e.title = title;
-          e.date = date;
-          e.location = loc;
-        }
+        eventsCol.doc(String(editingEventId)).update({ title: title, date: date, location: loc });
       } else {
-        eventsData.push({ id: Date.now(), title: title, date: date, location: loc });
+        const id = Date.now();
+        eventsCol.doc(String(id)).set({ id: id, title: title, date: date, location: loc });
       }
       editingEventId = null;
       closeModal('modal-add-event');
-      renderEventsList();
     }
     /* Download HTML5 Blob Helper */
     function downloadDocumentFile(filename) {
