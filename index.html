@@ -3,445 +3,84 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ELIYAH — Band Hub</title>
+  <title>Eliyah - Espace Groupe</title>
   <style>
     :root {
-      --bg-color: #0d0d0d;
-      --card-bg: #181818;
-      --accent-red: #8b0000;
-      --accent-red-hover: #a80000;
-      --text-main: #ffffff;
-      --text-muted: #aaaaaa;
-      --border-color: #2a2a2a;
+      --primary: #6c5ce7;
+      --primary-dark: #4834d4;
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --border-color: #334155;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --accent: #00b894;
+      --danger: #ff7675;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-    body {
-      background-color: var(--bg-color);
-      color: var(--text-main);
-      display: flex;
-      min-height: 100vh;
-    }
-
-    /* Sidebar Navigation */
-    aside {
-      width: 260px;
-      background: #111;
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-
-    .logo-container {
-      text-align: center;
-      margin-bottom: 30px;
-    }
-
-    .logo-container h1 {
-      font-size: 1.8rem;
-      letter-spacing: 2px;
-      color: var(--text-main);
-      text-transform: uppercase;
-      font-weight: 800;
-      border-bottom: 2px solid var(--accent-red);
-      display: inline-block;
-      padding-bottom: 5px;
-    }
-
-    nav ul {
-      list-style: none;
-    }
-
-    nav li {
-      margin-bottom: 10px;
-    }
-
-    nav a {
-      color: var(--text-muted);
-      text-decoration: none;
-      display: block;
-      padding: 12px 15px;
-      border-radius: 6px;
-      transition: all 0.2s ease;
-    }
-
-    nav a:hover, nav a.active {
-      background-color: var(--accent-red);
-      color: #fff;
-    }
-
-    .user-profile {
-      margin-top: auto;
-      padding-top: 20px;
-      border-top: 1px solid var(--border-color);
-      font-size: 0.9rem;
-    }
-
-    .btn-logout {
-      margin-top: 10px;
-      width: 100%;
-      padding: 8px;
-      background: transparent;
-      border: 1px solid var(--accent-red);
-      color: var(--text-main);
-      border-radius: 4px;
-      cursor: pointer;
-    }
-
-    .btn-logout:hover {
-      background: var(--accent-red);
-    }
-
-    /* Main Content */
-    main {
-      flex: 1;
-      padding: 30px;
-      overflow-y: auto;
-    }
-
-    .section {
-      display: none;
-    }
-
-    .section.active {
-      display: block;
-    }
-
-    h2 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
-      border-left: 4px solid var(--accent-red);
-      padding-left: 10px;
-    }
-
-    /* Cards & Containers */
-    .card {
-      background-color: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      padding: 20px;
-      margin-bottom: 20px;
-    }
-
-    .filter-bar {
-      display: flex;
-      gap: 15px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
-
-    input, select, textarea, button {
-      background: #222;
-      border: 1px solid var(--border-color);
-      color: #fff;
-      padding: 10px;
-      border-radius: 5px;
-      outline: none;
-    }
-
-    button.btn-primary {
-      background: var(--accent-red);
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    button.btn-primary:hover {
-      background: var(--accent-red-hover);
-    }
-
-    /* Data Tables / Lists */
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-
-    th, td {
-      text-align: left;
-      padding: 12px;
-      border-bottom: 1px solid var(--border-color);
-    }
-
-    th {
-      background-color: #222;
-      color: var(--text-muted);
-    }
-
-    /* Chat Container */
-    .chat-messages {
-      height: 350px;
-      overflow-y: auto;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-bottom: 15px;
-      padding-right: 10px;
-    }
-
-    .chat-msg {
-      background: #222;
-      padding: 10px 15px;
-      border-radius: 8px;
-      max-width: 70%;
-    }
-
-    .chat-msg.me {
-      align-self: flex-end;
-      background: var(--accent-red);
-    }
-
-    .chat-author {
-      font-size: 0.75rem;
-      color: #ccc;
-      margin-bottom: 3px;
-    }
-
-    /* Auth Overlay */
+    /* Auth Modal */
     #auth-overlay {
-      position: fixed;
-      top:0; left:0; right:0; bottom:0;
-      background: #0d0d0d;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 1000;
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.95); display: flex; align-items: center; justify-content: center; z-index: 9999;
     }
+    .auth-card { background: var(--card-bg); padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid var(--border-color); text-align: center; }
+    .auth-card h2 { margin-bottom: 1.5rem; color: var(--primary); font-size: 1.8rem; }
+    .auth-card input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: #0f172a; color: white; }
+    .auth-card button { width: 100%; padding: 0.75rem; border-radius: 6px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .auth-card button:hover { background: var(--primary-dark); }
 
-    .auth-box {
-      background: var(--card-bg);
-      padding: 40px;
-      border-radius: 8px;
-      border: 1px solid var(--border-color);
-      width: 100%;
-      max-width: 400px;
-    }
+    /* Layout */
+    #sidebar { width: 260px; background: var(--card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
+    .brand { padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; }
+    .brand-logo { width: 42px; height: 42px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
+    .nav-links { list-style: none; padding: 1rem 0; flex: 1; }
+    .nav-item { padding: 0.85rem 1.5rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; font-weight: 500; }
+    .nav-item:hover, .nav-item.active { background: rgba(108, 92, 231, 0.15); color: var(--text-main); border-left: 4px solid var(--primary); }
+    .user-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
+    .btn-logout { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; font-weight: bold; }
 
-    .auth-box h2 {
-      text-align: center;
-      margin-bottom: 20px;
-      border: none;
-      padding: 0;
-    }
+    /* Main Area */
+    #main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
+    .content-section { display: none; padding: 2rem; overflow-y: auto; flex: 1; }
+    .content-section.active { display: block; }
 
-    .auth-box input {
-      width: 100%;
-      margin-bottom: 15px;
-    }
+    /* Common Components */
+    .btn-primary { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
+    .card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color); padding: 1.25rem; }
+    .badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
+    .badge-key { background: #00cec9; color: #000; }
+    .badge-bpm { background: #fdcb6e; color: #000; }
 
-    .auth-box button {
-      width: 100%;
-    }
+    /* Form Styles */
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.4rem; color: var(--text-muted); font-size: 0.85rem; }
+    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: #0f172a; color: white; }
+
+    /* Chat UI */
+    #chat-messages { height: calc(100vh - 230px); overflow-y: auto; padding: 1rem; background: #0f172a; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .chat-msg { background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; max-width: 70%; border: 1px solid var(--border-color); }
+    .chat-msg.self { align-self: flex-end; background: var(--primary-dark); }
+    .chat-msg .author { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: bold; }
+
+    /* Table */
+    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+    th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
+    th { background: rgba(255,255,255,0.03); color: var(--text-muted); }
   </style>
-</head>
-<body>
 
-  <!-- Modal Authentification -->
-  <div id="auth-overlay">
-    <div class="auth-box">
-      <h2>ELIYAH.</h2>
-      <form id="login-form">
-        <input type="email" id="auth-email" placeholder="Email" required />
-        <input type="password" id="auth-password" placeholder="Mot de passe" required />
-        <button type="submit" class="btn-primary">Se connecter</button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Sidebar -->
-  <aside>
-    <div class="logo-container">
-      <h1>ELIYAH.</h1>
-    </div>
-    <nav>
-      <ul>
-        <li><a href="#agenda" class="nav-link active">📅 Agenda</a></li>
-        <li><a href="#songs" class="nav-link">🎵 Morceaux</a></li>
-        <li><a href="#production" class="nav-link">🎛️ Suivi Production</a></li>
-        <li><a href="#chat" class="nav-link">💬 Chat</a></li>
-        <li><a href="#documents" class="nav-link">📁 Documents</a></li>
-        <li id="admin-nav" style="display:none;"><a href="#admin" class="nav-link">⚙️ Administration</a></li>
-      </ul>
-    </nav>
-    <div class="user-profile">
-      <div id="user-email">Non connecté</div>
-      <div id="user-role" style="color: var(--text-muted); font-size: 0.8rem;">---</div>
-      <button class="btn-logout" id="logout-btn">Déconnexion</button>
-    </div>
-  </aside>
-
-  <!-- Main Content -->
-  <main>
-    
-    <!-- Agenda -->
-    <section id="agenda" class="section active">
-      <h2>Agenda & Répétitions</h2>
-      <div class="card" id="add-rehearsal-card" style="display:none;">
-        <h3>Ajouter une répétition / concert</h3>
-        <form id="rehearsal-form" style="display:flex; gap:10px; margin-top:10px;">
-          <input type="date" id="reh-date" required />
-          <input type="time" id="reh-time" required />
-          <input type="text" id="reh-title" placeholder="Lieu / Objet" required style="flex:1;" />
-          <button type="submit" class="btn-primary">Programmer</button>
-        </form>
-      </div>
-      <div class="card">
-        <h3>Prochains événements</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Heure</th>
-              <th>Événement</th>
-            </tr>
-          </thead>
-          <tbody id="rehearsals-list">
-            <!-- Dynamique -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Morceaux -->
-    <section id="songs" class="section">
-      <h2>Morceaux du Groupe</h2>
-      
-      <!-- Filtres -->
-      <div class="filter-bar card">
-        <input type="text" id="filter-search" placeholder="Rechercher par titre..." />
-        <select id="filter-key">
-          <option value="">Toutes les clés (Tonalité)</option>
-          <option value="Am">Am</option>
-          <option value="C">C</option>
-          <option value="Em">Em</option>
-          <option value="G">G</option>
-        </select>
-        <select id="filter-vocalists">
-          <option value="">Nb de chanteurs</option>
-          <option value="1">1 Chanteur</option>
-          <option value="2">2 Chanteurs</option>
-          <option value="3">3 Chanteurs</option>
-        </select>
-        <input type="number" id="filter-bpm" placeholder="BPM Max" />
-      </div>
-
-      <div class="card" id="add-song-card" style="display:none;">
-        <h3>Ajouter un morceau</h3>
-        <form id="song-form" style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-top:10px;">
-          <input type="text" id="song-title" placeholder="Titre du morceau" required />
-          <input type="text" id="song-key" placeholder="Clé (ex: Am)" required />
-          <input type="number" id="song-bpm" placeholder="BPM" required />
-          <input type="number" id="song-vocalists" placeholder="Nombre de chanteurs (1-3)" min="1" max="3" required />
-          <input type="file" id="song-file" accept="audio/*" style="grid-column: span 2;" />
-          <button type="submit" class="btn-primary" style="grid-column: span 2;">Enregistrer le morceau</button>
-        </form>
-      </div>
-
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Titre</th>
-              <th>Clé</th>
-              <th>BPM</th>
-              <th>Chanteurs</th>
-              <th>Audio</th>
-            </tr>
-          </thead>
-          <tbody id="songs-list">
-            <!-- Dynamique -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Suivi de Production -->
-    <section id="production" class="section">
-      <h2>Suivi de Production</h2>
-      <div class="card">
-        <table>
-          <thead>
-            <tr>
-              <th>Morceau</th>
-              <th>Arrangements</th>
-              <th>Enregistrement</th>
-              <th>Voix posées</th>
-              <th>Mix / Master</th>
-            </tr>
-          </thead>
-          <tbody id="production-list">
-            <!-- Dynamique -->
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <!-- Chat -->
-    <section id="chat" class="section">
-      <h2>Espace de Discussion</h2>
-      <div class="card">
-        <div class="chat-messages" id="chat-container">
-          <!-- Dynamique -->
-        </div>
-        <form id="chat-form" style="display:flex; gap:10px;">
-          <input type="text" id="chat-input" placeholder="Écrivez votre message..." required style="flex:1;" />
-          <button type="submit" class="btn-primary">Envoyer</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- Documents -->
-    <section id="documents" class="section">
-      <h2>Documents Officiels & Visuels</h2>
-      <div class="card" id="add-doc-card" style="display:none;">
-        <h3>Ajouter un document (Dossier de presse, Fiche technique...)</h3>
-        <form id="doc-form" style="display:flex; gap:10px; margin-top:10px;">
-          <input type="text" id="doc-name" placeholder="Nom du document" required style="flex:1;" />
-          <input type="file" id="doc-file" required />
-          <button type="submit" class="btn-primary">Uploader</button>
-        </form>
-      </div>
-      <div class="card">
-        <ul id="docs-list" style="list-style:none;">
-          <!-- Dynamique -->
-        </ul>
-      </div>
-    </section>
-
-    <!-- Admin -->
-    <section id="admin" class="section">
-      <h2>Gestion du Groupe & Permissions</h2>
-      <div class="card">
-        <h3>Créer un nouvel accès membre</h3>
-        <form id="create-user-form" style="display:flex; flex-direction:column; gap:10px; max-width:400px; margin-top:10px;">
-          <input type="email" id="new-user-email" placeholder="Email du membre" required />
-          <input type="password" id="new-user-password" placeholder="Mot de passe temporaire" required />
-          <select id="new-user-role">
-            <option value="member">Membre</option>
-            <option value="admin">Administrateur</option>
-          </select>
-          <button type="submit" class="btn-primary">Créer le compte</button>
-        </form>
-      </div>
-    </section>
-
-  </main>
-
-  <!-- Script Firebase & App Logic -->
+  <!-- Firebase SDKs -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, getDocs, onSnapshot, query, orderBy, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
 
-    // Vos identifiants Firebase
+    // Firebase Config (live-hub-2026)
     const firebaseConfig = {
       apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
       authDomain: "live-hub-2026.firebaseapp.com",
@@ -452,220 +91,334 @@
       measurementId: "G-MNHRC2MSBH"
     };
 
-    // Initialisation
+    // Initialize Services
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
     const storage = getStorage(app);
 
     let currentUser = null;
-    let currentUserRole = 'member';
+    let currentUserData = null;
 
-    // UI Navigation
-    const navLinks = document.querySelectorAll('.nav-link');
-    const sections = document.querySelectorAll('.section');
-
-    navLinks.forEach(link => {
-      link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const target = link.getAttribute('href').substring(1);
-
-        navLinks.forEach(l => l.classList.remove('active'));
-        sections.forEach(s => s.classList.remove('active'));
-
-        link.classList.add('active');
-        document.getElementById(target).classList.add('active');
-      });
-    });
-
-    // Gestion Auth
-    const authOverlay = document.getElementById('auth-overlay');
-    const loginForm = document.getElementById('login-form');
-
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const email = document.getElementById('auth-email').value;
-      const pass = document.getElementById('auth-password').value;
+    // --- Authentication ---
+    window.login = async () => {
+      const email = document.getElementById('login-email').value;
+      const pass = document.getElementById('login-pass').value;
       try {
         await signInWithEmailAndPassword(auth, email, pass);
       } catch (err) {
         alert("Erreur de connexion : " + err.message);
       }
-    });
+    };
 
-    document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
+    window.logout = () => signOut(auth);
 
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         currentUser = user;
-        authOverlay.style.display = 'none';
-        document.getElementById('user-email').innerText = user.email;
-        
-        // Charger le rôle
         const userDoc = await getDoc(doc(db, "users", user.uid));
-        if (userDoc.exists()) {
-          currentUserRole = userDoc.data().role || 'member';
-        } else {
-          currentUserRole = 'member';
+        currentUserData = userDoc.exists() ? userDoc.data() : { role: 'member', permissions: {} };
+        
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('user-email-display').innerText = user.email;
+        
+        if (currentUserData.role === 'admin') {
+          document.getElementById('admin-nav-item').style.display = 'flex';
         }
 
-        document.getElementById('user-role').innerText = currentUserRole.toUpperCase();
-
-        if (currentUserRole === 'admin') {
-          document.getElementById('admin-nav').style.display = 'block';
-          document.getElementById('add-rehearsal-card').style.display = 'block';
-          document.getElementById('add-song-card').style.display = 'block';
-          document.getElementById('add-doc-card').style.display = 'block';
-        }
-
-        // Charger les données
-        initDataListeners();
-
+        initRealtimeListeners();
       } else {
-        currentUser = null;
-        authOverlay.style.display = 'flex';
+        document.getElementById('auth-overlay').style.display = 'flex';
       }
     });
 
-    // Chargement dynamique des données Firestore
-    function initDataListeners() {
-      // 1. Agenda
-      onSnapshot(collection(db, "rehearsals"), (snapshot) => {
-        const tbody = document.getElementById('rehearsals-list');
-        tbody.innerHTML = '';
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          tbody.innerHTML += `<tr><td>${data.date}</td><td>${data.time}</td><td>${data.title}</td></tr>`;
-        });
-      });
-
-      // 2. Morceaux
+    // --- Realtime Subscriptions ---
+    function initRealtimeListeners() {
+      // 1. Repertoire Listener
       onSnapshot(collection(db, "songs"), (snapshot) => {
-        const tbody = document.getElementById('songs-list');
-        const prodBody = document.getElementById('production-list');
-        tbody.innerHTML = '';
-        prodBody.innerHTML = '';
-
-        snapshot.forEach(docSnap => {
-          const s = docSnap.data();
-          const audioElem = s.audioUrl ? `<audio controls src="${s.audioUrl}" style="max-width:200px; height:30px;"></audio>` : 'Aucun fichier';
-          
-          tbody.innerHTML += `
-            <tr data-key="${s.key}" data-vocalists="${s.vocalists}" data-bpm="${s.bpm}">
-              <td><strong>${s.title}</strong></td>
-              <td>${s.key}</td>
-              <td>${s.bpm}</td>
-              <td>${s.vocalists}</td>
-              <td>${audioElem}</td>
-            </tr>
-          `;
-
-          prodBody.innerHTML += `
-            <tr>
-              <td><strong>${s.title}</strong></td>
-              <td>${s.statusArrangement || 'En cours'}</td>
-              <td>${s.statusRecording || 'Non démarré'}</td>
-              <td>${s.statusVocals || 'Non démarré'}</td>
-              <td>${s.statusMix || 'Non démarré'}</td>
-            </tr>
-          `;
-        });
-      });
-
-      // 3. Chat (Ordre chronologique)
-      const qChat = query(collection(db, "chat"), orderBy("timestamp", "asc"));
-      onSnapshot(qChat, (snapshot) => {
-        const container = document.getElementById('chat-container');
+        const container = document.getElementById('songs-list');
         container.innerHTML = '';
-        snapshot.forEach(docSnap => {
-          const msg = docSnap.data();
-          const isMe = currentUser && msg.uid === currentUser.uid;
+        snapshot.forEach((doc) => {
+          const s = doc.data();
           container.innerHTML += `
-            <div class="chat-msg ${isMe ? 'me' : ''}">
-              <div class="chat-author">${msg.author}</div>
-              <div>${msg.text}</div>
-            </div>
-          `;
+            <div class="card">
+              <h3>${s.title}</h3>
+              <p style="margin: 0.5rem 0; color: var(--text-muted);">${s.notes || 'Pas de notes'}</p>
+              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+                <span class="badge badge-key">Clé: ${s.key}</span>
+                <span class="badge badge-bpm">${s.bpm} BPM</span>
+              </div>
+              <p style="font-size:0.85rem;"><strong>Chanteurs:</strong> ${s.singersCount}</p>
+              ${s.fileUrl ? `<audio controls src="${s.fileUrl}" style="width: 100%; margin-top: 0.5rem;"></audio>` : ''}
+            </div>`;
         });
-        container.scrollTop = container.scrollHeight;
       });
 
-      // 4. Documents
+      // 2. Chat Listener
+      const qChat = query(collection(db, "messages"), orderBy("timestamp", "asc"));
+      onSnapshot(qChat, (snapshot) => {
+        const chatBox = document.getElementById('chat-messages');
+        chatBox.innerHTML = '';
+        snapshot.forEach((doc) => {
+          const msg = doc.data();
+          const isSelf = currentUser && msg.senderId === currentUser.uid;
+          chatBox.innerHTML += `
+            <div class="chat-msg ${isSelf ? 'self' : ''}">
+              <div class="author">${msg.senderEmail}</div>
+              <div>${msg.text}</div>
+            </div>`;
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+      });
+
+      // 3. Agenda Listener
+      onSnapshot(collection(db, "rehearsals"), (snapshot) => {
+        const list = document.getElementById('agenda-list');
+        list.innerHTML = '';
+        snapshot.forEach((doc) => {
+          const r = doc.data();
+          list.innerHTML += `<div class="card" style="margin-bottom:0.75rem;">
+            <h4>${r.title}</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">${r.date} - ${r.location}</p>
+          </div>`;
+        });
+      });
+
+      // 4. Documents Listener
       onSnapshot(collection(db, "documents"), (snapshot) => {
         const list = document.getElementById('docs-list');
         list.innerHTML = '';
-        snapshot.forEach(docSnap => {
-          const d = docSnap.data();
-          list.innerHTML += `<li style="margin-bottom:10px;"><a href="${d.url}" target="_blank" style="color:#fff;">📄 ${d.name}</a></li>`;
+        snapshot.forEach((doc) => {
+          const d = doc.data();
+          list.innerHTML += `<tr>
+            <td>${d.name}</td>
+            <td>${d.category}</td>
+            <td><a href="${d.url}" target="_blank" style="color:var(--primary);">Télécharger</a></td>
+          </tr>`;
         });
       });
     }
 
-    // Soumission Formulaires
-    document.getElementById('rehearsal-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      await addDoc(collection(db, "rehearsals"), {
-        date: document.getElementById('reh-date').value,
-        time: document.getElementById('reh-time').value,
-        title: document.getElementById('reh-title').value
-      });
-      e.target.reset();
-    });
+    // --- Actions ---
+    window.addSong = async () => {
+      const title = document.getElementById('song-title').value;
+      const key = document.getElementById('song-key').value;
+      const bpm = document.getElementById('song-bpm').value;
+      const singersCount = document.getElementById('song-singers').value;
+      const fileInput = document.getElementById('song-file');
 
-    document.getElementById('song-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const file = document.getElementById('song-file').files[0];
-      let audioUrl = "";
-
-      if (file) {
-        const storageRef = ref(storage, 'songs/' + file.name);
-        await uploadBytes(storageRef, file);
-        audioUrl = await getDownloadURL(storageRef);
+      let fileUrl = "";
+      if (fileInput.files[0]) {
+        const fileRef = ref(storage, `songs/${Date.now()}_${fileInput.files[0].name}`);
+        await uploadBytes(fileRef, fileInput.files[0]);
+        fileUrl = await getDownloadURL(fileRef);
       }
 
       await addDoc(collection(db, "songs"), {
-        title: document.getElementById('song-title').value,
-        key: document.getElementById('song-key').value,
-        bpm: parseInt(document.getElementById('song-bpm').value),
-        vocalists: parseInt(document.getElementById('song-vocalists').value),
-        audioUrl: audioUrl,
-        statusArrangement: 'En cours',
-        statusRecording: 'Non démarré',
-        statusVocals: 'Non démarré',
-        statusMix: 'Non démarré'
+        title, key, bpm, singersCount, fileUrl, createdAt: serverTimestamp()
       });
-      e.target.reset();
-    });
+      alert("Morceau ajouté !");
+    };
 
-    document.getElementById('chat-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
+    window.sendMessage = async () => {
       const input = document.getElementById('chat-input');
       if (!input.value.trim()) return;
-
-      await addDoc(collection(db, "chat"), {
+      await addDoc(collection(db, "messages"), {
         text: input.value,
-        author: currentUser.email.split('@')[0],
-        uid: currentUser.uid,
-        timestamp: new Date()
+        senderId: currentUser.uid,
+        senderEmail: currentUser.email,
+        timestamp: serverTimestamp()
       });
       input.value = '';
-    });
+    };
 
-    document.getElementById('doc-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const file = document.getElementById('doc-file').files[0];
-      if (file) {
-        const storageRef = ref(storage, 'documents/' + file.name);
-        await uploadBytes(storageRef, file);
-        const url = await getDownloadURL(storageRef);
-        await addDoc(collection(db, "documents"), {
-          name: document.getElementById('doc-name').value,
-          url: url
+    window.addRehearsal = async () => {
+      const title = document.getElementById('reh-title').value;
+      const date = document.getElementById('reh-date').value;
+      const location = document.getElementById('reh-location').value;
+      await addDoc(collection(db, "rehearsals"), { title, date, location });
+      alert("Répétition ajoutée !");
+    };
+
+    window.uploadDoc = async () => {
+      const fileInput = document.getElementById('doc-file');
+      const category = document.getElementById('doc-category').value;
+      if (!fileInput.files[0]) return;
+      
+      const file = fileInput.files[0];
+      const fileRef = ref(storage, `docs/${Date.now()}_${file.name}`);
+      await uploadBytes(fileRef, file);
+      const url = await getDownloadURL(fileRef);
+
+      await addDoc(collection(db, "documents"), { name: file.name, category, url });
+      alert("Document ajouté !");
+    };
+
+    // Admin: Create User
+    window.createUserByAdmin = async () => {
+      const email = document.getElementById('new-user-email').value;
+      const pass = document.getElementById('new-user-pass').value;
+      const role = document.getElementById('new-user-role').value;
+
+      try {
+        // Enregistrement Firestore manuel pour attribuer le rôle
+        const res = await createUserWithEmailAndPassword(auth, email, pass);
+        await setDoc(doc(db, "users", res.user.uid), {
+          email, role, permissions: { editAgenda: true, editSongs: true }
         });
-        e.target.reset();
+        alert("Membre créé avec succès !");
+      } catch(err) {
+        alert("Erreur de création : " + err.message);
       }
-    });
+    };
+  </script>
+</head>
+<body>
 
+  <!-- Modal Authentification -->
+  <div id="auth-overlay">
+    <div class="auth-card">
+      <h2>Eliyah Live Hub</h2>
+      <div class="form-group">
+        <input type="email" id="login-email" placeholder="Adresse E-mail">
+      </div>
+      <div class="form-group">
+        <input type="password" id="login-pass" placeholder="Mot de passe">
+      </div>
+      <button onclick="login()">Se Connecter</button>
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="brand">
+      <div class="brand-logo">E</div>
+      <div>
+        <h3 style="font-size: 1rem;">Eliyah</h3>
+        <p style="font-size: 0.75rem; color: var(--text-muted);">Gestion du groupe</p>
+      </div>
+    </div>
+    <ul class="nav-links">
+      <li class="nav-item active" onclick="showSection('agenda')">📅 Agenda</li>
+      <li class="nav-item" onclick="showSection('songs')">🎵 Morceaux</li>
+      <li class="nav-item" onclick="showSection('workflow')">🎛️ Suivi & Mix</li>
+      <li class="nav-item" onclick="showSection('chat')">💬 Espace Chat</li>
+      <li class="nav-item" onclick="showSection('docs')">📁 Documents & Press</li>
+      <li class="nav-item" id="admin-nav-item" style="display:none;" onclick="showSection('admin')">👑 Admin</li>
+    </ul>
+    <div class="user-footer">
+      <span id="user-email-display" style="font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis;">...</span>
+      <button class="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div id="main-content">
+    <header>
+      <h2 id="section-title">Agenda & Répétitions</h2>
+      <p style="font-size: 0.85rem; color: var(--text-muted);">Groupe : 1 Guitare, 1 Clavier, 3 Voix</p>
+    </header>
+
+    <!-- 1. Agenda -->
+    <div id="section-agenda" class="content-section active">
+      <h3>Planifier une répétition</h3>
+      <div class="card" style="margin: 1rem 0; max-width: 500px;">
+        <div class="form-group"><label>Intitulé</label><input type="text" id="reh-title" placeholder="Ex: Répétition générale"></div>
+        <div class="form-group"><label>Date & Heure</label><input type="datetime-local" id="reh-date"></div>
+        <div class="form-group"><label>Lieu</label><input type="text" id="reh-location" placeholder="Ex: Studio A"></div>
+        <button class="btn-primary" onclick="addRehearsal()">Ajouter le RDV</button>
+      </div>
+      <h3>Prochains Rendez-vous</h3>
+      <div id="agenda-list" style="margin-top: 1rem;"></div>
+    </div>
+
+    <!-- 2. Morceaux -->
+    <div id="section-songs" class="content-section">
+      <h3>Répertoire des Morceaux</h3>
+      <div class="card" style="margin: 1rem 0; max-width: 600px;">
+        <h4>Ajouter un nouveau morceau</h4>
+        <div class="form-group"><label>Titre</label><input type="text" id="song-title"></div>
+        <div style="display: flex; gap: 1rem;">
+          <div class="form-group" style="flex:1;"><label>Clé / Tonalité</label><input type="text" id="song-key" placeholder="Ex: Am"></div>
+          <div class="form-group" style="flex:1;"><label>BPM</label><input type="number" id="song-bpm" placeholder="120"></div>
+          <div class="form-group" style="flex:1;"><label>Nb Chanteurs</label><input type="number" id="song-singers" value="3"></div>
+        </div>
+        <div class="form-group"><label>Fichier Audio (MP3/WAV)</label><input type="file" id="song-file" accept="audio/*"></div>
+        <button class="btn-primary" onclick="addSong()">Enregistrer le morceau</button>
+      </div>
+      <div class="card-grid" id="songs-list"></div>
+    </div>
+
+    <!-- 3. Suivi & Mix -->
+    <div id="section-workflow" class="content-section">
+      <h3>Avancement des Morceaux & Mixage</h3>
+      <p style="color: var(--text-muted); margin-top: 0.5rem;">Suivi des voix posées, des arrangements du clavier, des solos de guitare et de la finalisation du mixage.</p>
+    </div>
+
+    <!-- 4. Chat -->
+    <div id="section-chat" class="content-section">
+      <h3>Discussion du groupe</h3>
+      <div id="chat-messages"></div>
+      <div style="display: flex; gap: 0.5rem;">
+        <input type="text" id="chat-input" placeholder="Écrivez votre message..." style="flex: 1; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); background: #0f172a; color: white;">
+        <button class="btn-primary" onclick="sendMessage()">Envoyer</button>
+      </div>
+    </div>
+
+    <!-- 5. Documents -->
+    <div id="section-docs" class="content-section">
+      <h3>Documents Officiels & Presse</h3>
+      <div class="card" style="margin: 1rem 0; max-width: 500px;">
+        <div class="form-group"><label>Catégorie</label>
+          <select id="doc-category">
+            <option>Dossier de Presse</option>
+            <option>Photo Promo</option>
+            <option>Fiche Technique</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Fichier</label><input type="file" id="doc-file"></div>
+        <button class="btn-primary" onclick="uploadDoc()">Uploader</button>
+      </div>
+      <table>
+        <thead><tr><th>Nom</th><th>Catégorie</th><th>Action</th></tr></thead>
+        <tbody id="docs-list"></tbody>
+      </table>
+    </div>
+
+    <!-- 6. Admin Panel -->
+    <div id="section-admin" class="content-section">
+      <h3>Administration des membres</h3>
+      <div class="card" style="margin: 1rem 0; max-width: 500px;">
+        <h4>Ajouter un nouveau membre au groupe</h4>
+        <div class="form-group"><label>Adresse Email</label><input type="email" id="new-user-email"></div>
+        <div class="form-group"><label>Mot de passe provisoire</label><input type="password" id="new-user-pass"></div>
+        <div class="form-group"><label>Rôle</label>
+          <select id="new-user-role">
+            <option value="member">Membre du groupe</option>
+            <option value="admin">Administrateur</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="createUserByAdmin()">Créer l'utilisateur</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function showSection(id) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      document.getElementById(`section-${id}`).classList.add('active');
+      
+      const titles = {
+        agenda: "Agenda & Répétitions",
+        songs: "Répertoire des Morceaux",
+        workflow: "Suivi & Mixage",
+        chat: "Espace Chat",
+        docs: "Documents & Presse",
+        admin: "Administration"
+      };
+      document.getElementById('section-title').innerText = titles[id] || "";
+    }
   </script>
 </body>
 </html>
