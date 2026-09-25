@@ -1030,6 +1030,7 @@
         <button class="filter-btn active" onclick="filterChantiers('all', this)">Tous</button>
         <button class="filter-btn" onclick="filterChantiers('hebdo', this)">Hebdomadaire</button>
         <button class="filter-btn" onclick="filterChantiers('mensuel', this)">Mensuel</button>
+        <button class="filter-btn" onclick="filterChantiers('echeance', this)">Échéance</button>
         <button class="filter-btn" onclick="filterChantiers('urgent', this)">🚨 Urgents à finir</button>
       </div>
 
@@ -1479,6 +1480,7 @@
     let audioObj = new Audio();
     let currentPlayingTrackId = null;
     let isPlaying = false;
+    let currentChantierFilter = 'all';
 
     /* ================= INITIALIZATION & NAVIGATION ================= */
     window.addEventListener('DOMContentLoaded', () => {
@@ -1554,7 +1556,7 @@
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
-      renderChantiersList('all');
+      renderChantiersList(currentChantierFilter);
       renderMixTable();
       renderSongsTable();
       renderEventsList();
@@ -1563,6 +1565,15 @@
       renderDocsGrid();
       renderAdminUsers();
       updateKPIMetrics();
+    }
+
+    function filterChantiers(filter, element) {
+      currentChantierFilter = filter;
+      if (element) {
+        document.querySelectorAll('#view-chantiers .filter-btn').forEach(btn => btn.classList.remove('active'));
+        element.classList.add('active');
+      }
+      renderChantiersList(filter);
     }
 
     function updateKPIMetrics() {
@@ -1630,7 +1641,13 @@
 
       if (filter === 'hebdo') filtered = chantiersData.filter(c => c.type === 'hebdo');
       if (filter === 'mensuel') filtered = chantiersData.filter(c => c.type === 'mensuel');
+      if (filter === 'echeance') filtered = chantiersData.filter(c => !c.done);
       if (filter === 'urgent') filtered = chantiersData.filter(c => c.urgent === 'urgent');
+
+      if (filtered.length === 0) {
+        container.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:20px; text-align:center;">Aucun chantier ne correspond à ce filtre.</p>';
+        return;
+      }
 
       container.innerHTML = filtered.map(c => `
         <div class="chantier-card ${c.urgent === 'urgent' ? 'urgent' : 'normal'}">
