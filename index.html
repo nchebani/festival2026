@@ -14,7 +14,6 @@
   
   <!-- Chart.js for Pro Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
   <!-- STREAMING_CHUNK:Styling layout, theme design tokens, animations, and components... -->
   <style>
     :root {
@@ -45,14 +44,12 @@
       --radius-lg: 16px;
       --radius-md: 10px;
     }
-
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
     }
-
     body {
       background-color: var(--bg-main);
       color: var(--text-dark);
@@ -60,7 +57,6 @@
       height: 100vh;
       overflow: hidden;
     }
-
     /* ================= SIDEBAR ================= */
     aside {
       width: 270px;
@@ -73,7 +69,6 @@
       z-index: 20;
       flex-shrink: 0;
     }
-
     .brand-logo {
       display: flex;
       align-items: center;
@@ -81,7 +76,6 @@
       padding: 0 12px 20px 12px;
       border-bottom: 1px solid var(--border-color);
     }
-
     .logo-text {
       font-family: 'Space Grotesk', sans-serif;
       font-size: 26px;
@@ -90,11 +84,9 @@
       color: var(--text-dark);
       text-transform: uppercase;
     }
-
     .logo-text span {
       color: var(--brand-red);
     }
-
     .logo-badge {
       font-size: 10px;
       font-weight: 700;
@@ -104,7 +96,6 @@
       border-radius: 20px;
       text-transform: uppercase;
     }
-
     .nav-menu {
       list-style: none;
       margin-top: 18px;
@@ -112,7 +103,6 @@
       flex-direction: column;
       gap: 6px;
     }
-
     .nav-item {
       display: flex;
       align-items: center;
@@ -127,24 +117,20 @@
       text-decoration: none;
       position: relative;
     }
-
     .nav-item:hover {
       background: #F1F5F9;
       color: var(--text-dark);
     }
-
     .nav-item.active {
       background: var(--brand-red);
       color: #FFFFFF;
       box-shadow: 0 4px 12px rgba(139, 30, 45, 0.25);
     }
-
     .nav-item i {
       font-size: 18px;
       width: 22px;
       text-align: center;
     }
-
     .nav-badge {
       margin-left: auto;
       background: #EF4444;
@@ -154,7 +140,6 @@
       padding: 2px 7px;
       border-radius: 12px;
     }
-
     .user-card {
       background: #F8FAFC;
       border: 1px solid var(--border-color);
@@ -164,14 +149,12 @@
       align-items: center;
       justify-content: space-between;
     }
-
     .user-info {
       display: flex;
       align-items: center;
       gap: 10px;
       overflow: hidden;
     }
-
     .avatar {
       width: 38px;
       height: 38px;
@@ -184,13 +167,11 @@
       justify-content: center;
       flex-shrink: 0;
     }
-
     .user-det {
       display: flex;
       flex-direction: column;
       overflow: hidden;
     }
-
     .user-name {
       font-size: 13px;
       font-weight: 700;
@@ -199,7 +180,6 @@
       text-overflow: ellipsis;
       overflow: hidden;
     }
-
     .user-email {
       font-size: 11px;
       color: var(--text-muted);
@@ -207,7 +187,6 @@
       text-overflow: ellipsis;
       overflow: hidden;
     }
-
     .role-badge {
       font-size: 9px;
       font-weight: 800;
@@ -219,12 +198,10 @@
       display: inline-block;
       margin-top: 2px;
     }
-
     .role-badge.admin {
       background: #FEE2E2;
       color: #991B1B;
     }
-
     /* ================= MAIN CONTENT ================= */
     main {
       flex: 1;
@@ -234,7 +211,6 @@
       flex-direction: column;
       gap: 24px;
     }
-
     /* Top Bar Header */
     .top-header {
       display: flex;
@@ -243,25 +219,21 @@
       flex-wrap: wrap;
       gap: 16px;
     }
-
     .page-title h1 {
       font-size: 26px;
       font-weight: 800;
       color: var(--text-dark);
     }
-
     .page-title p {
       color: var(--text-muted);
       font-size: 13px;
       margin-top: 2px;
     }
-
     .header-actions {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-
     .group-tag {
       display: flex;
       align-items: center;
@@ -274,7 +246,6 @@
       font-size: 13px;
       font-weight: 600;
     }
-
     .tag-pill {
       background: #E0F2FE;
       color: #0369A1;
@@ -283,7 +254,6 @@
       font-size: 11px;
       font-weight: 700;
     }
-
     /* Views */
     .view-content {
       display: none;
@@ -291,23 +261,19 @@
       gap: 24px;
       animation: fadeIn 0.2s ease-in-out;
     }
-
     .view-content.active {
       display: flex;
     }
-
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     /* Quick KPI Stats Row */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
       gap: 16px;
     }
-
     .kpi-card {
       background: var(--bg-card);
       padding: 18px;
@@ -319,12 +285,10 @@
       gap: 14px;
       transition: transform 0.2s, box-shadow 0.2s;
     }
-
     .kpi-card:hover {
       transform: translateY(-2px);
       box-shadow: var(--shadow-md);
     }
-
     .kpi-icon {
       width: 48px;
       height: 48px;
@@ -335,7 +299,6 @@
       font-size: 20px;
       flex-shrink: 0;
     }
-
     .kpi-info h4 {
       font-size: 11px;
       text-transform: uppercase;
@@ -343,27 +306,23 @@
       color: var(--text-muted);
       font-weight: 700;
     }
-
     .kpi-info .val {
       font-size: 22px;
       font-weight: 800;
       color: var(--text-dark);
       margin-top: 2px;
     }
-
     .kpi-info .sub {
       font-size: 11px;
       font-weight: 600;
       margin-top: 2px;
     }
-
     /* Charts Section */
     .charts-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
       gap: 20px;
     }
-
     .chart-box {
       background: var(--bg-card);
       padding: 22px;
@@ -371,7 +330,6 @@
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-sm);
     }
-
     .box-header {
       display: flex;
       justify-content: space-between;
@@ -380,25 +338,21 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-
     .box-title h3 {
       font-size: 17px;
       font-weight: 700;
       color: var(--text-dark);
     }
-
     .box-title p {
       font-size: 12px;
       color: var(--text-muted);
     }
-
     /* Chantiers & Activity Feeds */
     .two-cols {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 20px;
     }
-
     .feed-list {
       display: flex;
       flex-direction: column;
@@ -407,7 +361,6 @@
       overflow-y: auto;
       padding-right: 4px;
     }
-
     .feed-item {
       display: flex;
       align-items: flex-start;
@@ -418,7 +371,6 @@
       border: 1px solid var(--border-color);
       font-size: 13px;
     }
-
     .feed-item-icon {
       width: 32px;
       height: 32px;
@@ -431,13 +383,11 @@
       font-size: 14px;
       flex-shrink: 0;
     }
-
     .feed-time {
       font-size: 11px;
       color: var(--text-muted);
       margin-top: 2px;
     }
-
     /* Chantiers (Hebdo / Mensuel) Cards */
     .chantier-card {
       background: white;
@@ -448,29 +398,24 @@
       position: relative;
       border-left: 5px solid var(--brand-red);
     }
-
     .chantier-card.urgent {
       border-left-color: #EF4444;
       background: #FEF2F2;
     }
-
     .chantier-card.normal {
       border-left-color: #0284C7;
     }
-
     .chantier-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 8px;
     }
-
     .chantier-title {
       font-weight: 700;
       font-size: 14px;
       color: var(--text-dark);
     }
-
     /* Tables Style (Suivi Mixage & Morceaux) */
     .data-card {
       background: white;
@@ -479,17 +424,14 @@
       box-shadow: var(--shadow-sm);
       overflow: hidden;
     }
-
     .table-wrapper {
       overflow-x: auto;
     }
-
     table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
     }
-
     th {
       background: #F8FAFC;
       color: var(--text-muted);
@@ -499,22 +441,18 @@
       padding: 14px 18px;
       border-bottom: 1px solid var(--border-color);
     }
-
     td {
       padding: 14px 18px;
       border-bottom: 1px solid #F1F5F9;
       font-size: 13px;
       vertical-align: middle;
     }
-
     tr:last-child td {
       border-bottom: none;
     }
-
     tr:hover td {
       background: #FAFAFA;
     }
-
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -525,11 +463,9 @@
       font-weight: 700;
       cursor: pointer;
     }
-
     .status-done { background: #D1FAE5; color: #047857; }
     .status-progress { background: #FEF3C7; color: #B45309; }
     .status-todo { background: #F1F5F9; color: #475569; }
-
     /* Action Buttons */
     .btn {
       display: inline-flex;
@@ -543,48 +479,39 @@
       border: none;
       transition: all 0.2s;
     }
-
     .btn-primary {
       background: var(--brand-red);
       color: white;
     }
-
     .btn-primary:hover {
       background: var(--brand-red-hover);
       box-shadow: 0 4px 12px rgba(139, 30, 45, 0.3);
     }
-
     .btn-secondary {
       background: #F1F5F9;
       color: var(--text-dark);
     }
-
     .btn-secondary:hover {
       background: #E2E8F0;
     }
-
     .btn-danger {
       background: #FEE2E2;
       color: #991B1B;
     }
-
     .btn-danger:hover {
       background: #FCA5A5;
     }
-
     .btn-sm {
       padding: 5px 10px;
       font-size: 11px;
       border-radius: 6px;
     }
-
     /* Filter pills */
     .filter-group {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
     .filter-btn {
       padding: 6px 14px;
       border-radius: 20px;
@@ -595,13 +522,11 @@
       color: var(--text-muted);
       cursor: pointer;
     }
-
     .filter-btn.active {
       background: var(--brand-red);
       color: white;
       border-color: var(--brand-red);
     }
-
     /* Chat View */
     .chat-container {
       background: white;
@@ -611,7 +536,6 @@
       display: flex;
       flex-direction: column;
     }
-
     .chat-messages {
       flex: 1;
       padding: 20px;
@@ -620,7 +544,6 @@
       flex-direction: column;
       gap: 12px;
     }
-
     .chat-bubble {
       max-width: 65%;
       padding: 12px 16px;
@@ -629,20 +552,17 @@
       line-height: 1.4;
       position: relative;
     }
-
     .chat-bubble.received {
       background: #F1F5F9;
       align-self: flex-start;
       border-bottom-left-radius: 4px;
     }
-
     .chat-bubble.sent {
       background: var(--brand-red);
       color: white;
       align-self: flex-end;
       border-bottom-right-radius: 4px;
     }
-
     .chat-bubble .meta {
       font-size: 10px;
       opacity: 0.7;
@@ -651,14 +571,12 @@
       justify-content: space-between;
       gap: 10px;
     }
-
     .chat-input-area {
       padding: 16px;
       border-top: 1px solid var(--border-color);
       display: flex;
       gap: 10px;
     }
-
     .chat-input {
       flex: 1;
       padding: 10px 16px;
@@ -667,7 +585,6 @@
       outline: none;
       font-size: 13px;
     }
-
     /* Modal Styling */
     .modal-overlay {
       position: fixed;
@@ -679,11 +596,9 @@
       justify-content: center;
       z-index: 100;
     }
-
     .modal-overlay.active {
       display: flex;
     }
-
     .modal-box {
       background: white;
       padding: 26px;
@@ -694,11 +609,9 @@
       max-height: 90vh;
       overflow-y: auto;
     }
-
     .form-group {
       margin-bottom: 14px;
     }
-
     .form-group label {
       display: block;
       font-size: 11px;
@@ -707,7 +620,6 @@
       margin-bottom: 6px;
       text-transform: uppercase;
     }
-
     .form-group input, .form-group select, .form-group textarea {
       width: 100%;
       padding: 10px 12px;
@@ -716,11 +628,9 @@
       font-size: 13px;
       outline: none;
     }
-
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
       border-color: var(--brand-red);
     }
-
     /* Global Persistent Audio Player */
     .global-audio-player {
       position: fixed;
@@ -736,14 +646,12 @@
       z-index: 50;
       box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
     }
-
     .player-track-info {
       display: flex;
       align-items: center;
       gap: 12px;
       min-width: 220px;
     }
-
     .player-track-icon {
       width: 40px;
       height: 40px;
@@ -754,7 +662,6 @@
       justify-content: center;
       font-size: 18px;
     }
-
     .player-controls {
       display: flex;
       align-items: center;
@@ -762,7 +669,6 @@
       flex: 1;
       max-width: 500px;
     }
-
     .player-btn {
       background: transparent;
       border: none;
@@ -770,7 +676,6 @@
       font-size: 18px;
       cursor: pointer;
     }
-
     .player-btn.play {
       width: 36px;
       height: 36px;
@@ -782,20 +687,17 @@
       justify-content: center;
       font-size: 16px;
     }
-
     .audio-progress {
       flex: 1;
       display: flex;
       align-items: center;
       gap: 10px;
     }
-
     .audio-progress input[type="range"] {
       flex: 1;
       accent-color: var(--brand-red);
       cursor: pointer;
     }
-
     @media (max-width: 1024px) {
       .charts-grid, .two-cols {
         grid-template-columns: 1fr;
@@ -820,7 +722,6 @@
   </style>
 </head>
 <body>
-
   <!-- ================= SIDEBAR ================= -->
   <!-- STREAMING_CHUNK:Rendering navigation sidebar & profile status... -->
   <aside>
@@ -829,7 +730,6 @@
         <div class="logo-text">ΣLIY<span>Δ</span>H.</div>
         <span class="logo-badge">PRO</span>
       </div>
-
       <ul class="nav-menu">
         <li class="nav-item active" onclick="switchTab('dashboard', this)">
           <i class="fa-solid fa-chart-pie"></i>
@@ -866,7 +766,6 @@
         </li>
       </ul>
     </div>
-
     <!-- User Profile Footer -->
     <div class="user-card">
       <div class="user-info">
@@ -882,18 +781,15 @@
       </button>
     </div>
   </aside>
-
   <!-- ================= MAIN CONTENT AREA ================= -->
   <!-- STREAMING_CHUNK:Rendering main layout and dashboard views... -->
   <main>
-
     <!-- Top Bar Header -->
     <div class="top-header">
       <div class="page-title">
         <h1 id="view-title">Tableau de Bord</h1>
         <p id="view-subtitle">Suivi global de l'avancement des productions & travaux du groupe.</p>
       </div>
-
       <div class="header-actions">
         <button class="btn btn-secondary" onclick="exportSummaryPDF()"><i class="fa-solid fa-print"></i> Synthèse / Rapport</button>
         <div class="group-tag">
@@ -903,10 +799,8 @@
         </div>
       </div>
     </div>
-
     <!-- ================= VIEW 1: DASHBOARD ================= -->
     <section id="view-dashboard" class="view-content active">
-
       <!-- KPI Metrics -->
       <div class="kpi-grid">
         <div class="kpi-card">
@@ -919,7 +813,6 @@
             <div class="sub" style="color: #059669;" id="kpi-mix-count">8 / 12 Titres mixés</div>
           </div>
         </div>
-
         <div class="kpi-card">
           <div class="kpi-icon" style="background: #F3E8FF; color: var(--col-comp);">
             <i class="fa-solid fa-compact-disc"></i>
@@ -930,7 +823,6 @@
             <div class="sub" style="color: #7C3AED;">11 Titres finalisés</div>
           </div>
         </div>
-
         <div class="kpi-card">
           <div class="kpi-icon" style="background: #E0F2FE; color: var(--col-comm);">
             <i class="fa-solid fa-bullhorn"></i>
@@ -941,7 +833,6 @@
             <div class="sub" style="color: #0284C7;">Presse & Kit médias</div>
           </div>
         </div>
-
         <div class="kpi-card">
           <div class="kpi-icon" style="background: #FEF3C7; color: var(--col-agenda);">
             <i class="fa-solid fa-calendar-check"></i>
@@ -953,7 +844,6 @@
           </div>
         </div>
       </div>
-
       <!-- Charts Section -->
       <div class="charts-grid">
         <div class="chart-box">
@@ -968,7 +858,6 @@
             <canvas id="progressChart"></canvas>
           </div>
         </div>
-
         <div class="chart-box">
           <div class="box-header">
             <div class="box-title">
@@ -981,7 +870,6 @@
           </div>
         </div>
       </div>
-
       <!-- Feed d'Activités Récents & Rappel Priorités -->
       <div class="two-cols">
         <!-- Live Activity Stream -->
@@ -996,7 +884,6 @@
             <!-- Dynamic Feed Items -->
           </div>
         </div>
-
         <!-- Rappel des Chantiers en cours -->
         <div class="chart-box">
           <div class="box-header">
@@ -1011,9 +898,7 @@
           </div>
         </div>
       </div>
-
     </section>
-
     <!-- ================= VIEW 2: CHANTIERS (HEBDO / MENSUEL) ================= -->
     <!-- STREAMING_CHUNK:Rendering Chantiers & Suivi Hebdomadaire section... -->
     <section id="view-chantiers" class="view-content">
@@ -1024,21 +909,17 @@
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-add-chantier')"><i class="fa-solid fa-plus"></i> Nouveau Chantier</button>
       </div>
-
       <!-- Filters Row -->
       <div class="filter-group">
         <button class="filter-btn active" onclick="filterChantiers('all', this)">Tous</button>
         <button class="filter-btn" onclick="filterChantiers('hebdo', this)">Hebdomadaire</button>
         <button class="filter-btn" onclick="filterChantiers('mensuel', this)">Mensuel</button>
-        <button class="filter-btn" onclick="filterChantiers('echeance', this)">Échéance</button>
         <button class="filter-btn" onclick="filterChantiers('urgent', this)">🚨 Urgents à finir</button>
       </div>
-
       <div id="chantiers-list-container">
         <!-- Dynamic Chantiers -->
       </div>
     </section>
-
     <!-- ================= VIEW 3: SUIVI & MIXAGE ================= -->
     <!-- STREAMING_CHUNK:Rendering Suivi & Mixage interactive table... -->
     <section id="view-mix" class="view-content">
@@ -1047,9 +928,8 @@
           <h3>Tableau de Suivi des Titres & Mixage Audio</h3>
           <p>Cliquez sur un statut ou le pourcentage pour mettre à jour les mixes en temps réel !</p>
         </div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-song')"><i class="fa-solid fa-plus"></i> Nouveau Titre</button>
+        <button class="btn btn-primary" onclick="openAddSongModal()"><i class="fa-solid fa-plus"></i> Nouveau Titre</button>
       </div>
-
       <div class="data-card">
         <div class="table-wrapper">
           <table>
@@ -1071,7 +951,6 @@
         </div>
       </div>
     </section>
-
     <!-- ================= VIEW 4: MORCEAUX & AUDIO ================= -->
     <!-- STREAMING_CHUNK:Rendering Morceaux & Audio Media Library... -->
     <section id="view-morceaux" class="view-content">
@@ -1082,10 +961,9 @@
         </div>
         <div class="filter-group">
           <input type="text" id="song-search-input" class="chat-input" placeholder="🔍 Rechercher un morceau..." oninput="renderSongsTable()">
-          <button class="btn btn-primary" onclick="openModal('modal-add-song')"><i class="fa-solid fa-plus"></i> Ajouter Morceau</button>
+          <button class="btn btn-primary" onclick="openAddSongModal()"><i class="fa-solid fa-plus"></i> Ajouter Morceau</button>
         </div>
       </div>
-
       <div class="data-card">
         <div class="table-wrapper">
           <table>
@@ -1107,7 +985,6 @@
         </div>
       </div>
     </section>
-
     <!-- ================= VIEW 5: AGENDA & SETLIST ================= -->
     <!-- STREAMING_CHUNK:Rendering Agenda & Live Concert Setlist Manager... -->
     <section id="view-agenda" class="view-content">
@@ -1116,9 +993,8 @@
           <h3>Agenda & Setlist du Concert Live</h3>
           <p>Planning des répétitions et ordonnancement de la setlist pour la scène</p>
         </div>
-        <button class="btn btn-primary" onclick="openModal('modal-add-event')"><i class="fa-solid fa-calendar-plus"></i> Ajouter Événement</button>
+        <button class="btn btn-primary" onclick="openAddEventModal()"><i class="fa-solid fa-calendar-plus"></i> Ajouter Événement</button>
       </div>
-
       <div class="two-cols">
         <!-- Calendar Events List -->
         <div class="chart-box">
@@ -1131,7 +1007,6 @@
             <!-- Dynamic Events -->
           </div>
         </div>
-
         <!-- Live Setlist Manager -->
         <div class="chart-box">
           <div class="box-header">
@@ -1147,7 +1022,6 @@
         </div>
       </div>
     </section>
-
     <!-- ================= VIEW 6: CHAT ================= -->
     <!-- STREAMING_CHUNK:Rendering Group Chat & Messaging Interface... -->
     <section id="view-chat" class="view-content">
@@ -1155,7 +1029,6 @@
         <h3>Espace de Discussion du Groupe ELIYAH</h3>
         <p>Échangez directement avec l'équipe sur les arrangements et le mix</p>
       </div>
-
       <div class="chat-container">
         <div class="chat-messages" id="chat-messages-box">
           <!-- Dynamic Chat Bubbles -->
@@ -1166,7 +1039,6 @@
         </div>
       </div>
     </section>
-
     <!-- ================= VIEW 7: DOCUMENTS & MEDIAS ================= -->
     <!-- STREAMING_CHUNK:Rendering Documents & Media Files Manager... -->
     <section id="view-docs" class="view-content">
@@ -1177,12 +1049,10 @@
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-add-doc')"><i class="fa-solid fa-upload"></i> Importer Document / Média</button>
       </div>
-
       <div class="kpi-grid" id="docs-grid-container">
         <!-- Dynamic Documents Cards -->
       </div>
     </section>
-
     <!-- ================= VIEW 8: ADMIN ================= -->
     <!-- STREAMING_CHUNK:Rendering Admin Management panel... -->
     <section id="view-admin" class="view-content">
@@ -1192,7 +1062,6 @@
           <p>Gestion des rôles et autorisations des utilisateurs</p>
         </div>
       </div>
-
       <div class="data-card">
         <div class="table-wrapper">
           <table>
@@ -1212,9 +1081,7 @@
         </div>
       </div>
     </section>
-
   </main>
-
   <!-- ================= PERSISTENT AUDIO PLAYER ================= -->
   <!-- STREAMING_CHUNK:Rendering Persistent Global Audio Player... -->
   <div class="global-audio-player">
@@ -1225,28 +1092,23 @@
         <div style="font-size: 11px; color: var(--text-light);" id="player-track-sub">ELIYAH Production</div>
       </div>
     </div>
-
     <div class="player-controls">
       <button class="player-btn" onclick="prevTrack()"><i class="fa-solid fa-backward-step"></i></button>
       <button class="player-btn play" onclick="togglePlay()"><i class="fa-solid fa-play" id="player-play-icon"></i></button>
       <button class="player-btn" onclick="nextTrack()"><i class="fa-solid fa-forward-step"></i></button>
-
       <div class="audio-progress">
         <span style="font-size: 11px;" id="audio-curr-time">0:00</span>
         <input type="range" id="audio-seek-slider" min="0" value="0" step="0.1" oninput="seekAudio(this.value)">
         <span style="font-size: 11px;" id="audio-dur-time">0:00</span>
       </div>
     </div>
-
     <div style="display: flex; align-items: center; gap: 10px;">
       <i class="fa-solid fa-volume-high" style="font-size: 14px;"></i>
       <input type="range" min="0" max="1" step="0.05" value="0.8" style="width: 70px; accent-color: var(--brand-red);" oninput="if(audioObj) audioObj.volume = this.value">
     </div>
   </div>
-
   <!-- ================= MODALS ================= -->
   <!-- STREAMING_CHUNK:Rendering Modals & Popups for CRUD actions... -->
-
   <!-- Notification Connection Modal -->
   <div class="modal-overlay" id="modal-conn-notif">
     <div class="modal-box">
@@ -1257,26 +1119,21 @@
         <h3 style="margin-top: 10px; font-weight: 800; font-size: 20px;">Récents Avancements du Groupe</h3>
         <p style="font-size: 13px; color: var(--text-muted);">Voici ce qui a changé depuis votre dernière connexion :</p>
       </div>
-
       <div class="feed-list" id="conn-notif-list" style="margin-bottom: 20px;">
         <!-- Dynamic Connection Digest -->
       </div>
-
       <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="closeModal('modal-conn-notif')">Compris, Accéder au Projet</button>
     </div>
   </div>
-
   <!-- Edit Track Mix Progress Modal -->
   <div class="modal-overlay" id="modal-edit-mix">
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Éditer le Mixage : <span id="modal-mix-song-title" style="color: var(--brand-red);"></span></h3>
       <input type="hidden" id="edit-mix-song-id">
-
       <div class="form-group">
         <label>Progression du Mixage (%)</label>
         <input type="number" id="edit-mix-pct" min="0" max="100" step="5">
       </div>
-
       <div class="form-group">
         <label>Statut Prise Guitare</label>
         <select id="edit-mix-guitar">
@@ -1285,7 +1142,6 @@
           <option value="À enregistrer">À enregistrer</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Statut Prise Clavier</label>
         <select id="edit-mix-clavier">
@@ -1294,7 +1150,6 @@
           <option value="À enregistrer">À enregistrer</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Statut Voix (3 voix)</label>
         <select id="edit-mix-voix">
@@ -1304,7 +1159,6 @@
           <option value="À enregistrer">À enregistrer</option>
         </select>
       </div>
-
       <div class="form-group">
         <label>Statut Général</label>
         <select id="edit-mix-status">
@@ -1313,18 +1167,16 @@
           <option value="Maquette">Maquette</option>
         </select>
       </div>
-
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-edit-mix')">Annuler</button>
         <button class="btn btn-primary" onclick="saveMixProgress()">Enregistrer les Modifications</button>
       </div>
     </div>
   </div>
-
   <!-- Add Song Modal -->
   <div class="modal-overlay" id="modal-add-song">
     <div class="modal-box">
-      <h3 style="margin-bottom: 16px; font-weight: 800;">Nouveau Morceau / Titre</h3>
+      <h3 id="song-modal-title" style="margin-bottom: 16px; font-weight: 800;">Nouveau Morceau / Titre</h3>
       <div class="form-group">
         <label>Nom du Morceau</label>
         <input type="text" id="new-song-title" placeholder="Ex: Rêve Éveillé">
@@ -1338,16 +1190,19 @@
         <input type="number" id="new-song-bpm" placeholder="Ex: 120">
       </div>
       <div class="form-group">
+        <label>Durée</label>
+        <input type="text" id="new-song-duration" placeholder="Ex: 03:45">
+      </div>
+      <div class="form-group">
         <label>Fichier Audio (MP3/WAV)</label>
         <input type="file" id="new-song-file" accept="audio/*">
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-add-song')">Annuler</button>
-        <button class="btn btn-primary" onclick="addNewSong()">Créer le Morceau</button>
+        <button id="song-modal-submit" class="btn btn-primary" onclick="saveSong()">Créer le Morceau</button>
       </div>
     </div>
   </div>
-
   <!-- Add Chantier Modal -->
   <div class="modal-overlay" id="modal-add-chantier">
     <div class="modal-box">
@@ -1380,7 +1235,6 @@
       </div>
     </div>
   </div>
-
   <!-- Add Document / Media Modal -->
   <div class="modal-overlay" id="modal-add-doc">
     <div class="modal-box">
@@ -1407,11 +1261,10 @@
       </div>
     </div>
   </div>
-
   <!-- Add Event Modal -->
   <div class="modal-overlay" id="modal-add-event">
     <div class="modal-box">
-      <h3 style="margin-bottom: 16px; font-weight: 800;">Ajouter un Événement</h3>
+      <h3 id="event-modal-title" style="margin-bottom: 16px; font-weight: 800;">Ajouter un Événement</h3>
       <div class="form-group">
         <label>Titre de l'Événement</label>
         <input type="text" id="new-event-title" placeholder="Ex: Répétition acoustique">
@@ -1426,11 +1279,10 @@
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-add-event')">Annuler</button>
-        <button class="btn btn-primary" onclick="addNewEvent()">Ajouter Événement</button>
+        <button id="event-modal-submit" class="btn btn-primary" onclick="saveEvent()">Ajouter Événement</button>
       </div>
     </div>
   </div>
-
   <!-- STREAMING_CHUNK:Javascript Application Engine & State management... -->
   <script>
     /* ================= APP STATE MANAGEMENT ================= */
@@ -1439,49 +1291,45 @@
       email: 'nchebani@gmail.com',
       role: 'admin' // 'admin' or 'user'
     };
-
     let songsData = [
       { id: 1, title: '01. Prelude / Eil', key: 'Am', bpm: 120, duration: '04:15', mixPct: 100, guitar: 'Prise OK', clavier: 'Prise OK', voix: '3/3 Posées', status: 'Masterisé', fileUrl: '' },
       { id: 2, title: '02. Lumière dans l\'Ombre', key: 'D', bpm: 95, duration: '03:48', mixPct: 75, guitar: 'Prise OK', clavier: 'Prise OK', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' },
       { id: 3, title: '03. Horizon Eliyah', key: 'Em', bpm: 128, duration: '05:10', mixPct: 30, guitar: 'Re-take', clavier: 'Prise OK', voix: 'À enregistrer', status: 'Maquette', fileUrl: '' },
       { id: 4, title: '04. Souffle Nouveau', key: 'G', bpm: 110, duration: '04:02', mixPct: 60, guitar: 'Prise OK', clavier: 'Re-take', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' }
     ];
-
     let activitiesData = [
       { id: 1, author: 'Lucas (Guitare)', text: 'a mis à jour la prise de guitare sur "Lumière dans l\'Ombre"', time: 'Aujourd\'hui à 14:20', icon: 'fa-guitar' },
       { id: 2, author: 'N. Chebani (Admin)', text: 'a ajusté le mixage global à 75% sur le Titre 02', time: 'Hier à 18:45', icon: 'fa-sliders' },
       { id: 3, author: 'Sarah (Voix)', text: 'a posé la seconde harmonie vocale sur "Souffle Nouveau"', time: '25 Sept. à 11:30', icon: 'fa-microphone' }
     ];
-
     let chantiersData = [
       { id: 1, title: 'Validation du master stéréo des 4 premiers titres', type: 'hebdo', urgent: 'urgent', assign: 'N. Chebani', done: false },
       { id: 2, title: 'Shooting photo officiel pour la pochette de l\'album', type: 'mensuel', urgent: 'urgent', assign: 'Équipe Visuel', done: false },
       { id: 3, title: 'Préparation du kit de communication et dossier de presse', type: 'mensuel', urgent: 'normal', assign: 'Sarah & Lucas', done: true },
       { id: 4, title: 'Raccord des effets claviers et synthés pour le live', type: 'hebdo', urgent: 'normal', assign: 'Claviériste', done: false }
     ];
-
     let documentsData = [
       { id: 1, title: 'Fiche_Technique_Eliyah_2026.pdf', type: 'pdf', desc: 'Patch scène 1 Guitare, 1 Clavier, 3 Micro Voix', icon: 'fa-file-pdf', color: '#E11D48' },
       { id: 2, title: 'Maquette_Live_Master_Wave.wav', type: 'wav', desc: 'Fichier audio non compressé 24bit / 48kHz', icon: 'fa-file-audio', color: '#0284C7' },
       { id: 3, title: 'Extrait_Concert_Teaser.mp4', type: 'video', desc: 'Captation vidéo multicam HD', icon: 'fa-file-video', color: '#7C3AED' }
     ];
-
     let eventsData = [
       { id: 1, title: 'Répétition Générale Acoustique', date: 'Mardi 29 Septembre — 20h00', location: 'Studio Nantes' },
       { id: 2, title: 'Concert Live Officiel', date: 'Samedi 12 Octobre — 21h00', location: 'Salle de Spectacle • Setlist 45min' }
     ];
-
+    // Order (and selection) of tracks in the official live setlist — independent from the repertoire order
+    let setlistOrder = songsData.map(s => s.id);
+    // Tracks whether a modal is in "edit" mode (holds the id being edited) or "add" mode (null)
+    let editingSongId = null;
+    let editingEventId = null;
     let chatData = [
       { id: 1, author: 'Lucas (Guitare)', text: 'Salut l\'équipe ! J\'ai re-déposé la prise de solo sur le Titre 02. Dites-moi ce que vous en pensez !', time: '14:20', isMe: false },
       { id: 2, author: 'N. Chebani', text: 'Top ! Je l\'intègre dans le mix immédiatement.', time: '14:25', isMe: true }
     ];
-
     // Audio Player State
     let audioObj = new Audio();
     let currentPlayingTrackId = null;
     let isPlaying = false;
-    let currentChantierFilter = 'all';
-
     /* ================= INITIALIZATION & NAVIGATION ================= */
     window.addEventListener('DOMContentLoaded', () => {
       renderAll();
@@ -1492,7 +1340,6 @@
         renderConnNotification();
         openModal('modal-conn-notif');
       }, 400);
-
       // Audio Player Progress Listeners
       audioObj.addEventListener('timeupdate', () => {
         if (audioObj.duration) {
@@ -1502,20 +1349,16 @@
           document.getElementById('audio-dur-time').textContent = formatTime(audioObj.duration);
         }
       });
-
       audioObj.addEventListener('ended', () => {
         isPlaying = false;
         updatePlayerUI();
       });
     });
-
     function switchTab(viewId, element) {
       document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-
       const targetView = document.getElementById('view-' + viewId);
       if (targetView) targetView.classList.add('active');
-
       if (element) {
         element.classList.add('active');
       } else {
@@ -1525,7 +1368,6 @@
           if (item.getAttribute('onclick')?.includes(viewId)) item.classList.add('active');
         });
       }
-
       const titles = {
         'dashboard': { title: 'Tableau de Bord', sub: 'Suivi global de l\'avancement des productions & travaux du groupe.' },
         'chantiers': { title: 'Suivi des Chantiers & Rappels', sub: 'Gestion hebdomadaire et mensuelle des travaux du groupe.' },
@@ -1536,13 +1378,11 @@
         'docs': { title: 'Documents & Médias', sub: 'Téléchargement de fiches PDF, fichiers WAV et vidéos MP4.' },
         'admin': { title: 'Espace Administration', sub: 'Gestion des autorisations et droits de suppression.' }
       };
-
       if (titles[viewId]) {
         document.getElementById('view-title').textContent = titles[viewId].title;
         document.getElementById('view-subtitle').textContent = titles[viewId].sub;
       }
     }
-
     function toggleUserRole() {
       currentUser.role = currentUser.role === 'admin' ? 'user' : 'admin';
       const roleDisplay = document.getElementById('user-role-display');
@@ -1551,12 +1391,11 @@
       alert(`Rôle utilisateur basculé en : ${currentUser.role.toUpperCase()}`);
       renderAll();
     }
-
     /* ================= RENDER FUNCTIONS ================= */
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
-      renderChantiersList(currentChantierFilter);
+      renderChantiersList('all');
       renderMixTable();
       renderSongsTable();
       renderEventsList();
@@ -1566,28 +1405,15 @@
       renderAdminUsers();
       updateKPIMetrics();
     }
-
-    function filterChantiers(filter, element) {
-      currentChantierFilter = filter;
-      if (element) {
-        document.querySelectorAll('#view-chantiers .filter-btn').forEach(btn => btn.classList.remove('active'));
-        element.classList.add('active');
-      }
-      renderChantiersList(filter);
-    }
-
     function updateKPIMetrics() {
       const totalSongs = songsData.length;
       const mixedSongs = songsData.filter(s => s.mixPct >= 100).length;
       const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (totalSongs || 1));
-
       document.getElementById('kpi-mix-pct').textContent = avgMix + '%';
       document.getElementById('kpi-mix-count').textContent = `${mixedSongs} / ${totalSongs} Titres terminés`;
-
       const urgentCount = chantiersData.filter(c => c.urgent === 'urgent' && !c.done).length;
       document.getElementById('urgent-count-badge').textContent = urgentCount;
     }
-
     /* STREAMING_CHUNK:Rendering Dashboard Feeds and Chantiers Cards... */
     function renderActivityFeed() {
       const container = document.getElementById('activity-feed-container');
@@ -1601,7 +1427,6 @@
         </div>
       `).join('');
     }
-
     function renderConnNotification() {
       const container = document.getElementById('conn-notif-list');
       container.innerHTML = activitiesData.map(act => `
@@ -1614,7 +1439,6 @@
         </div>
       `).join('');
     }
-
     function renderUrgentChantiersSummary() {
       const container = document.getElementById('urgent-chantiers-summary');
       const urgents = chantiersData.filter(c => c.urgent === 'urgent' && !c.done);
@@ -1623,7 +1447,6 @@
         container.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:10px;">✅ Aucun chantier urgent en attente !</p>';
         return;
       }
-
       container.innerHTML = urgents.map(c => `
         <div class="chantier-card urgent">
           <div class="chantier-header">
@@ -1634,21 +1457,19 @@
         </div>
       `).join('');
     }
+    function filterChantiers(type, btnEl) {
+      const group = btnEl.closest('.filter-group');
+      group.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+      btnEl.classList.add('active');
+      renderChantiersList(type);
+    }
 
     function renderChantiersList(filter = 'all') {
       const container = document.getElementById('chantiers-list-container');
       let filtered = chantiersData;
-
       if (filter === 'hebdo') filtered = chantiersData.filter(c => c.type === 'hebdo');
       if (filter === 'mensuel') filtered = chantiersData.filter(c => c.type === 'mensuel');
-      if (filter === 'echeance') filtered = chantiersData.filter(c => !c.done);
       if (filter === 'urgent') filtered = chantiersData.filter(c => c.urgent === 'urgent');
-
-      if (filtered.length === 0) {
-        container.innerHTML = '<p style="font-size:13px; color:var(--text-muted); padding:20px; text-align:center;">Aucun chantier ne correspond à ce filtre.</p>';
-        return;
-      }
-
       container.innerHTML = filtered.map(c => `
         <div class="chantier-card ${c.urgent === 'urgent' ? 'urgent' : 'normal'}">
           <div class="chantier-header">
@@ -1668,7 +1489,6 @@
         </div>
       `).join('');
     }
-
     /* STREAMING_CHUNK:Rendering Suivi Mixage Interactive Table... */
     function renderMixTable() {
       const tbody = document.getElementById('mix-table-body');
@@ -1694,7 +1514,6 @@
         </tr>
       `).join('');
     }
-
     function openEditMixModal(id) {
       const song = songsData.find(s => s.id === id);
       if (!song) return;
@@ -1707,7 +1526,6 @@
       document.getElementById('edit-mix-status').value = song.status;
       openModal('modal-edit-mix');
     }
-
     function saveMixProgress() {
       const id = parseInt(document.getElementById('edit-mix-song-id').value);
       const song = songsData.find(s => s.id === id);
@@ -1717,7 +1535,6 @@
         song.clavier = document.getElementById('edit-mix-clavier').value;
         song.voix = document.getElementById('edit-mix-voix').value;
         song.status = document.getElementById('edit-mix-status').value;
-
         // Log Activity
         activitiesData.unshift({
           id: Date.now(),
@@ -1726,19 +1543,16 @@
           time: 'À l\'instant',
           icon: 'fa-sliders'
         });
-
         closeModal('modal-edit-mix');
         renderAll();
         renderCharts();
       }
     }
-
     /* STREAMING_CHUNK:Rendering Songs & Audio Library Table... */
     function renderSongsTable() {
       const tbody = document.getElementById('songs-table-body');
       const search = document.getElementById('song-search-input')?.value.toLowerCase() || '';
       const filtered = songsData.filter(s => s.title.toLowerCase().includes(search));
-
       tbody.innerHTML = filtered.map(s => `
         <tr>
           <td><strong>${s.title}</strong></td>
@@ -1757,12 +1571,14 @@
             </button>
           </td>
           <td>
-            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i> Supprimer</button>` : '<span style="color:var(--text-muted); font-size:11px;">Lecture seule</span>'}
+            ${currentUser.role === 'admin' ? `
+              <button class="btn btn-secondary btn-sm" onclick="editSong(${s.id})"><i class="fa-solid fa-pen"></i> Modifier</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i> Supprimer</button>
+            ` : '<span style="color:var(--text-muted); font-size:11px;">Lecture seule</span>'}
           </td>
         </tr>
       `).join('');
     }
-
     function renderEventsList() {
       const container = document.getElementById('events-list-container');
       container.innerHTML = eventsData.map(e => `
@@ -1772,14 +1588,37 @@
             <div style="font-size:12px; color:var(--brand-red); font-weight:600; margin-top:2px;"><i class="fa-solid fa-calendar-day"></i> ${e.date}</div>
             <div style="font-size:11px; color:var(--text-muted); margin-top:2px;"><i class="fa-solid fa-location-dot"></i> ${e.location}</div>
           </div>
-          ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+          ${currentUser.role === 'admin' ? `
+            <div style="display:flex; gap:6px;">
+              <button class="btn btn-secondary btn-sm" onclick="editEvent(${e.id})"><i class="fa-solid fa-pen"></i></button>
+              <button class="btn btn-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash"></i></button>
+            </div>
+          ` : ''}
         </div>
       `).join('');
     }
-
+    function durationToSeconds(dur) {
+      const parts = (dur || '0:00').split(':').map(n => parseInt(n) || 0);
+      return parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
+    }
+    function updateSetlistTotalTime() {
+      const totalSeconds = setlistOrder
+        .map(id => songsData.find(s => s.id === id))
+        .filter(Boolean)
+        .reduce((sum, s) => sum + durationToSeconds(s.duration), 0);
+      const mins = Math.round(totalSeconds / 60);
+      const el = document.getElementById('setlist-total-time');
+      if (el) el.textContent = mins + ' min';
+    }
     function renderSetlist() {
+      // Keep setlistOrder in sync in case songs were deleted from the repertoire
+      setlistOrder = setlistOrder.filter(id => songsData.some(s => s.id === id));
       const container = document.getElementById('setlist-items-container');
-      container.innerHTML = songsData.map((s, idx) => `
+      const isAdmin = currentUser.role === 'admin';
+      container.innerHTML = setlistOrder.map((id, idx) => {
+        const s = songsData.find(sg => sg.id === id);
+        if (!s) return '';
+        return `
         <div class="feed-item" style="align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 12px;">
             <span style="font-weight:800; color:var(--brand-red); font-size:14px;">#${idx + 1}</span>
@@ -1788,11 +1627,51 @@
               <div style="font-size:11px; color:var(--text-muted);">${s.key} • ${s.bpm} BPM</div>
             </div>
           </div>
-          <span class="status-pill status-todo">${s.duration}</span>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <span class="status-pill status-todo">${s.duration}</span>
+            ${isAdmin ? `
+              <div style="display:flex; gap:4px;">
+                <button class="btn btn-secondary btn-sm" title="Monter" onclick="moveSetlistItem(${s.id}, -1)" ${idx === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
+                <button class="btn btn-secondary btn-sm" title="Descendre" onclick="moveSetlistItem(${s.id}, 1)" ${idx === setlistOrder.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
+                <button class="btn btn-danger btn-sm" title="Retirer du Setlist" onclick="removeFromSetlist(${s.id})"><i class="fa-solid fa-xmark"></i></button>
+              </div>
+            ` : ''}
+          </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
+      if (isAdmin) {
+        const available = songsData.filter(s => !setlistOrder.includes(s.id));
+        container.innerHTML += `
+          <div class="feed-item" style="align-items:center; gap:8px;">
+            ${available.length > 0 ? `
+              <select id="setlist-add-select" class="chat-input" style="flex:1;">
+                ${available.map(s => `<option value="${s.id}">${s.title}</option>`).join('')}
+              </select>
+              <button class="btn btn-primary btn-sm" onclick="addToSetlist()"><i class="fa-solid fa-plus"></i> Ajouter au Setlist</button>
+            ` : `<span style="color:var(--text-muted); font-size:12px;">Tous les morceaux du répertoire sont déjà dans le setlist.</span>`}
+          </div>
+        `;
+      }
+      updateSetlistTotalTime();
     }
-
+    function moveSetlistItem(id, direction) {
+      const idx = setlistOrder.indexOf(id);
+      const newIdx = idx + direction;
+      if (idx === -1 || newIdx < 0 || newIdx >= setlistOrder.length) return;
+      [setlistOrder[idx], setlistOrder[newIdx]] = [setlistOrder[newIdx], setlistOrder[idx]];
+      renderSetlist();
+    }
+    function removeFromSetlist(id) {
+      setlistOrder = setlistOrder.filter(sid => sid !== id);
+      renderSetlist();
+    }
+    function addToSetlist() {
+      const select = document.getElementById('setlist-add-select');
+      if (!select || !select.value) return;
+      setlistOrder.push(parseInt(select.value));
+      renderSetlist();
+    }
     function renderChat() {
       const container = document.getElementById('chat-messages-box');
       container.innerHTML = chatData.map(c => `
@@ -1807,12 +1686,10 @@
       `).join('');
       container.scrollTop = container.scrollHeight;
     }
-
     function sendChatMessage() {
       const input = document.getElementById('chat-text-input');
       const text = input.value.trim();
       if (!text) return;
-
       chatData.push({
         id: Date.now(),
         author: currentUser.name,
@@ -1820,11 +1697,9 @@
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         isMe: true
       });
-
       input.value = '';
       renderChat();
     }
-
     function renderDocsGrid() {
       const container = document.getElementById('docs-grid-container');
       container.innerHTML = documentsData.map(d => `
@@ -1843,7 +1718,6 @@
         </div>
       `).join('');
     }
-
     function renderAdminUsers() {
       const tbody = document.getElementById('admin-users-table');
       const users = [
@@ -1851,7 +1725,6 @@
         { id: 2, name: 'Lucas Guitare', email: 'lucas@eliyah.band', role: 'user' },
         { id: 3, name: 'Sarah Voix', email: 'sarah@eliyah.band', role: 'user' }
       ];
-
       tbody.innerHTML = users.map(u => `
         <tr>
           <td><strong>${u.name}</strong></td>
@@ -1867,7 +1740,6 @@
         </tr>
       `).join('');
     }
-
     /* STREAMING_CHUNK:CRUD Actions & Media Downloads Logic... */
     function toggleChantierDone(id) {
       const chantier = chantiersData.find(c => c.id === id);
@@ -1876,14 +1748,12 @@
         renderAll();
       }
     }
-
     function deleteChantier(id) {
       if (confirm('Êtes-vous sûr de vouloir supprimer ce chantier ?')) {
         chantiersData = chantiersData.filter(c => c.id !== id);
         renderAll();
       }
     }
-
     function deleteSong(id) {
       if (confirm('Êtes-vous sûr de vouloir supprimer ce morceau du répertoire ?')) {
         songsData = songsData.filter(s => s.id !== id);
@@ -1891,60 +1761,86 @@
         renderCharts();
       }
     }
-
     function deleteEvent(id) {
       if (confirm('Supprimer cet événement de l\'agenda ?')) {
         eventsData = eventsData.filter(e => e.id !== id);
         renderAll();
       }
     }
-
     function deleteChatMessage(id) {
       chatData = chatData.filter(c => c.id !== id);
       renderChat();
     }
-
     function deleteDocument(id) {
       if (confirm('Supprimer ce document du kit média ?')) {
         documentsData = documentsData.filter(d => d.id !== id);
         renderDocsGrid();
       }
     }
-
-    function addNewSong() {
+    function openAddSongModal() {
+      editingSongId = null;
+      document.getElementById('song-modal-title').textContent = 'Nouveau Morceau / Titre';
+      document.getElementById('song-modal-submit').textContent = 'Créer le Morceau';
+      document.getElementById('new-song-title').value = '';
+      document.getElementById('new-song-key').value = '';
+      document.getElementById('new-song-bpm').value = '';
+      document.getElementById('new-song-duration').value = '';
+      openModal('modal-add-song');
+    }
+    function editSong(id) {
+      if (currentUser.role !== 'admin') return;
+      const s = songsData.find(sg => sg.id === id);
+      if (!s) return;
+      editingSongId = id;
+      document.getElementById('song-modal-title').textContent = 'Modifier le Morceau';
+      document.getElementById('song-modal-submit').textContent = 'Enregistrer les modifications';
+      document.getElementById('new-song-title').value = s.title;
+      document.getElementById('new-song-key').value = s.key;
+      document.getElementById('new-song-bpm').value = s.bpm;
+      document.getElementById('new-song-duration').value = s.duration;
+      openModal('modal-add-song');
+    }
+    function saveSong() {
       const title = document.getElementById('new-song-title').value.trim();
       const key = document.getElementById('new-song-key').value.trim() || 'Do maj';
       const bpm = parseInt(document.getElementById('new-song-bpm').value) || 120;
-
+      const duration = document.getElementById('new-song-duration').value.trim();
       if (!title) return alert('Veuillez saisir un titre !');
-
-      songsData.push({
-        id: Date.now(),
-        title: title,
-        key: key,
-        bpm: bpm,
-        duration: '03:45',
-        mixPct: 0,
-        guitar: 'À enregistrer',
-        clavier: 'À enregistrer',
-        voix: 'À enregistrer',
-        status: 'Maquette',
-        fileUrl: ''
-      });
-
+      if (editingSongId !== null) {
+        const s = songsData.find(sg => sg.id === editingSongId);
+        if (s) {
+          s.title = title;
+          s.key = key;
+          s.bpm = bpm;
+          if (duration) s.duration = duration;
+        }
+      } else {
+        songsData.push({
+          id: Date.now(),
+          title: title,
+          key: key,
+          bpm: bpm,
+          duration: duration || '03:45',
+          mixPct: 0,
+          guitar: 'À enregistrer',
+          clavier: 'À enregistrer',
+          voix: 'À enregistrer',
+          status: 'Maquette',
+          fileUrl: ''
+        });
+        setlistOrder.push(songsData[songsData.length - 1].id);
+      }
+      editingSongId = null;
       closeModal('modal-add-song');
       renderAll();
       renderCharts();
     }
-
     function addNewChantier() {
       const title = document.getElementById('new-chantier-title').value.trim();
       const type = document.getElementById('new-chantier-type').value;
       const urgent = document.getElementById('new-chantier-urgent').value;
       const assign = document.getElementById('new-chantier-assign').value.trim() || 'Groupe';
-
       if (!title) return alert('Saisir le titre du chantier');
-
       chantiersData.push({
         id: Date.now(),
         title: title,
@@ -1953,23 +1849,18 @@
         assign: assign,
         done: false
       });
-
       closeModal('modal-add-chantier');
       renderAll();
     }
-
     function addNewDocument() {
       const title = document.getElementById('new-doc-title').value.trim();
       const type = document.getElementById('new-doc-type').value;
-
       if (!title) return alert('Saisir le nom du document');
-
       const typeDetails = {
         pdf: { icon: 'fa-file-pdf', color: '#E11D48', desc: 'Document PDF officiel' },
         wav: { icon: 'fa-file-audio', color: '#0284C7', desc: 'Fichier Audio Master HD' },
         video: { icon: 'fa-file-video', color: '#7C3AED', desc: 'Vidéo HD Live' }
       };
-
       documentsData.push({
         id: Date.now(),
         title: title,
@@ -1978,23 +1869,49 @@
         icon: typeDetails[type].icon,
         color: typeDetails[type].color
       });
-
       closeModal('modal-add-doc');
       renderDocsGrid();
     }
-
-    function addNewEvent() {
+    function openAddEventModal() {
+      editingEventId = null;
+      document.getElementById('event-modal-title').textContent = 'Ajouter un Événement';
+      document.getElementById('event-modal-submit').textContent = 'Ajouter Événement';
+      document.getElementById('new-event-title').value = '';
+      document.getElementById('new-event-date').value = '';
+      document.getElementById('new-event-location').value = '';
+      openModal('modal-add-event');
+    }
+    function editEvent(id) {
+      if (currentUser.role !== 'admin') return;
+      const e = eventsData.find(ev => ev.id === id);
+      if (!e) return;
+      editingEventId = id;
+      document.getElementById('event-modal-title').textContent = 'Modifier l\'Événement';
+      document.getElementById('event-modal-submit').textContent = 'Enregistrer les modifications';
+      document.getElementById('new-event-title').value = e.title;
+      document.getElementById('new-event-date').value = e.date;
+      document.getElementById('new-event-location').value = e.location;
+      openModal('modal-add-event');
+    }
+    function saveEvent() {
       const title = document.getElementById('new-event-title').value.trim();
       const date = document.getElementById('new-event-date').value.trim();
       const loc = document.getElementById('new-event-location').value.trim();
-
       if (!title || !date) return alert('Saisir titre et date !');
-
-      eventsData.push({ id: Date.now(), title: title, date: date, location: loc });
+      if (editingEventId !== null) {
+        const e = eventsData.find(ev => ev.id === editingEventId);
+        if (e) {
+          e.title = title;
+          e.date = date;
+          e.location = loc;
+        }
+      } else {
+        eventsData.push({ id: Date.now(), title: title, date: date, location: loc });
+      }
+      editingEventId = null;
       closeModal('modal-add-event');
       renderEventsList();
     }
-
     /* Download HTML5 Blob Helper */
     function downloadDocumentFile(filename) {
       const content = "Fichier de test généré par ELIYAH App - " + filename;
@@ -2006,16 +1923,13 @@
       a.click();
       URL.revokeObjectURL(url);
     }
-
     function downloadSongFile(title) {
       downloadDocumentFile(title.replace(/[^a-zA-Z0-9]/g, "_") + ".wav");
     }
-
     /* ================= AUDIO PLAYER ENGINE ================= */
     function playSongTrack(id) {
       const song = songsData.find(s => s.id === id);
       if (!song) return;
-
       if (currentPlayingTrackId === id && isPlaying) {
         audioObj.pause();
         isPlaying = false;
@@ -2032,13 +1946,11 @@
       updatePlayerUI();
       renderSongsTable();
     }
-
     function togglePlay() {
       if (!currentPlayingTrackId && songsData.length > 0) {
         playSongTrack(songsData[0].id);
         return;
       }
-
       if (isPlaying) {
         audioObj.pause();
         isPlaying = false;
@@ -2049,11 +1961,9 @@
       updatePlayerUI();
       renderSongsTable();
     }
-
     function updatePlayerUI() {
       const playIcon = document.getElementById('player-play-icon');
       const discIcon = document.getElementById('player-disc-icon');
-
       if (isPlaying) {
         playIcon.className = 'fa-solid fa-pause';
         discIcon.style.animationPlayState = 'running';
@@ -2062,34 +1972,28 @@
         discIcon.style.animationPlayState = 'paused';
       }
     }
-
     function seekAudio(val) {
       if (audioObj) audioObj.currentTime = val;
     }
-
     function formatTime(secs) {
       const m = Math.floor(secs / 60);
       const s = Math.floor(secs % 60);
       return `${m}:${s < 10 ? '0' : ''}${s}`;
     }
-
     function prevTrack() {
       if (songsData.length === 0) return;
       let idx = songsData.findIndex(s => s.id === currentPlayingTrackId);
       idx = (idx - 1 + songsData.length) % songsData.length;
       playSongTrack(songsData[idx].id);
     }
-
     function nextTrack() {
       if (songsData.length === 0) return;
       let idx = songsData.findIndex(s => s.id === currentPlayingTrackId);
       idx = (idx + 1) % songsData.length;
       playSongTrack(songsData[idx].id);
     }
-
     /* STREAMING_CHUNK:Chart.js Rendering Engine... */
     let progressChart, mixDoughnutChart;
-
     function initCharts() {
       const ctxProgress = document.getElementById('progressChart').getContext('2d');
       progressChart = new Chart(ctxProgress, {
@@ -2110,7 +2014,6 @@
           scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }
         }
       });
-
       const ctxDoughnut = document.getElementById('mixDoughnutChart').getContext('2d');
       mixDoughnutChart = new Chart(ctxDoughnut, {
         type: 'doughnut',
@@ -2130,25 +2033,19 @@
         }
       });
     }
-
     function renderCharts() {
       if (!progressChart || !mixDoughnutChart) return;
-
       const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (songsData.length || 1));
       progressChart.data.datasets[0].data[0] = avgMix;
       progressChart.update();
-
       const masterised = songsData.filter(s => s.status === 'Masterisé').length;
       const inMix = songsData.filter(s => s.status === 'En Mixage').length;
       const maquette = songsData.filter(s => s.status === 'Maquette').length;
-
       mixDoughnutChart.data.datasets[0].data = [masterised, inMix, maquette];
       mixDoughnutChart.update();
     }
-
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     function closeModal(id) { document.getElementById(id).classList.remove('active'); }
-
     function exportSummaryPDF() {
       window.print();
     }
