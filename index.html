@@ -3,422 +3,1211 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eliyah - Espace Groupe</title>
+  <title>ELIYAH — Gestion du Groupe & Suivi Production</title>
+  
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  
+  <!-- Chart.js for Pro Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
   <style>
     :root {
-      --primary: #6c5ce7;
-      --primary-dark: #4834d4;
-      --bg-dark: #0f172a;
-      --card-bg: #1e293b;
-      --border-color: #334155;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --accent: #00b894;
-      --danger: #ff7675;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: var(--bg-dark); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
-
-    /* Auth Modal */
-    #auth-overlay {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(15, 23, 42, 0.95); display: flex; align-items: center; justify-content: center; z-index: 9999;
-    }
-    .auth-card { background: var(--card-bg); padding: 2.5rem; border-radius: 12px; width: 100%; max-width: 400px; border: 1px solid var(--border-color); text-align: center; }
-    .auth-card h2 { margin-bottom: 1.5rem; color: var(--primary); font-size: 1.8rem; }
-    .auth-card input { width: 100%; padding: 0.75rem; margin-bottom: 1rem; border-radius: 6px; border: 1px solid var(--border-color); background: #0f172a; color: white; }
-    .auth-card button { width: 100%; padding: 0.75rem; border-radius: 6px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer; transition: 0.2s; }
-    .auth-card button:hover { background: var(--primary-dark); }
-
-    /* Layout */
-    #sidebar { width: 260px; background: var(--card-bg); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; }
-    .brand { padding: 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 1rem; }
-    .brand-logo { width: 42px; height: 42px; background: var(--primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.2rem; }
-    .nav-links { list-style: none; padding: 1rem 0; flex: 1; }
-    .nav-item { padding: 0.85rem 1.5rem; color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 0.75rem; transition: 0.2s; font-weight: 500; }
-    .nav-item:hover, .nav-item.active { background: rgba(108, 92, 231, 0.15); color: var(--text-main); border-left: 4px solid var(--primary); }
-    .user-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; }
-    .btn-logout { background: transparent; border: none; color: var(--danger); cursor: pointer; font-size: 0.85rem; font-weight: bold; }
-
-    /* Main Area */
-    #main-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-    header { padding: 1.2rem 2rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); }
-    .content-section { display: none; padding: 2rem; overflow-y: auto; flex: 1; }
-    .content-section.active { display: block; }
-
-    /* Common Components */
-    .btn-primary { background: var(--primary); color: white; border: none; padding: 0.6rem 1.2rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
-    .btn-primary:hover { background: var(--primary-dark); }
-    .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; margin-top: 1.5rem; }
-    .card { background: var(--card-bg); border-radius: 8px; border: 1px solid var(--border-color); padding: 1.25rem; }
-    .badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; display: inline-block; }
-    .badge-key { background: #00cec9; color: #000; }
-    .badge-bpm { background: #fdcb6e; color: #000; }
-
-    /* Form Styles */
-    .form-group { margin-bottom: 1rem; }
-    .form-group label { display: block; margin-bottom: 0.4rem; color: var(--text-muted); font-size: 0.85rem; }
-    .form-group input, .form-group select, .form-group textarea { width: 100%; padding: 0.6rem; border-radius: 6px; border: 1px solid var(--border-color); background: #0f172a; color: white; }
-
-    /* Chat UI */
-    #chat-messages { height: calc(100vh - 230px); overflow-y: auto; padding: 1rem; background: #0f172a; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 1rem; display: flex; flex-direction: column; gap: 0.75rem; }
-    .chat-msg { background: var(--card-bg); padding: 0.75rem 1rem; border-radius: 8px; max-width: 70%; border: 1px solid var(--border-color); }
-    .chat-msg.self { align-self: flex-end; background: var(--primary-dark); }
-    .chat-msg .author { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.25rem; font-weight: bold; }
-
-    /* Table */
-    table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
-    th, td { text-align: left; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); }
-    th { background: rgba(255,255,255,0.03); color: var(--text-muted); }
-  </style>
-
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
-    import { getFirestore, collection, addDoc, onSnapshot, doc, setDoc, getDoc, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-storage.js";
-
-    // Firebase Config (live-hub-2026)
-    const firebaseConfig = {
-      apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
-      authDomain: "live-hub-2026.firebaseapp.com",
-      projectId: "live-hub-2026",
-      storageBucket: "live-hub-2026.firebasestorage.app",
-      messagingSenderId: "56918867184",
-      appId: "1:56918867184:web:7667d75288d14a565e9635",
-      measurementId: "G-MNHRC2MSBH"
-    };
-
-    // Initialize Services
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-    const storage = getStorage(app);
-
-    let currentUser = null;
-    let currentUserData = null;
-
-    // --- Authentication ---
-    window.login = async () => {
-      const email = document.getElementById('login-email').value;
-      const pass = document.getElementById('login-pass').value;
-      try {
-        await signInWithEmailAndPassword(auth, email, pass);
-      } catch (err) {
-        alert("Erreur de connexion : " + err.message);
-      }
-    };
-
-    window.logout = () => signOut(auth);
-
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        currentUser = user;
-        const userDoc = await getDoc(doc(db, "users", user.uid));
-        currentUserData = userDoc.exists() ? userDoc.data() : { role: 'member', permissions: {} };
-        
-        document.getElementById('auth-overlay').style.display = 'none';
-        document.getElementById('user-email-display').innerText = user.email;
-        
-        if (currentUserData.role === 'admin') {
-          document.getElementById('admin-nav-item').style.display = 'flex';
-        }
-
-        initRealtimeListeners();
-      } else {
-        document.getElementById('auth-overlay').style.display = 'flex';
-      }
-    });
-
-    // --- Realtime Subscriptions ---
-    function initRealtimeListeners() {
-      // 1. Repertoire Listener
-      onSnapshot(collection(db, "songs"), (snapshot) => {
-        const container = document.getElementById('songs-list');
-        container.innerHTML = '';
-        snapshot.forEach((doc) => {
-          const s = doc.data();
-          container.innerHTML += `
-            <div class="card">
-              <h3>${s.title}</h3>
-              <p style="margin: 0.5rem 0; color: var(--text-muted);">${s.notes || 'Pas de notes'}</p>
-              <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
-                <span class="badge badge-key">Clé: ${s.key}</span>
-                <span class="badge badge-bpm">${s.bpm} BPM</span>
-              </div>
-              <p style="font-size:0.85rem;"><strong>Chanteurs:</strong> ${s.singersCount}</p>
-              ${s.fileUrl ? `<audio controls src="${s.fileUrl}" style="width: 100%; margin-top: 0.5rem;"></audio>` : ''}
-            </div>`;
-        });
-      });
-
-      // 2. Chat Listener
-      const qChat = query(collection(db, "messages"), orderBy("timestamp", "asc"));
-      onSnapshot(qChat, (snapshot) => {
-        const chatBox = document.getElementById('chat-messages');
-        chatBox.innerHTML = '';
-        snapshot.forEach((doc) => {
-          const msg = doc.data();
-          const isSelf = currentUser && msg.senderId === currentUser.uid;
-          chatBox.innerHTML += `
-            <div class="chat-msg ${isSelf ? 'self' : ''}">
-              <div class="author">${msg.senderEmail}</div>
-              <div>${msg.text}</div>
-            </div>`;
-        });
-        chatBox.scrollTop = chatBox.scrollHeight;
-      });
-
-      // 3. Agenda Listener
-      onSnapshot(collection(db, "rehearsals"), (snapshot) => {
-        const list = document.getElementById('agenda-list');
-        list.innerHTML = '';
-        snapshot.forEach((doc) => {
-          const r = doc.data();
-          list.innerHTML += `<div class="card" style="margin-bottom:0.75rem;">
-            <h4>${r.title}</h4>
-            <p style="font-size: 0.85rem; color: var(--text-muted);">${r.date} - ${r.location}</p>
-          </div>`;
-        });
-      });
-
-      // 4. Documents Listener
-      onSnapshot(collection(db, "documents"), (snapshot) => {
-        const list = document.getElementById('docs-list');
-        list.innerHTML = '';
-        snapshot.forEach((doc) => {
-          const d = doc.data();
-          list.innerHTML += `<tr>
-            <td>${d.name}</td>
-            <td>${d.category}</td>
-            <td><a href="${d.url}" target="_blank" style="color:var(--primary);">Télécharger</a></td>
-          </tr>`;
-        });
-      });
-    }
-
-    // --- Actions ---
-    window.addSong = async () => {
-      const title = document.getElementById('song-title').value;
-      const key = document.getElementById('song-key').value;
-      const bpm = document.getElementById('song-bpm').value;
-      const singersCount = document.getElementById('song-singers').value;
-      const fileInput = document.getElementById('song-file');
-
-      let fileUrl = "";
-      if (fileInput.files[0]) {
-        const fileRef = ref(storage, `songs/${Date.now()}_${fileInput.files[0].name}`);
-        await uploadBytes(fileRef, fileInput.files[0]);
-        fileUrl = await getDownloadURL(fileRef);
-      }
-
-      await addDoc(collection(db, "songs"), {
-        title, key, bpm, singersCount, fileUrl, createdAt: serverTimestamp()
-      });
-      alert("Morceau ajouté !");
-    };
-
-    window.sendMessage = async () => {
-      const input = document.getElementById('chat-input');
-      if (!input.value.trim()) return;
-      await addDoc(collection(db, "messages"), {
-        text: input.value,
-        senderId: currentUser.uid,
-        senderEmail: currentUser.email,
-        timestamp: serverTimestamp()
-      });
-      input.value = '';
-    };
-
-    window.addRehearsal = async () => {
-      const title = document.getElementById('reh-title').value;
-      const date = document.getElementById('reh-date').value;
-      const location = document.getElementById('reh-location').value;
-      await addDoc(collection(db, "rehearsals"), { title, date, location });
-      alert("Répétition ajoutée !");
-    };
-
-    window.uploadDoc = async () => {
-      const fileInput = document.getElementById('doc-file');
-      const category = document.getElementById('doc-category').value;
-      if (!fileInput.files[0]) return;
+      --bg-main: #F4F6F9;
+      --bg-card: #FFFFFF;
+      --sidebar-bg: #FFFFFF;
+      --border-color: #E2E8F0;
       
-      const file = fileInput.files[0];
-      const fileRef = ref(storage, `docs/${Date.now()}_${file.name}`);
-      await uploadBytes(fileRef, file);
-      const url = await getDownloadURL(fileRef);
+      /* Colors inspired by ELIYAH logo & vibrant accents */
+      --brand-red: #8B1E2D;
+      --brand-red-light: #FFF1F2;
+      --brand-red-hover: #701522;
+      
+      --text-dark: #0F172A;
+      --text-muted: #64748B;
+      --text-light: #94A3B8;
+      
+      /* Activity Colors */
+      --col-mix: #E11D48;        /* Rose / Crimson */
+      --col-comp: #7C3AED;       /* Violet */
+      --col-comm: #0284C7;       /* Cyan Blue */
+      --col-prep: #059669;       /* Emerald Green */
+      --col-agenda: #D97706;     /* Amber */
+      
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 12px -2px rgba(0,0,0,0.08);
+      --shadow-lg: 0 10px 25px -5px rgba(0,0,0,0.1);
+      --radius-lg: 16px;
+      --radius-md: 10px;
+    }
 
-      await addDoc(collection(db, "documents"), { name: file.name, category, url });
-      alert("Document ajouté !");
-    };
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    }
 
-    // Admin: Create User
-    window.createUserByAdmin = async () => {
-      const email = document.getElementById('new-user-email').value;
-      const pass = document.getElementById('new-user-pass').value;
-      const role = document.getElementById('new-user-role').value;
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-dark);
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-      try {
-        // Enregistrement Firestore manuel pour attribuer le rôle
-        const res = await createUserWithEmailAndPassword(auth, email, pass);
-        await setDoc(doc(db, "users", res.user.uid), {
-          email, role, permissions: { editAgenda: true, editSongs: true }
-        });
-        alert("Membre créé avec succès !");
-      } catch(err) {
-        alert("Erreur de création : " + err.message);
+    /* ================= SIDEBAR ================= */
+    aside {
+      width: 270px;
+      background: var(--sidebar-bg);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 24px 16px;
+      z-index: 10;
+    }
+
+    .brand-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 12px 24px 12px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .logo-text {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      color: var(--text-dark);
+      text-transform: uppercase;
+      position: relative;
+    }
+
+    .logo-text span {
+      color: var(--brand-red);
+    }
+
+    .logo-badge {
+      font-size: 10px;
+      font-weight: 700;
+      background: var(--brand-red-light);
+      color: var(--brand-red);
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    .nav-menu {
+      list-style: none;
+      margin-top: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      color: var(--text-muted);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+    }
+
+    .nav-item:hover {
+      background: #F1F5F9;
+      color: var(--text-dark);
+    }
+
+    .nav-item.active {
+      background: var(--brand-red);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(139, 30, 45, 0.25);
+    }
+
+    .nav-item i {
+      font-size: 18px;
+      width: 22px;
+      text-align: center;
+    }
+
+    .user-card {
+      background: #F8FAFC;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .avatar {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--brand-red), #E11D48);
+      color: white;
+      font-weight: 700;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .user-det {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .user-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .user-email {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .logout-btn {
+      color: #EF4444;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      padding: 6px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+
+    .logout-btn:hover {
+      background: #FEE2E2;
+    }
+
+    /* ================= MAIN CONTENT ================= */
+    main {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Top Bar Header */
+    .top-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .page-title h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: var(--text-dark);
+    }
+
+    .page-title p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-top: 2px;
+    }
+
+    .group-tag {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 8px 16px;
+      border-radius: 30px;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .tag-pill {
+      background: #E0F2FE;
+      color: #0369A1;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 12px;
+    }
+
+    /* Views */
+    .view-content {
+      display: none;
+      flex-direction: column;
+      gap: 24px;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+
+    .view-content.active {
+      display: flex;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Quick KPI Stats Row */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 18px;
+    }
+
+    .kpi-card {
+      background: var(--bg-card);
+      padding: 20px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .kpi-icon {
+      width: 52px;
+      height: 52px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+    }
+
+    .kpi-info h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    .kpi-info .val {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-top: 2px;
+    }
+
+    .kpi-info .sub {
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 2px;
+    }
+
+    /* Dashboard Charts Section */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .chart-box {
+      background: var(--bg-card);
+      padding: 24px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .box-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .box-title h3 {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .box-title p {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* Tasks Progress Checklist Section */
+    .tasks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .task-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      padding: 20px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .task-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .category-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+    }
+
+    .badge-mix { background: #FFE4E6; color: var(--col-mix); }
+    .badge-comp { background: #F3E8FF; color: var(--col-comp); }
+    .badge-comm { background: #E0F2FE; color: var(--col-comm); }
+    .badge-prep { background: #D1FAE5; color: var(--col-prep); }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: #E2E8F0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0 16px 0;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 10px;
+      transition: width 0.4s ease;
+    }
+
+    .task-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .task-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: var(--text-dark);
+    }
+
+    .task-item input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--brand-red);
+      cursor: pointer;
+    }
+
+    /* Tables Style (Suivi Mixage & Morceaux) */
+    .data-card {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #F8FAFC;
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    td {
+      padding: 16px 20px;
+      border-bottom: 1px solid #F1F5F9;
+      font-size: 14px;
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr:hover td {
+      background: #FAFAFA;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .status-done { background: #D1FAE5; color: #047857; }
+    .status-progress { background: #FEF3C7; color: #B45309; }
+    .status-todo { background: #F1F5F9; color: #475569; }
+
+    /* Action Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 18px;
+      border-radius: var(--radius-md);
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--brand-red);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-red-hover);
+      box-shadow: 0 4px 12px rgba(139, 30, 45, 0.3);
+    }
+
+    .btn-secondary {
+      background: #F1F5F9;
+      color: var(--text-dark);
+    }
+
+    .btn-secondary:hover {
+      background: #E2E8F0;
+    }
+
+    /* Chat View Mockup */
+    .chat-container {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      height: 520px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .chat-bubble {
+      max-width: 60%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .chat-bubble.received {
+      background: #F1F5F9;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-bubble.sent {
+      background: var(--brand-red);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-input-area {
+      padding: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 12px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 12px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.5);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      padding: 28px;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+    }
+
+    @media (max-width: 1024px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
       }
-    };
-  </script>
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Modal Authentification -->
-  <div id="auth-overlay">
-    <div class="auth-card">
-      <h2>Eliyah Live Hub</h2>
+  <!-- ================= SIDEBAR ================= -->
+  <aside>
+    <div>
+      <div class="brand-logo">
+        <div class="logo-text">ΣLIY<span>Δ</span>H.</div>
+        <span class="logo-badge">Pro</span>
+      </div>
+
+      <ul class="nav-menu">
+        <li class="nav-item active" onclick="switchTab('dashboard', this)">
+          <i class="fa-solid fa-chart-pie"></i>
+          <span>Tableau de Bord</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('mix', this)">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Suivi & Mixage</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('morceaux', this)">
+          <i class="fa-solid fa-music"></i>
+          <span>Morceaux</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('agenda', this)">
+          <i class="fa-solid fa-calendar-days"></i>
+          <span>Agenda & Lives</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('chat', this)">
+          <i class="fa-solid fa-comments"></i>
+          <span>Espace Chat</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('docs', this)">
+          <i class="fa-solid fa-folder-open"></i>
+          <span>Documents & Presse</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('admin', this)">
+          <i class="fa-solid fa-crown"></i>
+          <span>Espace Admin</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- User Profile Footer -->
+    <div class="user-card">
+      <div class="user-info">
+        <div class="avatar" id="user-avatar">N</div>
+        <div class="user-det">
+          <span class="user-name" id="user-name-display">N. Chebani</span>
+          <span class="user-email" id="user-email-display">nchebani@gmail.com</span>
+        </div>
+      </div>
+      <button class="logout-btn" title="Déconnexion" onclick="logout()">
+        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ================= MAIN CONTENT AREA ================= -->
+  <main>
+
+    <!-- Top Bar Header -->
+    <div class="top-header">
+      <div class="page-title">
+        <h1 id="view-title">Tableau de Bord</h1>
+        <p id="view-subtitle">Suivi global de l'avancement des productions & travaux du groupe.</p>
+      </div>
+
+      <div class="group-tag">
+        <i class="fa-solid fa-users" style="color: var(--brand-red);"></i>
+        <span>Formation :</span>
+        <span class="tag-pill">1 Guitare • 1 Clavier • 3 Voix</span>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 1: DASHBOARD ================= -->
+    <section id="view-dashboard" class="view-content active">
+
+      <!-- KPI Metrics -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #FFE4E6; color: var(--col-mix);">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div class="kpi-info">
+            <h4>Mixage & Audio</h4>
+            <div class="val">68%</div>
+            <div class="sub" style="color: #059669;">8 / 12 Titres mixés</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #F3E8FF; color: var(--col-comp);">
+            <i class="fa-solid fa-compact-disc"></i>
+          </div>
+          <div class="kpi-info">
+            <h4>Compositions</h4>
+            <div class="val">92%</div>
+            <div class="sub" style="color: #7C3AED;">11 Titres finalisés</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #E0F2FE; color: var(--col-comm);">
+            <i class="fa-solid fa-bullhorn"></i>
+          </div>
+          <div class="kpi-info">
+            <h4>Communication</h4>
+            <div class="val">45%</div>
+            <div class="sub" style="color: #0284C7;">Presse & Kit médias</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #FEF3C7; color: var(--col-agenda);">
+            <i class="fa-solid fa-guitar"></i>
+          </div>
+          <div class="kpi-info">
+            <h4>Répétitions</h4>
+            <div class="val">14h</div>
+            <div class="sub" style="color: #D97706;">Prochain live : 12 Oct</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-grid">
+        <!-- Main Progress Bar Chart -->
+        <div class="chart-box">
+          <div class="box-header">
+            <div class="box-title">
+              <h3>Avancement par Pôle d'Activité</h3>
+              <p>Répartition des travaux réalisés et restant à faire</p>
+            </div>
+            <button class="btn btn-secondary" onclick="refreshCharts()"><i class="fa-solid fa-rotate-right"></i> Actualiser</button>
+          </div>
+          <div style="height: 280px;">
+            <canvas id="progressChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Doughnut Mix Status -->
+        <div class="chart-box">
+          <div class="box-header">
+            <div class="box-title">
+              <h3>Statut des Mixes</h3>
+              <p>Répartition globale des 12 titres</p>
+            </div>
+          </div>
+          <div style="height: 280px; display: flex; align-items: center; justify-content: center;">
+            <canvas id="mixDoughnutChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Task Lists Grid by Category -->
+      <div class="box-title" style="margin-top: 10px;">
+        <h3>Suivi Détaillé des Tâches à Faire</h3>
+        <p>Cochez les jalons validés pour mettre à jour les statistiques de l'équipe</p>
+      </div>
+
+      <div class="tasks-grid">
+        <!-- Card 1: Mixage -->
+        <div class="task-card">
+          <div class="task-card-header">
+            <span class="category-badge badge-mix"><i class="fa-solid fa-sliders"></i> Mixage & Arrangements</span>
+            <span style="font-weight: 800; font-size: 14px; color: var(--col-mix);">68%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 68%; background: var(--col-mix);"></div>
+          </div>
+          <ul class="task-list">
+            <li class="task-item"><input type="checkbox" checked> Enregistrement des 3 voix principales</li>
+            <li class="task-item"><input type="checkbox" checked> Calage des arrangements clavier</li>
+            <li class="task-item"><input type="checkbox"> Solo de guitare électrique (Titre 04)</li>
+            <li class="task-item"><input type="checkbox"> Finalisation du mixage Stéréo & Mastering</li>
+          </ul>
+        </div>
+
+        <!-- Card 2: Communication -->
+        <div class="task-card">
+          <div class="task-card-header">
+            <span class="category-badge badge-comm"><i class="fa-solid fa-bullhorn"></i> Communication & Visuel</span>
+            <span style="font-weight: 800; font-size: 14px; color: var(--col-comm);">45%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 45%; background: var(--col-comm);"></div>
+          </div>
+          <ul class="task-list">
+            <li class="task-item"><input type="checkbox" checked> Intégration du nouveau Logo ELIYAH.</li>
+            <li class="task-item"><input type="checkbox"> Shooting photo officiel du groupe</li>
+            <li class="task-item"><input type="checkbox"> Rédaction de la biographie & dossier de presse</li>
+            <li class="task-item"><input type="checkbox"> Plannification des posts Instagram & Facebook</li>
+          </ul>
+        </div>
+
+        <!-- Card 3: Preparation Live -->
+        <div class="task-card">
+          <div class="task-card-header">
+            <span class="category-badge badge-prep"><i class="fa-solid fa-calendar-check"></i> Préparation Concerts</span>
+            <span style="font-weight: 800; font-size: 14px; color: var(--col-prep);">80%</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div class="progress-bar-fill" style="width: 80%; background: var(--col-prep);"></div>
+          </div>
+          <ul class="task-list">
+            <li class="task-item"><input type="checkbox" checked> Validation de la Setlist officielle</li>
+            <li class="task-item"><input type="checkbox" checked> Répétition générale acoustique</li>
+            <li class="task-item"><input type="checkbox" checked> Fiche technique son & patch scène</li>
+            <li class="task-item"><input type="checkbox"> Raccord lumières & effets scène</li>
+          </ul>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= VIEW 2: SUIVI & MIXAGE ================= -->
+    <section id="view-mix" class="view-content">
+      <div class="box-header">
+        <div class="box-title">
+          <h3>Tableau de Suivi des Titres & Mixage</h3>
+          <p>Détail par instrument (Guitare, Clavier, Voix 1, 2, 3) et état du mixage</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-song')"><i class="fa-solid fa-plus"></i> Ajouter un Titre</button>
+      </div>
+
+      <div class="data-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Guitare</th>
+                <th>Clavier</th>
+                <th>Voix (3)</th>
+                <th>Progression Mix</th>
+                <th>Statut Final</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>01. Prelude / Eil</strong></td>
+                <td><span class="status-pill status-done"><i class="fa-solid fa-check"></i> Prise OK</span></td>
+                <td><span class="status-pill status-done"><i class="fa-solid fa-check"></i> Prise OK</span></td>
+                <td><span class="status-pill status-done"><i class="fa-solid fa-check"></i> 3/3 Posées</span></td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="progress-bar-bg" style="width: 100px; margin: 0;"><div class="progress-bar-fill" style="width: 100%; background: #059669;"></div></div>
+                    <span style="font-size: 12px; font-weight: 700;">100%</span>
+                  </div>
+                </td>
+                <td><span class="status-pill status-done">Masterisé</span></td>
+                <td><button class="btn btn-secondary" style="padding: 6px 10px;"><i class="fa-solid fa-pen"></i></button></td>
+              </tr>
+              <tr>
+                <td><strong>02. Lumière dans l'Ombre</strong></td>
+                <td><span class="status-pill status-done"><i class="fa-solid fa-check"></i> Prise OK</span></td>
+                <td><span class="status-pill status-done"><i class="fa-solid fa-check"></i> Prise OK</span></td>
+                <td><span class="status-pill status-progress"><i class="fa-solid fa-clock"></i> 2/3 Posées</span></td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="progress-bar-bg" style="width: 100px; margin: 0;"><div class="progress-bar-fill" style="width: 75%; background: var(--col-mix);"></div></div>
+                    <span style="font-size: 12px; font-weight: 700;">75%</span>
+                  </div>
+                </td>
+                <td><span class="status-pill status-progress">En Mixage</span></td>
+                <td><button class="btn btn-secondary" style="padding: 6px 10px;"><i class="fa-solid fa-pen"></i></button></td>
+              </tr>
+              <tr>
+                <td><strong>03. Horizon Eliyah</strong></td>
+                <td><span class="status-pill status-progress"><i class="fa-solid fa-clock"></i> Re-take</span></td>
+                <td><span class="status-pill status-done"><i class="fa-solid fa-check"></i> Prise OK</span></td>
+                <td><span class="status-pill status-todo"><i class="fa-solid fa-hourglass"></i> À enregistrer</span></td>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <div class="progress-bar-bg" style="width: 100px; margin: 0;"><div class="progress-bar-fill" style="width: 30%; background: #D97706;"></div></div>
+                    <span style="font-size: 12px; font-weight: 700;">30%</span>
+                  </div>
+                </td>
+                <td><span class="status-pill status-todo">Maquette</span></td>
+                <td><button class="btn btn-secondary" style="padding: 6px 10px;"><i class="fa-solid fa-pen"></i></button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 3: MORCEAUX ================= -->
+    <section id="view-morceaux" class="view-content">
+      <div class="box-header">
+        <div class="box-title">
+          <h3>Répertoire & Morceaux du Groupe</h3>
+          <p>Tonalités, tempos, durée et fichiers audio de référence</p>
+        </div>
+        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Nouveau Morceau</button>
+      </div>
+
+      <div class="data-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Titre</th>
+                <th>Tonalité</th>
+                <th>Tempo (BPM)</th>
+                <th>Durée</th>
+                <th>Lecteur Audio</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Prelude / Eil</strong></td>
+                <td>La mineur (Am)</td>
+                <td>120 BPM</td>
+                <td>04:15</td>
+                <td><audio controls style="height: 32px; width: 220px;"><source src="#" type="audio/mpeg"></audio></td>
+              </tr>
+              <tr>
+                <td><strong>Lumière dans l'Ombre</strong></td>
+                <td>Ré majeur (D)</td>
+                <td>95 BPM</td>
+                <td>03:48</td>
+                <td><audio controls style="height: 32px; width: 220px;"><source src="#" type="audio/mpeg"></audio></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 4: AGENDA ================= -->
+    <section id="view-agenda" class="view-content">
+      <div class="box-header">
+        <div class="box-title">
+          <h3>Agenda, Répétitions & Concerts</h3>
+          <p>Planning des sessions du groupe Eliyah</p>
+        </div>
+        <button class="btn btn-primary"><i class="fa-solid fa-plus"></i> Ajouter une Date</button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #FEF3C7; color: #D97706;">
+            <i class="fa-solid fa-guitar"></i>
+          </div>
+          <div>
+            <span class="category-badge badge-prep">Prochaine Répétition</span>
+            <h4 style="font-size: 16px; font-weight: 800; margin-top: 6px;">Mardi 29 Septembre — 20h00</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">Studio Repetition Nantes • Ordre : Titres 01 à 05</p>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #E0F2FE; color: var(--col-comm);">
+            <i class="fa-solid fa-ticket"></i>
+          </div>
+          <div>
+            <span class="category-badge badge-comm">Concert Live</span>
+            <h4 style="font-size: 16px; font-weight: 800; margin-top: 6px;">Samedi 12 Octobre — 21h00</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">Salle de Spectacle • Setlist 45 minutes</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 5: CHAT ================= -->
+    <section id="view-chat" class="view-content">
+      <div class="box-title">
+        <h3>Espace de Discussion du Groupe</h3>
+        <p>Échangez directement sur les mix, arrangements et répétitions</p>
+      </div>
+
+      <div class="chat-container">
+        <div class="chat-messages">
+          <div class="chat-bubble received">
+            <strong>Guitare :</strong> Salut l'équipe ! J'ai re-déposé la prise de solo sur le Titre 02 dans le dossier. Dites-moi ce que vous en pensez.
+          </div>
+          <div class="chat-bubble sent">
+            <strong>Moi (Admin) :</strong> Super ! Je l'intègre directement dans la session de mixage ce soir.
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" placeholder="Écrivez un message au groupe...">
+          <button class="btn btn-primary"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 6: DOCS ================= -->
+    <section id="view-docs" class="view-content">
+      <div class="box-header">
+        <div class="box-title">
+          <h3>Documents & Kit Média / Presse</h3>
+          <p>Fiches techniques, logos HD, contrats et dossiers de presse</p>
+        </div>
+        <button class="btn btn-primary"><i class="fa-solid fa-upload"></i> Importer un Fichier</button>
+      </div>
+
+      <div class="tasks-grid">
+        <div class="kpi-card">
+          <i class="fa-solid fa-file-pdf" style="font-size: 32px; color: #E11D48;"></i>
+          <div>
+            <h4 style="font-size: 15px; font-weight: 700;">Fiche_Technique_Eliyah_2026.pdf</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">Patch scène 1 Guitare, 1 Clavier, 3 Micro Voix</p>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <i class="fa-solid fa-file-image" style="font-size: 32px; color: #0284C7;"></i>
+          <div>
+            <h4 style="font-size: 15px; font-weight: 700;">Logo_Eliyah_Vectoriel_HD.png</h4>
+            <p style="font-size: 12px; color: var(--text-muted);">Format vectoriel avec ombrage rouge bordeaux</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= VIEW 7: ADMIN ================= -->
+    <section id="view-admin" class="view-content">
+      <div class="box-header">
+        <div class="box-title">
+          <h3>👑 Administration & Rôles Membres</h3>
+          <p>Gestion des autorisations d'accès au projet Eliyah</p>
+        </div>
+      </div>
+
+      <div class="data-card">
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Membre</th>
+                <th>Adresse Email</th>
+                <th>Rôle</th>
+                <th>Statut</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>N. Chebani</strong></td>
+                <td>nchebani@gmail.com</td>
+                <td><span class="category-badge badge-mix">Admin</span></td>
+                <td><span class="status-pill status-done">Actif</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal for Adding Song -->
+  <div class="modal-overlay" id="modal-add-song">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 16px; font-weight: 800;">Ajouter un nouveau morceau</h3>
       <div class="form-group">
-        <input type="email" id="login-email" placeholder="Adresse E-mail">
+        <label>Nom du Titre</label>
+        <input type="text" placeholder="Ex: Chanson de l'aube">
       </div>
       <div class="form-group">
-        <input type="password" id="login-pass" placeholder="Mot de passe">
+        <label>Tonalité & Tempo</label>
+        <input type="text" placeholder="Ex: Do majeur / 110 BPM">
       </div>
-      <button onclick="login()">Se Connecter</button>
-    </div>
-  </div>
-
-  <!-- Sidebar -->
-  <div id="sidebar">
-    <div class="brand">
-      <div class="brand-logo">E</div>
-      <div>
-        <h3 style="font-size: 1rem;">Eliyah</h3>
-        <p style="font-size: 0.75rem; color: var(--text-muted);">Gestion du groupe</p>
-      </div>
-    </div>
-    <ul class="nav-links">
-      <li class="nav-item active" onclick="showSection('agenda')">📅 Agenda</li>
-      <li class="nav-item" onclick="showSection('songs')">🎵 Morceaux</li>
-      <li class="nav-item" onclick="showSection('workflow')">🎛️ Suivi & Mix</li>
-      <li class="nav-item" onclick="showSection('chat')">💬 Espace Chat</li>
-      <li class="nav-item" onclick="showSection('docs')">📁 Documents & Press</li>
-      <li class="nav-item" id="admin-nav-item" style="display:none;" onclick="showSection('admin')">👑 Admin</li>
-    </ul>
-    <div class="user-footer">
-      <span id="user-email-display" style="font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis;">...</span>
-      <button class="btn-logout" onclick="logout()">Déconnexion</button>
-    </div>
-  </div>
-
-  <!-- Main Content -->
-  <div id="main-content">
-    <header>
-      <h2 id="section-title">Agenda & Répétitions</h2>
-      <p style="font-size: 0.85rem; color: var(--text-muted);">Groupe : 1 Guitare, 1 Clavier, 3 Voix</p>
-    </header>
-
-    <!-- 1. Agenda -->
-    <div id="section-agenda" class="content-section active">
-      <h3>Planifier une répétition</h3>
-      <div class="card" style="margin: 1rem 0; max-width: 500px;">
-        <div class="form-group"><label>Intitulé</label><input type="text" id="reh-title" placeholder="Ex: Répétition générale"></div>
-        <div class="form-group"><label>Date & Heure</label><input type="datetime-local" id="reh-date"></div>
-        <div class="form-group"><label>Lieu</label><input type="text" id="reh-location" placeholder="Ex: Studio A"></div>
-        <button class="btn-primary" onclick="addRehearsal()">Ajouter le RDV</button>
-      </div>
-      <h3>Prochains Rendez-vous</h3>
-      <div id="agenda-list" style="margin-top: 1rem;"></div>
-    </div>
-
-    <!-- 2. Morceaux -->
-    <div id="section-songs" class="content-section">
-      <h3>Répertoire des Morceaux</h3>
-      <div class="card" style="margin: 1rem 0; max-width: 600px;">
-        <h4>Ajouter un nouveau morceau</h4>
-        <div class="form-group"><label>Titre</label><input type="text" id="song-title"></div>
-        <div style="display: flex; gap: 1rem;">
-          <div class="form-group" style="flex:1;"><label>Clé / Tonalité</label><input type="text" id="song-key" placeholder="Ex: Am"></div>
-          <div class="form-group" style="flex:1;"><label>BPM</label><input type="number" id="song-bpm" placeholder="120"></div>
-          <div class="form-group" style="flex:1;"><label>Nb Chanteurs</label><input type="number" id="song-singers" value="3"></div>
-        </div>
-        <div class="form-group"><label>Fichier Audio (MP3/WAV)</label><input type="file" id="song-file" accept="audio/*"></div>
-        <button class="btn-primary" onclick="addSong()">Enregistrer le morceau</button>
-      </div>
-      <div class="card-grid" id="songs-list"></div>
-    </div>
-
-    <!-- 3. Suivi & Mix -->
-    <div id="section-workflow" class="content-section">
-      <h3>Avancement des Morceaux & Mixage</h3>
-      <p style="color: var(--text-muted); margin-top: 0.5rem;">Suivi des voix posées, des arrangements du clavier, des solos de guitare et de la finalisation du mixage.</p>
-    </div>
-
-    <!-- 4. Chat -->
-    <div id="section-chat" class="content-section">
-      <h3>Discussion du groupe</h3>
-      <div id="chat-messages"></div>
-      <div style="display: flex; gap: 0.5rem;">
-        <input type="text" id="chat-input" placeholder="Écrivez votre message..." style="flex: 1; padding: 0.75rem; border-radius: 6px; border: 1px solid var(--border-color); background: #0f172a; color: white;">
-        <button class="btn-primary" onclick="sendMessage()">Envoyer</button>
-      </div>
-    </div>
-
-    <!-- 5. Documents -->
-    <div id="section-docs" class="content-section">
-      <h3>Documents Officiels & Presse</h3>
-      <div class="card" style="margin: 1rem 0; max-width: 500px;">
-        <div class="form-group"><label>Catégorie</label>
-          <select id="doc-category">
-            <option>Dossier de Presse</option>
-            <option>Photo Promo</option>
-            <option>Fiche Technique</option>
-          </select>
-        </div>
-        <div class="form-group"><label>Fichier</label><input type="file" id="doc-file"></div>
-        <button class="btn-primary" onclick="uploadDoc()">Uploader</button>
-      </div>
-      <table>
-        <thead><tr><th>Nom</th><th>Catégorie</th><th>Action</th></tr></thead>
-        <tbody id="docs-list"></tbody>
-      </table>
-    </div>
-
-    <!-- 6. Admin Panel -->
-    <div id="section-admin" class="content-section">
-      <h3>Administration des membres</h3>
-      <div class="card" style="margin: 1rem 0; max-width: 500px;">
-        <h4>Ajouter un nouveau membre au groupe</h4>
-        <div class="form-group"><label>Adresse Email</label><input type="email" id="new-user-email"></div>
-        <div class="form-group"><label>Mot de passe provisoire</label><input type="password" id="new-user-pass"></div>
-        <div class="form-group"><label>Rôle</label>
-          <select id="new-user-role">
-            <option value="member">Membre du groupe</option>
-            <option value="admin">Administrateur</option>
-          </select>
-        </div>
-        <button class="btn-primary" onclick="createUserByAdmin()">Créer l'utilisateur</button>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-song')">Annuler</button>
+        <button class="btn btn-primary" onclick="closeModal('modal-add-song')">Enregistrer</button>
       </div>
     </div>
   </div>
 
+  <!-- JavaScript Logic -->
   <script>
-    function showSection(id) {
-      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-      document.getElementById(`section-${id}`).classList.add('active');
-      
+    // Navigation Tabs Switcher
+    function switchTab(viewId, element) {
+      document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+
+      const targetView = document.getElementById('view-' + viewId);
+      if (targetView) targetView.classList.add('active');
+      if (element) element.classList.add('active');
+
+      // Update Header Text dynamically
       const titles = {
-        agenda: "Agenda & Répétitions",
-        songs: "Répertoire des Morceaux",
-        workflow: "Suivi & Mixage",
-        chat: "Espace Chat",
-        docs: "Documents & Presse",
-        admin: "Administration"
+        'dashboard': { title: 'Tableau de Bord', sub: 'Suivi global de l\'avancement des productions & travaux du groupe.' },
+        'mix': { title: 'Suivi & Mixage Audio', sub: 'Suivi détaillé des prises de voix, claviers, guitares et finalisation du mix.' },
+        'morceaux': { title: 'Répertoire & Titres', sub: 'Liste complète des morceaux, tempos, tonalités et maquettes.' },
+        'agenda': { title: 'Agenda & Concerts', sub: 'Dates de répétitions, balances et concerts à venir.' },
+        'chat': { title: 'Espace Chat', sub: 'Messagerie instantanée interne du groupe.' },
+        'docs': { title: 'Documents & Presse', sub: 'Fiches techniques, contrats et visuels officiels.' },
+        'admin': { title: 'Espace Administration', sub: 'Gestion des rôles et des accès Firebase.' }
       };
-      document.getElementById('section-title').innerText = titles[id] || "";
+
+      if (titles[viewId]) {
+        document.getElementById('view-title').textContent = titles[viewId].title;
+        document.getElementById('view-subtitle').textContent = titles[viewId].sub;
+      }
     }
+
+    // Modal Manager
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    // Logout Functionality
+    function logout() {
+      if (confirm("Voulez-vous vraiment vous déconnecter ?")) {
+        window.location.reload();
+      }
+    }
+
+    // Chart.js Graphs Initialization
+    let progressChart, mixDoughnutChart;
+
+    function initCharts() {
+      // Bar Chart: Pole Progress
+      const ctxProgress = document.getElementById('progressChart').getContext('2d');
+      progressChart = new Chart(ctxProgress, {
+        type: 'bar',
+        data: {
+          labels: ['Mixage & Master', 'Compositions', 'Communication', 'Répétitions', 'Logistique'],
+          datasets: [{
+            label: 'Avancement (%)',
+            data: [68, 92, 45, 80, 60],
+            backgroundColor: [
+              '#E11D48', // Mix
+              '#7C3AED', // Comp
+              '#0284C7', // Comm
+              '#059669', // Prep
+              '#D97706'  // Log
+            ],
+            borderRadius: 8
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: 100,
+              ticks: { callback: value => value + '%' }
+            }
+          }
+        }
+      });
+
+      // Doughnut Chart: Mix Status
+      const ctxDoughnut = document.getElementById('mixDoughnutChart').getContext('2d');
+      mixDoughnutChart = new Chart(ctxDoughnut, {
+        type: 'doughnut',
+        data: {
+          labels: ['Masterisé', 'En Mixage', 'Maquette / Idée'],
+          datasets: [{
+            data: [5, 4, 3],
+            backgroundColor: ['#059669', '#E11D48', '#CBD5E1'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          },
+          cutout: '70%'
+        }
+      });
+    }
+
+    function refreshCharts() {
+      if (progressChart) progressChart.update();
+      if (mixDoughnutChart) mixDoughnutChart.update();
+    }
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      initCharts();
+    });
   </script>
 </body>
 </html>
