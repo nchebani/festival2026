@@ -14,7 +14,7 @@
   
   <!-- Chart.js for Pro Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- STREAMING_CHUNK:Styling layout, theme design tokens, animations, and components... -->
+  
   <style>
     :root {
       --bg-main: #F4F6F9;
@@ -202,16 +202,39 @@
       background: #FEE2E2;
       color: #991B1B;
     }
+    .user-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .action-icon-btn {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px;
+      border-radius: 6px;
+      transition: all 0.2s ease;
+      font-size: 14px;
+    }
+    .action-icon-btn:hover {
+      background: #E2E8F0;
+      color: var(--text-dark);
+    }
+    .action-icon-btn.logout:hover {
+      background: #FEE2E2;
+      color: #DC2626;
+    }
+
     /* ================= MAIN CONTENT ================= */
     main {
       flex: 1;
       overflow-y: auto;
-      padding: 28px 36px 100px 36px; /* extra bottom padding for persistent audio player */
+      padding: 28px 36px 100px 36px;
       display: flex;
       flex-direction: column;
       gap: 24px;
     }
-    /* Top Bar Header */
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -254,7 +277,6 @@
       font-size: 11px;
       font-weight: 700;
     }
-    /* Views */
     .view-content {
       display: none;
       flex-direction: column;
@@ -268,7 +290,6 @@
       from { opacity: 0; transform: translateY(4px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    /* Quick KPI Stats Row */
     .kpi-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
@@ -317,7 +338,6 @@
       font-weight: 600;
       margin-top: 2px;
     }
-    /* Charts Section */
     .charts-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -347,7 +367,6 @@
       font-size: 12px;
       color: var(--text-muted);
     }
-    /* Chantiers & Activity Feeds */
     .two-cols {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -388,7 +407,6 @@
       color: var(--text-muted);
       margin-top: 2px;
     }
-    /* Chantiers (Hebdo / Mensuel) Cards */
     .chantier-card {
       background: white;
       border-radius: var(--radius-md);
@@ -416,7 +434,6 @@
       font-size: 14px;
       color: var(--text-dark);
     }
-    /* Tables Style (Suivi Mixage & Morceaux) */
     .data-card {
       background: white;
       border-radius: var(--radius-lg);
@@ -466,7 +483,7 @@
     .status-done { background: #D1FAE5; color: #047857; }
     .status-progress { background: #FEF3C7; color: #B45309; }
     .status-todo { background: #F1F5F9; color: #475569; }
-    /* Action Buttons */
+    
     .btn {
       display: inline-flex;
       align-items: center;
@@ -506,7 +523,6 @@
       font-size: 11px;
       border-radius: 6px;
     }
-    /* Filter pills */
     .filter-group {
       display: flex;
       align-items: center;
@@ -527,7 +543,6 @@
       color: white;
       border-color: var(--brand-red);
     }
-    /* Chat View */
     .chat-container {
       background: white;
       border-radius: var(--radius-lg);
@@ -585,7 +600,6 @@
       outline: none;
       font-size: 13px;
     }
-    /* Modal Styling */
     .modal-overlay {
       position: fixed;
       inset: 0;
@@ -631,7 +645,6 @@
     .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
       border-color: var(--brand-red);
     }
-    /* Global Persistent Audio Player */
     .global-audio-player {
       position: fixed;
       bottom: 0;
@@ -723,7 +736,6 @@
 </head>
 <body>
   <!-- ================= SIDEBAR ================= -->
-  <!-- STREAMING_CHUNK:Rendering navigation sidebar & profile status... -->
   <aside>
     <div>
       <div class="brand-logo">
@@ -766,7 +778,7 @@
         </li>
       </ul>
     </div>
-    <!-- User Profile Footer -->
+    <!-- User Profile Footer with Logout Button -->
     <div class="user-card">
       <div class="user-info">
         <div class="avatar" id="user-avatar">N</div>
@@ -776,15 +788,19 @@
           <span class="role-badge admin" id="user-role-display">ADMINISTRATEUR</span>
         </div>
       </div>
-      <button class="logout-btn" style="background:transparent; border:none; color:#EF4444; cursor:pointer;" title="Inverser Rôle (Test Admin/User)" onclick="toggleUserRole()">
-        <i class="fa-solid fa-user-shield"></i>
-      </button>
+      <div class="user-actions">
+        <button class="action-icon-btn" title="Inverser Rôle (Test Admin/User)" onclick="toggleUserRole()">
+          <i class="fa-solid fa-user-shield"></i>
+        </button>
+        <button class="action-icon-btn logout" title="Déconnexion" onclick="logoutUser()">
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </button>
+      </div>
     </div>
   </aside>
+
   <!-- ================= MAIN CONTENT AREA ================= -->
-  <!-- STREAMING_CHUNK:Rendering main layout and dashboard views... -->
   <main>
-    <!-- Top Bar Header -->
     <div class="top-header">
       <div class="page-title">
         <h1 id="view-title">Tableau de Bord</h1>
@@ -799,9 +815,9 @@
         </div>
       </div>
     </div>
-    <!-- ================= VIEW 1: DASHBOARD ================= -->
+
+    <!-- VIEW 1: DASHBOARD -->
     <section id="view-dashboard" class="view-content active">
-      <!-- KPI Metrics -->
       <div class="kpi-grid">
         <div class="kpi-card">
           <div class="kpi-icon" style="background: #FFE4E6; color: var(--col-mix);">
@@ -844,7 +860,7 @@
           </div>
         </div>
       </div>
-      <!-- Charts Section -->
+
       <div class="charts-grid">
         <div class="chart-box">
           <div class="box-header">
@@ -862,7 +878,7 @@
           <div class="box-header">
             <div class="box-title">
               <h3>Statut des Mixes</h3>
-              <p>Répartition globale des 12 titres</p>
+              <p>Répartition globale des titres</p>
             </div>
           </div>
           <div style="height: 260px; display: flex; align-items: center; justify-content: center;">
@@ -870,9 +886,8 @@
           </div>
         </div>
       </div>
-      <!-- Feed d'Activités Récents & Rappel Priorités -->
+
       <div class="two-cols">
-        <!-- Live Activity Stream -->
         <div class="chart-box">
           <div class="box-header">
             <div class="box-title">
@@ -880,11 +895,8 @@
               <p>Historique direct des interventions des membres du groupe</p>
             </div>
           </div>
-          <div class="feed-list" id="activity-feed-container">
-            <!-- Dynamic Feed Items -->
-          </div>
+          <div class="feed-list" id="activity-feed-container"></div>
         </div>
-        <!-- Rappel des Chantiers en cours -->
         <div class="chart-box">
           <div class="box-header">
             <div class="box-title">
@@ -893,14 +905,12 @@
             </div>
             <button class="btn btn-primary btn-sm" onclick="switchTab('chantiers', null)"><i class="fa-solid fa-arrow-right"></i> Voir Tout</button>
           </div>
-          <div id="urgent-chantiers-summary">
-            <!-- Dynamic Urgent Cards -->
-          </div>
+          <div id="urgent-chantiers-summary"></div>
         </div>
       </div>
     </section>
-    <!-- ================= VIEW 2: CHANTIERS (HEBDO / MENSUEL) ================= -->
-    <!-- STREAMING_CHUNK:Rendering Chantiers & Suivi Hebdomadaire section... -->
+
+    <!-- VIEW 2: CHANTIERS -->
     <section id="view-chantiers" class="view-content">
       <div class="box-header">
         <div class="box-title">
@@ -909,24 +919,21 @@
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-add-chantier')"><i class="fa-solid fa-plus"></i> Nouveau Chantier</button>
       </div>
-      <!-- Filters Row -->
       <div class="filter-group">
         <button class="filter-btn active" onclick="filterChantiers('all', this)">Tous</button>
         <button class="filter-btn" onclick="filterChantiers('hebdo', this)">Hebdomadaire</button>
         <button class="filter-btn" onclick="filterChantiers('mensuel', this)">Mensuel</button>
         <button class="filter-btn" onclick="filterChantiers('urgent', this)">🚨 Urgents à finir</button>
       </div>
-      <div id="chantiers-list-container">
-        <!-- Dynamic Chantiers -->
-      </div>
+      <div id="chantiers-list-container"></div>
     </section>
-    <!-- ================= VIEW 3: SUIVI & MIXAGE ================= -->
-    <!-- STREAMING_CHUNK:Rendering Suivi & Mixage interactive table... -->
+
+    <!-- VIEW 3: SUIVI & MIXAGE -->
     <section id="view-mix" class="view-content">
       <div class="box-header">
         <div class="box-title">
           <h3>Tableau de Suivi des Titres & Mixage Audio</h3>
-          <p>Cliquez sur un statut ou le pourcentage pour mettre à jour les mixes en temps réel !</p>
+          <p>Mettez à jour les mixes en temps réel !</p>
         </div>
         <button class="btn btn-primary" onclick="openAddSongModal()"><i class="fa-solid fa-plus"></i> Nouveau Titre</button>
       </div>
@@ -944,20 +951,18 @@
                 <th>Actions Admin</th>
               </tr>
             </thead>
-            <tbody id="mix-table-body">
-              <!-- Dynamic Rows -->
-            </tbody>
+            <tbody id="mix-table-body"></tbody>
           </table>
         </div>
       </div>
     </section>
-    <!-- ================= VIEW 4: MORCEAUX & AUDIO ================= -->
-    <!-- STREAMING_CHUNK:Rendering Morceaux & Audio Media Library... -->
+
+    <!-- VIEW 4: MORCEAUX & AUDIO -->
     <section id="view-morceaux" class="view-content">
       <div class="box-header">
         <div class="box-title">
           <h3>Répertoire, Audio & Maquettes</h3>
-          <p>Écoutez les fichiers audio (MP3/WAV) directement ou téléchargez-les</p>
+          <p>Écoutez les fichiers audio directement ou téléchargez-les</p>
         </div>
         <div class="filter-group">
           <input type="text" id="song-search-input" class="chat-input" placeholder="🔍 Rechercher un morceau..." oninput="renderSongsTable()">
@@ -978,15 +983,13 @@
                 <th>Actions Admin</th>
               </tr>
             </thead>
-            <tbody id="songs-table-body">
-              <!-- Dynamic Rows -->
-            </tbody>
+            <tbody id="songs-table-body"></tbody>
           </table>
         </div>
       </div>
     </section>
-    <!-- ================= VIEW 5: AGENDA & SETLIST ================= -->
-    <!-- STREAMING_CHUNK:Rendering Agenda & Live Concert Setlist Manager... -->
+
+    <!-- VIEW 5: AGENDA & SETLIST -->
     <section id="view-agenda" class="view-content">
       <div class="box-header">
         <div class="box-title">
@@ -996,18 +999,14 @@
         <button class="btn btn-primary" onclick="openAddEventModal()"><i class="fa-solid fa-calendar-plus"></i> Ajouter Événement</button>
       </div>
       <div class="two-cols">
-        <!-- Calendar Events List -->
         <div class="chart-box">
           <div class="box-header">
             <div class="box-title">
               <h3>Événements à venir</h3>
             </div>
           </div>
-          <div id="events-list-container" class="feed-list">
-            <!-- Dynamic Events -->
-          </div>
+          <div id="events-list-container" class="feed-list"></div>
         </div>
-        <!-- Live Setlist Manager -->
         <div class="chart-box">
           <div class="box-header">
             <div class="box-title">
@@ -1016,45 +1015,39 @@
             </div>
             <button class="btn btn-secondary btn-sm" onclick="alert('Setlist sauvegardée pour le concert !')"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
           </div>
-          <div class="feed-list" id="setlist-items-container">
-            <!-- Dynamic Setlist items -->
-          </div>
+          <div class="feed-list" id="setlist-items-container"></div>
         </div>
       </div>
     </section>
-    <!-- ================= VIEW 6: CHAT ================= -->
-    <!-- STREAMING_CHUNK:Rendering Group Chat & Messaging Interface... -->
+
+    <!-- VIEW 6: CHAT -->
     <section id="view-chat" class="view-content">
       <div class="box-title">
         <h3>Espace de Discussion du Groupe ELIYAH</h3>
         <p>Échangez directement avec l'équipe sur les arrangements et le mix</p>
       </div>
       <div class="chat-container">
-        <div class="chat-messages" id="chat-messages-box">
-          <!-- Dynamic Chat Bubbles -->
-        </div>
+        <div class="chat-messages" id="chat-messages-box"></div>
         <div class="chat-input-area">
-          <input type="text" id="chat-text-input" class="chat-input" placeholder="Écrivez votre message à l'équipe..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+          <input type="text" id="chat-text-input" class="chat-input" placeholder="Écrivez votre message..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
           <button class="btn btn-primary" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
         </div>
       </div>
     </section>
-    <!-- ================= VIEW 7: DOCUMENTS & MEDIAS ================= -->
-    <!-- STREAMING_CHUNK:Rendering Documents & Media Files Manager... -->
+
+    <!-- VIEW 7: DOCUMENTS & MEDIAS -->
     <section id="view-docs" class="view-content">
       <div class="box-header">
         <div class="box-title">
           <h3>Documents, Fiches Techniques & Médias</h3>
-          <p>Téléchargez ou importez des documents (PDF, WAV, MP3, Vidéos MP4)</p>
+          <p>Téléchargez ou importez des documents (PDF, WAV, MP3, MP4)</p>
         </div>
         <button class="btn btn-primary" onclick="openModal('modal-add-doc')"><i class="fa-solid fa-upload"></i> Importer Document / Média</button>
       </div>
-      <div class="kpi-grid" id="docs-grid-container">
-        <!-- Dynamic Documents Cards -->
-      </div>
+      <div class="kpi-grid" id="docs-grid-container"></div>
     </section>
-    <!-- ================= VIEW 8: ADMIN ================= -->
-    <!-- STREAMING_CHUNK:Rendering Admin Management panel... -->
+
+    <!-- VIEW 8: ADMIN -->
     <section id="view-admin" class="view-content">
       <div class="box-header">
         <div class="box-title">
@@ -1074,16 +1067,14 @@
                 <th>Actions Admin</th>
               </tr>
             </thead>
-            <tbody id="admin-users-table">
-              <!-- Dynamic Admin Users -->
-            </tbody>
+            <tbody id="admin-users-table"></tbody>
           </table>
         </div>
       </div>
     </section>
   </main>
+
   <!-- ================= PERSISTENT AUDIO PLAYER ================= -->
-  <!-- STREAMING_CHUNK:Rendering Persistent Global Audio Player... -->
   <div class="global-audio-player">
     <div class="player-track-info">
       <div class="player-track-icon"><i class="fa-solid fa-compact-disc fa-spin-pulse" id="player-disc-icon" style="animation-play-state: paused;"></i></div>
@@ -1107,9 +1098,8 @@
       <input type="range" min="0" max="1" step="0.05" value="0.8" style="width: 70px; accent-color: var(--brand-red);" oninput="if(audioObj) audioObj.volume = this.value">
     </div>
   </div>
-  <!-- ================= MODALS ================= -->
-  <!-- STREAMING_CHUNK:Rendering Modals & Popups for CRUD actions... -->
-  <!-- Notification Connection Modal -->
+
+  <!-- MODALS -->
   <div class="modal-overlay" id="modal-conn-notif">
     <div class="modal-box">
       <div style="text-align: center; margin-bottom: 16px;">
@@ -1119,13 +1109,11 @@
         <h3 style="margin-top: 10px; font-weight: 800; font-size: 20px;">Récents Avancements du Groupe</h3>
         <p style="font-size: 13px; color: var(--text-muted);">Voici ce qui a changé depuis votre dernière connexion :</p>
       </div>
-      <div class="feed-list" id="conn-notif-list" style="margin-bottom: 20px;">
-        <!-- Dynamic Connection Digest -->
-      </div>
+      <div class="feed-list" id="conn-notif-list" style="margin-bottom: 20px;"></div>
       <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="closeModal('modal-conn-notif')">Compris, Accéder au Projet</button>
     </div>
   </div>
-  <!-- Edit Track Mix Progress Modal -->
+
   <div class="modal-overlay" id="modal-edit-mix">
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Éditer le Mixage : <span id="modal-mix-song-title" style="color: var(--brand-red);"></span></h3>
@@ -1173,7 +1161,7 @@
       </div>
     </div>
   </div>
-  <!-- Add Song Modal -->
+
   <div class="modal-overlay" id="modal-add-song">
     <div class="modal-box">
       <h3 id="song-modal-title" style="margin-bottom: 16px; font-weight: 800;">Nouveau Morceau / Titre</h3>
@@ -1203,7 +1191,7 @@
       </div>
     </div>
   </div>
-  <!-- Add Chantier Modal -->
+
   <div class="modal-overlay" id="modal-add-chantier">
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Nouveau Chantier / Tâche</h3>
@@ -1235,7 +1223,7 @@
       </div>
     </div>
   </div>
-  <!-- Add Document / Media Modal -->
+
   <div class="modal-overlay" id="modal-add-doc">
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Importer un Document / Média</h3>
@@ -1261,7 +1249,7 @@
       </div>
     </div>
   </div>
-  <!-- Add Event Modal -->
+
   <div class="modal-overlay" id="modal-add-event">
     <div class="modal-box">
       <h3 id="event-modal-title" style="margin-bottom: 16px; font-weight: 800;">Ajouter un Événement</h3>
@@ -1283,12 +1271,13 @@
       </div>
     </div>
   </div>
-  <!-- Firebase (Firestore) — stockage temps réel partagé -->
+
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
-  <!-- STREAMING_CHUNK:Javascript Application Engine & State management... -->
+
   <script>
-    /* ================= FIREBASE (FIRESTORE) SETUP ================= */
+    /* ================= FIREBASE SETUP ================= */
     const firebaseConfig = {
       apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
       authDomain: "live-hub-2026.firebaseapp.com",
@@ -1300,7 +1289,7 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const FieldValue = firebase.firestore.FieldValue;
+
     const songsCol = db.collection('songs');
     const chantiersCol = db.collection('chantiers');
     const eventsCol = db.collection('events');
@@ -1310,15 +1299,12 @@
     const setlistDocRef = db.collection('appState').doc('setlist');
 
     /* ================= APP STATE MANAGEMENT ================= */
-    // currentUser.role is kept live in sync with the matching document in the
-    // 'users' Firestore collection (matched by email) — see initFirebaseSync().
     let currentUser = {
       name: 'N. Chebani',
       email: 'nchebani@gmail.com',
-      role: 'admin' // 'admin' or 'user'
+      role: 'admin'
     };
-    // These arrays are populated in real time from Firestore via onSnapshot
-    // listeners (see initFirebaseSync below) — they are no longer edited directly.
+
     let songsData = [];
     let chantiersData = [];
     let documentsData = [];
@@ -1326,23 +1312,21 @@
     let chatData = [];
     let usersData = [];
     let setlistOrder = [];
-    // Activity feed stays local to this session (not persisted to Firestore)
     let activitiesData = [
       { id: 1, author: 'Lucas (Guitare)', text: 'a mis à jour la prise de guitare sur "Lumière dans l\'Ombre"', time: 'Aujourd\'hui à 14:20', icon: 'fa-guitar' },
       { id: 2, author: 'N. Chebani (Admin)', text: 'a ajusté le mixage global à 75% sur le Titre 02', time: 'Hier à 18:45', icon: 'fa-sliders' },
       { id: 3, author: 'Sarah (Voix)', text: 'a posé la seconde harmonie vocale sur "Souffle Nouveau"', time: '25 Sept. à 11:30', icon: 'fa-microphone' }
     ];
-    // Tracks whether a modal is in "edit" mode (holds the id being edited) or "add" mode (null)
+
     let editingSongId = null;
     let editingEventId = null;
-    // Audio Player State
     let audioObj = new Audio();
     let currentPlayingTrackId = null;
     let isPlaying = false;
+    let progressChartInstance = null;
+    let doughnutChartInstance = null;
 
-    /* Default data used ONLY once, to seed Firestore the very first time a
-       collection is found empty (fresh project). After that, everything lives
-       in Firestore and these are never used again. */
+    /* Default Data */
     const DEFAULT_SONGS = [
       { id: 1, title: '01. Prelude / Eil', key: 'Am', bpm: 120, duration: '04:15', mixPct: 100, guitar: 'Prise OK', clavier: 'Prise OK', voix: '3/3 Posées', status: 'Masterisé', fileUrl: '' },
       { id: 2, title: '02. Lumière dans l\'Ombre', key: 'D', bpm: 95, duration: '03:48', mixPct: 75, guitar: 'Prise OK', clavier: 'Prise OK', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' },
@@ -1371,89 +1355,16 @@
       { name: 'Sarah Voix', email: 'sarah@eliyah.band', role: 'user' }
     ];
 
-    /* ================= FIRESTORE SYNC ================= */
-    function seedCollectionIfEmpty(colRef, defaultItems, useAutoId = false) {
-      colRef.limit(1).get().then(snap => {
-        if (snap.empty && defaultItems.length > 0) {
-          const batch = db.batch();
-          defaultItems.forEach(item => {
-            const ref = useAutoId ? colRef.doc() : colRef.doc(String(item.id));
-            batch.set(ref, item);
-          });
-          batch.commit().catch(err => console.error('Erreur de seed Firestore :', err));
-        }
-      }).catch(err => console.error('Erreur de lecture Firestore :', err));
-    }
-    function seedSetlistIfEmpty() {
-      setlistDocRef.get().then(doc => {
-        if (!doc.exists) setlistDocRef.set({ order: DEFAULT_SETLIST_ORDER });
-      }).catch(err => console.error('Erreur de lecture Firestore (setlist) :', err));
-    }
-    function initFirebaseSync() {
-      seedCollectionIfEmpty(songsCol, DEFAULT_SONGS);
-      seedCollectionIfEmpty(chantiersCol, DEFAULT_CHANTIERS);
-      seedCollectionIfEmpty(documentsCol, DEFAULT_DOCUMENTS);
-      seedCollectionIfEmpty(eventsCol, DEFAULT_EVENTS);
-      seedCollectionIfEmpty(usersCol, DEFAULT_USERS, true);
-      seedSetlistIfEmpty();
-
-      songsCol.onSnapshot(snap => {
-        songsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
-        renderAll();
-        renderCharts();
-      }, err => console.error('Firestore (songs) :', err));
-
-      chantiersCol.onSnapshot(snap => {
-        chantiersData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
-        renderAll();
-      }, err => console.error('Firestore (chantiers) :', err));
-
-      documentsCol.onSnapshot(snap => {
-        documentsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
-        renderDocsGrid();
-      }, err => console.error('Firestore (documents) :', err));
-
-      eventsCol.onSnapshot(snap => {
-        eventsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
-        renderEventsList();
-        renderSetlist();
-      }, err => console.error('Firestore (events) :', err));
-
-      chatCol.onSnapshot(snap => {
-        chatData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
-        renderChat();
-      }, err => console.error('Firestore (chat) :', err));
-
-      setlistDocRef.onSnapshot(doc => {
-        setlistOrder = (doc.exists && Array.isArray(doc.data().order)) ? doc.data().order : [];
-        renderSetlist();
-      }, err => console.error('Firestore (setlist) :', err));
-
-      usersCol.onSnapshot(snap => {
-        usersData = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
-        renderAdminUsers();
-        // Keep this session's role in sync with what's set in Firestore for this email
-        const myProfile = usersData.find(u => u.email === currentUser.email);
-        if (myProfile && myProfile.role !== currentUser.role) {
-          currentUser.role = myProfile.role;
-          updateRoleBadge();
-          renderAll();
-        }
-      }, err => console.error('Firestore (users) :', err));
-    }
-
-    /* ================= INITIALIZATION & NAVIGATION ================= */
+    /* ================= INITIALIZATION & FIRESTORE SYNC ================= */
     window.addEventListener('DOMContentLoaded', () => {
-      renderAll();
       initCharts();
       initFirebaseSync();
 
-      // Connection Notification Modal Trigger
       setTimeout(() => {
         renderConnNotification();
         openModal('modal-conn-notif');
       }, 400);
-      // Audio Player Progress Listeners
+
       audioObj.addEventListener('timeupdate', () => {
         if (audioObj.duration) {
           document.getElementById('audio-seek-slider').max = audioObj.duration;
@@ -1467,20 +1378,121 @@
         updatePlayerUI();
       });
     });
+
+    function seedCollectionIfEmpty(colRef, defaultItems, useAutoId = false) {
+      colRef.limit(1).get().then(snap => {
+        if (snap.empty && defaultItems.length > 0) {
+          const batch = db.batch();
+          defaultItems.forEach(item => {
+            const ref = useAutoId ? colRef.doc() : colRef.doc(String(item.id));
+            batch.set(ref, item);
+          });
+          batch.commit().catch(err => console.error('Erreur seed :', err));
+        }
+      });
+    }
+
+    function seedSetlistIfEmpty() {
+      setlistDocRef.get().then(doc => {
+        if (!doc.exists) setlistDocRef.set({ order: DEFAULT_SETLIST_ORDER });
+      });
+    }
+
+    function initFirebaseSync() {
+      seedCollectionIfEmpty(songsCol, DEFAULT_SONGS);
+      seedCollectionIfEmpty(chantiersCol, DEFAULT_CHANTIERS);
+      seedCollectionIfEmpty(documentsCol, DEFAULT_DOCUMENTS);
+      seedCollectionIfEmpty(eventsCol, DEFAULT_EVENTS);
+      seedCollectionIfEmpty(usersCol, DEFAULT_USERS, true);
+      seedSetlistIfEmpty();
+
+      songsCol.onSnapshot(snap => {
+        songsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderAll();
+        renderCharts();
+      });
+
+      chantiersCol.onSnapshot(snap => {
+        chantiersData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderAll();
+      });
+
+      documentsCol.onSnapshot(snap => {
+        documentsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderDocsGrid();
+      });
+
+      eventsCol.onSnapshot(snap => {
+        eventsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderEventsList();
+        renderSetlist();
+      });
+
+      chatCol.onSnapshot(snap => {
+        chatData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderChat();
+      });
+
+      setlistDocRef.onSnapshot(doc => {
+        setlistOrder = (doc.exists && Array.isArray(doc.data().order)) ? doc.data().order : [];
+        renderSetlist();
+      });
+
+      usersCol.onSnapshot(snap => {
+        usersData = snap.docs.map(d => ({ docId: d.id, ...d.data() }));
+        renderAdminUsers();
+        const myProfile = usersData.find(u => u.email === currentUser.email);
+        if (myProfile && myProfile.role !== currentUser.role) {
+          currentUser.role = myProfile.role;
+          updateRoleBadge();
+          renderAll();
+        }
+      });
+    }
+
+    /* ================= LOGOUT & ROLE FUNCTIONS ================= */
+    function logoutUser() {
+      if (confirm('Voulez-vous vraiment vous déconnecter de l\'application ?')) {
+        alert('Vous avez été déconnecté avec succès.');
+        window.location.reload();
+      }
+    }
+
+    function toggleUserRole() {
+      const newRole = currentUser.role === 'admin' ? 'user' : 'admin';
+      const myProfile = usersData.find(u => u.email === currentUser.email);
+      if (myProfile) {
+        usersCol.doc(myProfile.docId).update({ role: newRole });
+      } else {
+        usersCol.add({ name: currentUser.name, email: currentUser.email, role: newRole });
+      }
+      currentUser.role = newRole;
+      updateRoleBadge();
+      renderAll();
+    }
+
+    function updateRoleBadge() {
+      const roleDisplay = document.getElementById('user-role-display');
+      roleDisplay.textContent = currentUser.role === 'admin' ? 'ADMINISTRATEUR' : 'MEMBRE GROUPE';
+      roleDisplay.className = 'role-badge ' + (currentUser.role === 'admin' ? 'admin' : '');
+    }
+
+    /* ================= NAVIGATION ================= */
     function switchTab(viewId, element) {
       document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      
       const targetView = document.getElementById('view-' + viewId);
       if (targetView) targetView.classList.add('active');
+      
       if (element) {
         element.classList.add('active');
       } else {
-        // Auto highlight sidebar element
-        const navItems = document.querySelectorAll('.nav-item');
-        navItems.forEach(item => {
+        document.querySelectorAll('.nav-item').forEach(item => {
           if (item.getAttribute('onclick')?.includes(viewId)) item.classList.add('active');
         });
       }
+
       const titles = {
         'dashboard': { title: 'Tableau de Bord', sub: 'Suivi global de l\'avancement des productions & travaux du groupe.' },
         'chantiers': { title: 'Suivi des Chantiers & Rappels', sub: 'Gestion hebdomadaire et mensuelle des travaux du groupe.' },
@@ -1491,31 +1503,14 @@
         'docs': { title: 'Documents & Médias', sub: 'Téléchargement de fiches PDF, fichiers WAV et vidéos MP4.' },
         'admin': { title: 'Espace Administration', sub: 'Gestion des autorisations et droits de suppression.' }
       };
+
       if (titles[viewId]) {
         document.getElementById('view-title').textContent = titles[viewId].title;
         document.getElementById('view-subtitle').textContent = titles[viewId].sub;
       }
     }
-    function updateRoleBadge() {
-      const roleDisplay = document.getElementById('user-role-display');
-      roleDisplay.textContent = currentUser.role === 'admin' ? 'ADMINISTRATEUR' : 'MEMBRE GROUPE';
-      roleDisplay.className = 'role-badge ' + (currentUser.role === 'admin' ? 'admin' : '');
-    }
-    function toggleUserRole() {
-      const newRole = currentUser.role === 'admin' ? 'user' : 'admin';
-      const myProfile = usersData.find(u => u.email === currentUser.email);
-      if (myProfile) {
-        usersCol.doc(myProfile.docId).update({ role: newRole });
-      } else {
-        usersCol.add({ name: currentUser.name, email: currentUser.email, role: newRole });
-      }
-      // Optimistic local update for instant feedback; the users listener above
-      // will confirm/sync it a moment later from Firestore.
-      currentUser.role = newRole;
-      updateRoleBadge();
-      renderAll();
-    }
-    /* ================= RENDER FUNCTIONS ================= */
+
+    /* ================= RENDERING ================= */
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
@@ -1529,16 +1524,19 @@
       renderAdminUsers();
       updateKPIMetrics();
     }
+
     function updateKPIMetrics() {
       const totalSongs = songsData.length;
       const mixedSongs = songsData.filter(s => s.mixPct >= 100).length;
       const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (totalSongs || 1));
+      
       document.getElementById('kpi-mix-pct').textContent = avgMix + '%';
       document.getElementById('kpi-mix-count').textContent = `${mixedSongs} / ${totalSongs} Titres terminés`;
+      
       const urgentCount = chantiersData.filter(c => c.urgent === 'urgent' && !c.done).length;
       document.getElementById('urgent-count-badge').textContent = urgentCount;
     }
-    /* STREAMING_CHUNK:Rendering Dashboard Feeds and Chantiers Cards... */
+
     function renderActivityFeed() {
       const container = document.getElementById('activity-feed-container');
       container.innerHTML = activitiesData.map(act => `
@@ -1551,6 +1549,7 @@
         </div>
       `).join('');
     }
+
     function renderConnNotification() {
       const container = document.getElementById('conn-notif-list');
       container.innerHTML = activitiesData.map(act => `
@@ -1563,6 +1562,7 @@
         </div>
       `).join('');
     }
+
     function renderUrgentChantiersSummary() {
       const container = document.getElementById('urgent-chantiers-summary');
       const urgents = chantiersData.filter(c => c.urgent === 'urgent' && !c.done);
@@ -1581,6 +1581,7 @@
         </div>
       `).join('');
     }
+
     function filterChantiers(type, btnEl) {
       const group = btnEl.closest('.filter-group');
       group.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
@@ -1594,6 +1595,7 @@
       if (filter === 'hebdo') filtered = chantiersData.filter(c => c.type === 'hebdo');
       if (filter === 'mensuel') filtered = chantiersData.filter(c => c.type === 'mensuel');
       if (filter === 'urgent') filtered = chantiersData.filter(c => c.urgent === 'urgent');
+
       container.innerHTML = filtered.map(c => `
         <div class="chantier-card ${c.urgent === 'urgent' ? 'urgent' : 'normal'}">
           <div class="chantier-header">
@@ -1608,12 +1610,40 @@
           </div>
           <div style="font-size: 12px; color: var(--text-muted); display:flex; justify-content:space-between; margin-top:8px;">
             <span><i class="fa-solid fa-user-gear"></i> Responsables : <strong>${c.assign}</strong></span>
-            <span>${c.done ? '<strong style="color:#047857;">Completed</strong>' : 'In Progress'}</span>
+            <span>${c.done ? '<strong style="color:#047857;">Terminé</strong>' : 'En cours'}</span>
           </div>
         </div>
       `).join('');
     }
-    /* STREAMING_CHUNK:Rendering Suivi Mixage Interactive Table... */
+
+    function toggleChantierDone(id) {
+      const item = chantiersData.find(c => c.id === id);
+      if (item) {
+        chantiersCol.doc(String(id)).update({ done: !item.done });
+      }
+    }
+
+    function deleteChantier(id) {
+      if (confirm('Supprimer ce chantier ?')) {
+        chantiersCol.doc(String(id)).delete();
+      }
+    }
+
+    function addNewChantier() {
+      const title = document.getElementById('new-chantier-title').value.trim();
+      if (!title) return alert('Veuillez remplir le titre.');
+      const type = document.getElementById('new-chantier-type').value;
+      const urgent = document.getElementById('new-chantier-urgent').value;
+      const assign = document.getElementById('new-chantier-assign').value.trim() || 'Non assigné';
+
+      const newId = Date.now();
+      chantiersCol.doc(String(newId)).set({
+        id: newId, title, type, urgent, assign, done: false
+      });
+      closeModal('modal-add-chantier');
+      document.getElementById('new-chantier-title').value = '';
+    }
+
     function renderMixTable() {
       const tbody = document.getElementById('mix-table-body');
       tbody.innerHTML = songsData.map(s => `
@@ -1632,12 +1662,13 @@
           </td>
           <td><span class="status-pill ${s.status === 'Masterisé' ? 'status-done' : (s.status === 'En Mixage' ? 'status-progress' : 'status-todo')}">${s.status}</span></td>
           <td>
-            <button class="btn btn-secondary btn-sm" onclick="openEditMixModal(${s.id})"><i class="fa-solid fa-pen"></i> Éditer Mix</button>
+            <button class="btn btn-secondary btn-sm" onclick="openEditMixModal(${s.id})"><i class="fa-solid fa-pen"></i> Éditer</button>
             ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </td>
         </tr>
       `).join('');
     }
+
     function openEditMixModal(id) {
       const song = songsData.find(s => s.id === id);
       if (!song) return;
@@ -1650,6 +1681,7 @@
       document.getElementById('edit-mix-status').value = song.status;
       openModal('modal-edit-mix');
     }
+
     function saveMixProgress() {
       const id = parseInt(document.getElementById('edit-mix-song-id').value);
       const song = songsData.find(s => s.id === id);
@@ -1659,247 +1691,47 @@
         const clavier = document.getElementById('edit-mix-clavier').value;
         const voix = document.getElementById('edit-mix-voix').value;
         const status = document.getElementById('edit-mix-status').value;
+
         songsCol.doc(String(id)).update({ mixPct, guitar, clavier, voix, status });
-        // Log Activity (kept local to this session, not persisted)
         activitiesData.unshift({
           id: Date.now(),
           author: `${currentUser.name} (${currentUser.role.toUpperCase()})`,
-          text: `a mis à jour le mix de "${song.title}" à ${mixPct}%`,
+          text: `a mis à jour le mixage du titre "${song.title}" (${mixPct}%)`,
           time: 'À l\'instant',
           icon: 'fa-sliders'
         });
         closeModal('modal-edit-mix');
-        renderActivityFeed();
       }
     }
-    /* STREAMING_CHUNK:Rendering Songs & Audio Library Table... */
+
     function renderSongsTable() {
       const tbody = document.getElementById('songs-table-body');
       const search = document.getElementById('song-search-input')?.value.toLowerCase() || '';
       const filtered = songsData.filter(s => s.title.toLowerCase().includes(search));
+
       tbody.innerHTML = filtered.map(s => `
         <tr>
           <td><strong>${s.title}</strong></td>
-          <td>${s.key}</td>
+          <td><span class="status-pill status-todo">${s.key}</span></td>
           <td>${s.bpm} BPM</td>
           <td>${s.duration}</td>
           <td>
-            <button class="btn btn-secondary btn-sm" onclick="playSongTrack(${s.id})">
+            <button class="btn btn-secondary btn-sm" onclick="playTrack(${s.id})">
               <i class="fa-solid ${currentPlayingTrackId === s.id && isPlaying ? 'fa-pause' : 'fa-play'}"></i> 
-              ${currentPlayingTrackId === s.id && isPlaying ? 'En lecture' : 'Écouter'}
+              ${currentPlayingTrackId === s.id && isPlaying ? 'Pause' : 'Écouter'}
             </button>
           </td>
           <td>
-            <button class="btn btn-secondary btn-sm" onclick="downloadSongFile('${s.title}')">
-              <i class="fa-solid fa-download"></i> Télécharger WAV
-            </button>
+            ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> DL</a>` : '<span style="font-size:11px; color:var(--text-light);">Aucun fichier</span>'}
           </td>
           <td>
-            ${currentUser.role === 'admin' ? `
-              <button class="btn btn-secondary btn-sm" onclick="editSong(${s.id})"><i class="fa-solid fa-pen"></i> Modifier</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i> Supprimer</button>
-            ` : '<span style="color:var(--text-muted); font-size:11px;">Lecture seule</span>'}
+            <button class="btn btn-secondary btn-sm" onclick="openEditSongModal(${s.id})"><i class="fa-solid fa-pen"></i></button>
+            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </td>
         </tr>
       `).join('');
     }
-    function renderEventsList() {
-      const container = document.getElementById('events-list-container');
-      container.innerHTML = eventsData.map(e => `
-        <div class="feed-item" style="justify-content: space-between;">
-          <div>
-            <div style="font-weight:700; font-size:14px; color:var(--text-dark);">${e.title}</div>
-            <div style="font-size:12px; color:var(--brand-red); font-weight:600; margin-top:2px;"><i class="fa-solid fa-calendar-day"></i> ${e.date}</div>
-            <div style="font-size:11px; color:var(--text-muted); margin-top:2px;"><i class="fa-solid fa-location-dot"></i> ${e.location}</div>
-          </div>
-          ${currentUser.role === 'admin' ? `
-            <div style="display:flex; gap:6px;">
-              <button class="btn btn-secondary btn-sm" onclick="editEvent(${e.id})"><i class="fa-solid fa-pen"></i></button>
-              <button class="btn btn-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash"></i></button>
-            </div>
-          ` : ''}
-        </div>
-      `).join('');
-    }
-    function durationToSeconds(dur) {
-      const parts = (dur || '0:00').split(':').map(n => parseInt(n) || 0);
-      return parts.length === 2 ? parts[0] * 60 + parts[1] : 0;
-    }
-    function updateSetlistTotalTime() {
-      const totalSeconds = setlistOrder
-        .map(id => songsData.find(s => s.id === id))
-        .filter(Boolean)
-        .reduce((sum, s) => sum + durationToSeconds(s.duration), 0);
-      const mins = Math.round(totalSeconds / 60);
-      const el = document.getElementById('setlist-total-time');
-      if (el) el.textContent = mins + ' min';
-    }
-    function renderSetlist() {
-      const container = document.getElementById('setlist-items-container');
-      if (!container) return;
-      // Only display entries that still have a matching song (stale ids are cleaned
-      // up automatically next time the setlist is written to, e.g. on next move/add).
-      const validOrder = setlistOrder.filter(id => songsData.some(s => s.id === id));
-      const isAdmin = currentUser.role === 'admin';
-      container.innerHTML = validOrder.map((id, idx) => {
-        const s = songsData.find(sg => sg.id === id);
-        if (!s) return '';
-        return `
-        <div class="feed-item" style="align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <span style="font-weight:800; color:var(--brand-red); font-size:14px;">#${idx + 1}</span>
-            <div>
-              <div style="font-weight:700;">${s.title}</div>
-              <div style="font-size:11px; color:var(--text-muted);">${s.key} • ${s.bpm} BPM</div>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <span class="status-pill status-todo">${s.duration}</span>
-            ${isAdmin ? `
-              <div style="display:flex; gap:4px;">
-                <button class="btn btn-secondary btn-sm" title="Monter" onclick="moveSetlistItem(${s.id}, -1)" ${idx === 0 ? 'disabled' : ''}><i class="fa-solid fa-arrow-up"></i></button>
-                <button class="btn btn-secondary btn-sm" title="Descendre" onclick="moveSetlistItem(${s.id}, 1)" ${idx === validOrder.length - 1 ? 'disabled' : ''}><i class="fa-solid fa-arrow-down"></i></button>
-                <button class="btn btn-danger btn-sm" title="Retirer du Setlist" onclick="removeFromSetlist(${s.id})"><i class="fa-solid fa-xmark"></i></button>
-              </div>
-            ` : ''}
-          </div>
-        </div>
-      `;
-      }).join('');
-      if (isAdmin) {
-        const available = songsData.filter(s => !validOrder.includes(s.id));
-        container.innerHTML += `
-          <div class="feed-item" style="align-items:center; gap:8px;">
-            ${available.length > 0 ? `
-              <select id="setlist-add-select" class="chat-input" style="flex:1;">
-                ${available.map(s => `<option value="${s.id}">${s.title}</option>`).join('')}
-              </select>
-              <button class="btn btn-primary btn-sm" onclick="addToSetlist()"><i class="fa-solid fa-plus"></i> Ajouter au Setlist</button>
-            ` : `<span style="color:var(--text-muted); font-size:12px;">Tous les morceaux du répertoire sont déjà dans le setlist.</span>`}
-          </div>
-        `;
-      }
-      updateSetlistTotalTime();
-    }
-    function moveSetlistItem(id, direction) {
-      const idx = setlistOrder.indexOf(id);
-      const newIdx = idx + direction;
-      if (idx === -1 || newIdx < 0 || newIdx >= setlistOrder.length) return;
-      const newOrder = [...setlistOrder];
-      [newOrder[idx], newOrder[newIdx]] = [newOrder[newIdx], newOrder[idx]];
-      setlistDocRef.set({ order: newOrder }, { merge: true });
-    }
-    function removeFromSetlist(id) {
-      setlistDocRef.set({ order: setlistOrder.filter(sid => sid !== id) }, { merge: true });
-    }
-    function addToSetlist() {
-      const select = document.getElementById('setlist-add-select');
-      if (!select || !select.value) return;
-      const id = parseInt(select.value);
-      setlistDocRef.set({ order: [...setlistOrder, id] }, { merge: true });
-    }
-    function renderChat() {
-      const container = document.getElementById('chat-messages-box');
-      container.innerHTML = chatData.map(c => `
-        <div class="chat-bubble ${c.author === currentUser.name ? 'sent' : 'received'}">
-          <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${c.author}</div>
-          <div>${c.text}</div>
-          <div class="meta">
-            <span>${c.time}</span>
-            ${currentUser.role === 'admin' ? `<i class="fa-solid fa-trash" style="cursor:pointer;" title="Supprimer Message" onclick="deleteChatMessage(${c.id})"></i>` : ''}
-          </div>
-        </div>
-      `).join('');
-      container.scrollTop = container.scrollHeight;
-    }
-    function sendChatMessage() {
-      const input = document.getElementById('chat-text-input');
-      const text = input.value.trim();
-      if (!text) return;
-      const id = Date.now();
-      chatCol.doc(String(id)).set({
-        id: id,
-        author: currentUser.name,
-        text: text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
-      input.value = '';
-    }
-    function renderDocsGrid() {
-      const container = document.getElementById('docs-grid-container');
-      container.innerHTML = documentsData.map(d => `
-        <div class="kpi-card" style="justify-content: space-between;">
-          <div style="display:flex; align-items:center; gap:14px;">
-            <i class="fa-solid ${d.icon}" style="font-size: 32px; color: ${d.color};"></i>
-            <div>
-              <h4 style="font-size: 14px; font-weight: 700; color:var(--text-dark);">${d.title}</h4>
-              <p style="font-size: 11px; color: var(--text-muted);">${d.desc}</p>
-            </div>
-          </div>
-          <div style="display:flex; align-items:center; gap:8px;">
-            <button class="btn btn-secondary btn-sm" onclick="downloadDocumentFile('${d.title}')"><i class="fa-solid fa-download"></i> Telecharger</button>
-            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteDocument(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
-          </div>
-        </div>
-      `).join('');
-    }
-    function renderAdminUsers() {
-      const tbody = document.getElementById('admin-users-table');
-      if (!tbody) return;
-      tbody.innerHTML = usersData.map(u => `
-        <tr>
-          <td><strong>${u.name}</strong></td>
-          <td>${u.email}</td>
-          <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${u.role.toUpperCase()}</span></td>
-          <td>
-            <select class="chat-input" style="padding:4px 8px; font-size:12px;" onchange="updateUserRole('${u.docId}', this.value)">
-              <option value="user" ${u.role === 'user' ? 'selected' : ''}>Membre Groupe</option>
-              <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Administrateur</option>
-            </select>
-          </td>
-          <td><button class="btn btn-danger btn-sm" onclick="removeUser('${u.docId}')"><i class="fa-solid fa-user-xmark"></i> Retirer</button></td>
-        </tr>
-      `).join('');
-    }
-    function updateUserRole(docId, newRole) {
-      usersCol.doc(docId).update({ role: newRole });
-    }
-    function removeUser(docId) {
-      if (confirm('Retirer ce membre du groupe ?')) {
-        usersCol.doc(docId).delete();
-      }
-    }
-    /* STREAMING_CHUNK:CRUD Actions & Media Downloads Logic... */
-    function toggleChantierDone(id) {
-      const chantier = chantiersData.find(c => c.id === id);
-      if (chantier) {
-        chantiersCol.doc(String(id)).update({ done: !chantier.done });
-      }
-    }
-    function deleteChantier(id) {
-      if (confirm('Êtes-vous sûr de vouloir supprimer ce chantier ?')) {
-        chantiersCol.doc(String(id)).delete();
-      }
-    }
-    function deleteSong(id) {
-      if (confirm('Êtes-vous sûr de vouloir supprimer ce morceau du répertoire ?')) {
-        songsCol.doc(String(id)).delete();
-        setlistDocRef.set({ order: FieldValue.arrayRemove(id) }, { merge: true });
-      }
-    }
-    function deleteEvent(id) {
-      if (confirm('Supprimer cet événement de l\'agenda ?')) {
-        eventsCol.doc(String(id)).delete();
-      }
-    }
-    function deleteChatMessage(id) {
-      chatCol.doc(String(id)).delete();
-    }
-    function deleteDocument(id) {
-      if (confirm('Supprimer ce document du kit média ?')) {
-        documentsCol.doc(String(id)).delete();
-      }
-    }
+
     function openAddSongModal() {
       editingSongId = null;
       document.getElementById('song-modal-title').textContent = 'Nouveau Morceau / Titre';
@@ -1908,88 +1740,75 @@
       document.getElementById('new-song-key').value = '';
       document.getElementById('new-song-bpm').value = '';
       document.getElementById('new-song-duration').value = '';
+      document.getElementById('new-song-file').value = '';
       openModal('modal-add-song');
     }
-    function editSong(id) {
-      if (currentUser.role !== 'admin') return;
-      const s = songsData.find(sg => sg.id === id);
-      if (!s) return;
+
+    function openEditSongModal(id) {
+      const song = songsData.find(s => s.id === id);
+      if (!song) return;
       editingSongId = id;
-      document.getElementById('song-modal-title').textContent = 'Modifier le Morceau';
-      document.getElementById('song-modal-submit').textContent = 'Enregistrer les modifications';
-      document.getElementById('new-song-title').value = s.title;
-      document.getElementById('new-song-key').value = s.key;
-      document.getElementById('new-song-bpm').value = s.bpm;
-      document.getElementById('new-song-duration').value = s.duration;
+      document.getElementById('song-modal-title').textContent = 'Éditer le Morceau';
+      document.getElementById('song-modal-submit').textContent = 'Enregistrer';
+      document.getElementById('new-song-title').value = song.title;
+      document.getElementById('new-song-key').value = song.key;
+      document.getElementById('new-song-bpm').value = song.bpm;
+      document.getElementById('new-song-duration').value = song.duration;
+      document.getElementById('new-song-file').value = '';
       openModal('modal-add-song');
     }
+
     function saveSong() {
       const title = document.getElementById('new-song-title').value.trim();
-      const key = document.getElementById('new-song-key').value.trim() || 'Do maj';
+      if (!title) return alert('Veuillez entrer un titre.');
+      const key = document.getElementById('new-song-key').value.trim() || 'Am';
       const bpm = parseInt(document.getElementById('new-song-bpm').value) || 120;
-      const duration = document.getElementById('new-song-duration').value.trim();
-      if (!title) return alert('Veuillez saisir un titre !');
-      if (editingSongId !== null) {
-        const updates = { title: title, key: key, bpm: bpm };
-        if (duration) updates.duration = duration;
-        songsCol.doc(String(editingSongId)).update(updates);
-      } else {
-        const id = Date.now();
-        songsCol.doc(String(id)).set({
-          id: id,
-          title: title,
-          key: key,
-          bpm: bpm,
-          duration: duration || '03:45',
-          mixPct: 0,
-          guitar: 'À enregistrer',
-          clavier: 'À enregistrer',
-          voix: 'À enregistrer',
-          status: 'Maquette',
-          fileUrl: ''
-        });
-        setlistDocRef.set({ order: FieldValue.arrayUnion(id) }, { merge: true });
+      const duration = document.getElementById('new-song-duration').value.trim() || '03:30';
+      const fileInput = document.getElementById('new-song-file');
+
+      let fileUrl = '';
+      if (fileInput.files.length > 0) {
+        fileUrl = URL.createObjectURL(fileInput.files[0]);
       }
-      editingSongId = null;
+
+      if (editingSongId) {
+        const payload = { title, key, bpm, duration };
+        if (fileUrl) payload.fileUrl = fileUrl;
+        songsCol.doc(String(editingSongId)).update(payload);
+      } else {
+        const newId = Date.now();
+        songsCol.doc(String(newId)).set({
+          id: newId, title, key, bpm, duration,
+          mixPct: 0, guitar: 'À enregistrer', clavier: 'À enregistrer', voix: 'À enregistrer',
+          status: 'Maquette', fileUrl
+        });
+      }
       closeModal('modal-add-song');
     }
-    function addNewChantier() {
-      const title = document.getElementById('new-chantier-title').value.trim();
-      const type = document.getElementById('new-chantier-type').value;
-      const urgent = document.getElementById('new-chantier-urgent').value;
-      const assign = document.getElementById('new-chantier-assign').value.trim() || 'Groupe';
-      if (!title) return alert('Saisir le titre du chantier');
-      const id = Date.now();
-      chantiersCol.doc(String(id)).set({
-        id: id,
-        title: title,
-        type: type,
-        urgent: urgent,
-        assign: assign,
-        done: false
-      });
-      closeModal('modal-add-chantier');
+
+    function deleteSong(id) {
+      if (confirm('Supprimer définitivement ce morceau ?')) {
+        songsCol.doc(String(id)).delete();
+      }
     }
-    function addNewDocument() {
-      const title = document.getElementById('new-doc-title').value.trim();
-      const type = document.getElementById('new-doc-type').value;
-      if (!title) return alert('Saisir le nom du document');
-      const typeDetails = {
-        pdf: { icon: 'fa-file-pdf', color: '#E11D48', desc: 'Document PDF officiel' },
-        wav: { icon: 'fa-file-audio', color: '#0284C7', desc: 'Fichier Audio Master HD' },
-        video: { icon: 'fa-file-video', color: '#7C3AED', desc: 'Vidéo HD Live' }
-      };
-      const id = Date.now();
-      documentsCol.doc(String(id)).set({
-        id: id,
-        title: title,
-        type: type,
-        desc: typeDetails[type].desc,
-        icon: typeDetails[type].icon,
-        color: typeDetails[type].color
-      });
-      closeModal('modal-add-doc');
+
+    function renderEventsList() {
+      const container = document.getElementById('events-list-container');
+      container.innerHTML = eventsData.map(e => `
+        <div class="feed-item">
+          <div class="feed-item-icon" style="background:#FEF3C7; color:#D97706;"><i class="fa-solid fa-calendar-day"></i></div>
+          <div style="flex:1;">
+            <div style="font-weight:700;">${e.title}</div>
+            <div class="feed-time"><i class="fa-regular fa-clock"></i> ${e.date} • <strong>${e.location}</strong></div>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-secondary btn-sm" onclick="openEditEventModal(${e.id})"><i class="fa-solid fa-pen"></i></button>
+            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>
+        </div>
+      `).join('');
     }
+
     function openAddEventModal() {
       editingEventId = null;
       document.getElementById('event-modal-title').textContent = 'Ajouter un Événement';
@@ -1999,166 +1818,320 @@
       document.getElementById('new-event-location').value = '';
       openModal('modal-add-event');
     }
-    function editEvent(id) {
-      if (currentUser.role !== 'admin') return;
-      const e = eventsData.find(ev => ev.id === id);
-      if (!e) return;
+
+    function openEditEventModal(id) {
+      const ev = eventsData.find(e => e.id === id);
+      if (!ev) return;
       editingEventId = id;
-      document.getElementById('event-modal-title').textContent = 'Modifier l\'Événement';
-      document.getElementById('event-modal-submit').textContent = 'Enregistrer les modifications';
-      document.getElementById('new-event-title').value = e.title;
-      document.getElementById('new-event-date').value = e.date;
-      document.getElementById('new-event-location').value = e.location;
+      document.getElementById('event-modal-title').textContent = 'Éditer l\'Événement';
+      document.getElementById('event-modal-submit').textContent = 'Enregistrer';
+      document.getElementById('new-event-title').value = ev.title;
+      document.getElementById('new-event-date').value = ev.date;
+      document.getElementById('new-event-location').value = ev.location;
       openModal('modal-add-event');
     }
+
     function saveEvent() {
       const title = document.getElementById('new-event-title').value.trim();
-      const date = document.getElementById('new-event-date').value.trim();
-      const loc = document.getElementById('new-event-location').value.trim();
-      if (!title || !date) return alert('Saisir titre et date !');
-      if (editingEventId !== null) {
-        eventsCol.doc(String(editingEventId)).update({ title: title, date: date, location: loc });
+      if (!title) return alert('Titre obligatoire.');
+      const date = document.getElementById('new-event-date').value.trim() || 'À déterminer';
+      const location = document.getElementById('new-event-location').value.trim() || 'Studio';
+
+      if (editingEventId) {
+        eventsCol.doc(String(editingEventId)).update({ title, date, location });
       } else {
-        const id = Date.now();
-        eventsCol.doc(String(id)).set({ id: id, title: title, date: date, location: loc });
+        const newId = Date.now();
+        eventsCol.doc(String(newId)).set({ id: newId, title, date, location });
       }
-      editingEventId = null;
       closeModal('modal-add-event');
     }
-    /* Download HTML5 Blob Helper */
-    function downloadDocumentFile(filename) {
-      const content = "Fichier de test généré par ELIYAH App - " + filename;
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
+
+    function deleteEvent(id) {
+      if (confirm('Supprimer cet événement ?')) {
+        eventsCol.doc(String(id)).delete();
+      }
     }
-    function downloadSongFile(title) {
-      downloadDocumentFile(title.replace(/[^a-zA-Z0-9]/g, "_") + ".wav");
+
+    function renderSetlist() {
+      const container = document.getElementById('setlist-items-container');
+      let items = setlistOrder.map(id => songsData.find(s => s.id === id)).filter(Boolean);
+      
+      songsData.forEach(s => {
+        if (!items.find(i => i.id === s.id)) items.push(s);
+      });
+
+      container.innerHTML = items.map((s, idx) => `
+        <div class="feed-item" style="justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:12px;">
+            <span style="font-weight:800; color:var(--brand-red); width:20px;">#${idx + 1}</span>
+            <div>
+              <strong>${s.title}</strong>
+              <div class="feed-time">${s.duration} • Key: ${s.key} • Tempo: ${s.bpm} BPM</div>
+            </div>
+          </div>
+          <div style="display:flex; gap:4px;">
+            <button class="btn btn-secondary btn-sm" onclick="moveSetlistItem(${s.id}, -1)"><i class="fa-solid fa-arrow-up"></i></button>
+            <button class="btn btn-secondary btn-sm" onclick="moveSetlistItem(${s.id}, 1)"><i class="fa-solid fa-arrow-down"></i></button>
+          </div>
+        </div>
+      `).join('');
     }
-    /* ================= AUDIO PLAYER ENGINE ================= */
-    function playSongTrack(id) {
-      const song = songsData.find(s => s.id === id);
-      if (!song) return;
-      if (currentPlayingTrackId === id && isPlaying) {
-        audioObj.pause();
-        isPlaying = false;
+
+    function moveSetlistItem(songId, direction) {
+      let currentOrder = setlistOrder.length ? [...setlistOrder] : songsData.map(s => s.id);
+      const index = currentOrder.indexOf(songId);
+      if (index === -1) return;
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= currentOrder.length) return;
+
+      const temp = currentOrder[index];
+      currentOrder[index] = currentOrder[targetIndex];
+      currentOrder[targetIndex] = temp;
+
+      setlistDocRef.set({ order: currentOrder });
+    }
+
+    function renderChat() {
+      const box = document.getElementById('chat-messages-box');
+      if (!box) return;
+      box.innerHTML = chatData.map(c => `
+        <div class="chat-bubble ${c.sender === currentUser.name ? 'sent' : 'received'}">
+          <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${c.sender}</div>
+          <div>${c.text}</div>
+          <div class="meta"><span>${c.time}</span></div>
+        </div>
+      `).join('');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendChatMessage() {
+      const input = document.getElementById('chat-text-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const newId = Date.now();
+      chatCol.doc(String(newId)).set({
+        id: newId,
+        sender: currentUser.name,
+        text: text,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      });
+      input.value = '';
+    }
+
+    function renderDocsGrid() {
+      const container = document.getElementById('docs-grid-container');
+      container.innerHTML = documentsData.map(d => `
+        <div class="kpi-card" style="flex-direction:column; align-items:flex-start;">
+          <div style="display:flex; align-items:center; gap:12px; width:100%;">
+            <div class="kpi-icon" style="background:${d.color || '#E11D48'}20; color:${d.color || '#E11D48'};">
+              <i class="fa-solid ${d.icon || 'fa-file'}"></i>
+            </div>
+            <div style="overflow:hidden;">
+              <h4 style="white-space:nowrap; text-overflow:ellipsis; overflow:hidden;">${d.title}</h4>
+              <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">${d.desc}</p>
+            </div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:12px; border-top:1px solid #F1F5F9; padding-top:10px;">
+            <a href="#" class="btn btn-secondary btn-sm" onclick="alert('Téléchargement du fichier : ${d.title}')"><i class="fa-solid fa-download"></i> Télécharger</a>
+            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function addNewDocument() {
+      const title = document.getElementById('new-doc-title').value.trim();
+      if (!title) return alert('Titre requis.');
+      const type = document.getElementById('new-doc-type').value;
+
+      let icon = 'fa-file-pdf';
+      let color = '#E11D48';
+      if (type === 'wav') { icon = 'fa-file-audio'; color = '#0284C7'; }
+      if (type === 'video') { icon = 'fa-file-video'; color = '#7C3AED'; }
+
+      const newId = Date.now();
+      documentsCol.doc(String(newId)).set({
+        id: newId, title, type, desc: 'Fichier ajouté à la médiathèque', icon, color
+      });
+      closeModal('modal-add-doc');
+    }
+
+    function deleteDoc(id) {
+      if (confirm('Supprimer ce document ?')) {
+        documentsCol.doc(String(id)).delete();
+      }
+    }
+
+    function renderAdminUsers() {
+      const tbody = document.getElementById('admin-users-table');
+      if (!tbody) return;
+      tbody.innerHTML = usersData.map(u => `
+        <tr>
+          <td><strong>${u.name}</strong></td>
+          <td>${u.email}</td>
+          <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${u.role.toUpperCase()}</span></td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="toggleUserRoleInAdmin('${u.docId}', '${u.role}')">
+              Basculer en ${u.role === 'admin' ? 'Membre' : 'Admin'}
+            </button>
+          </td>
+          <td>
+            <button class="btn btn-danger btn-sm" onclick="deleteAdminUser('${u.docId}')"><i class="fa-solid fa-user-xmark"></i> Retirer</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function toggleUserRoleInAdmin(docId, currentRole) {
+      const newRole = currentRole === 'admin' ? 'user' : 'admin';
+      usersCol.doc(docId).update({ role: newRole });
+    }
+
+    function deleteAdminUser(docId) {
+      if (confirm('Retirer cet utilisateur ?')) {
+        usersCol.doc(docId).delete();
+      }
+    }
+
+    /* ================= AUDIO PLAYER ================= */
+    function playTrack(id) {
+      const track = songsData.find(s => s.id === id);
+      if (!track) return;
+
+      if (currentPlayingTrackId === id) {
+        togglePlay();
       } else {
         currentPlayingTrackId = id;
-        document.getElementById('player-track-title').textContent = song.title;
-        document.getElementById('player-track-sub').textContent = `${song.key} • ${song.bpm} BPM`;
+        document.getElementById('player-track-title').textContent = track.title;
+        document.getElementById('player-track-sub').textContent = `${track.bpm} BPM • Tonalité ${track.key}`;
         
-        // Demo Tone Generator for Audio Preview
-        audioObj.src = "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"; 
-        audioObj.play().catch(() => {});
-        isPlaying = true;
+        if (track.fileUrl) {
+          audioObj.src = track.fileUrl;
+          audioObj.play();
+          isPlaying = true;
+        } else {
+          alert('Aucun fichier audio lié à ce morceau.');
+          isPlaying = false;
+        }
+        updatePlayerUI();
       }
-      updatePlayerUI();
-      renderSongsTable();
     }
+
     function togglePlay() {
-      if (!currentPlayingTrackId && songsData.length > 0) {
-        playSongTrack(songsData[0].id);
-        return;
-      }
+      if (!currentPlayingTrackId) return;
       if (isPlaying) {
         audioObj.pause();
         isPlaying = false;
       } else {
-        audioObj.play().catch(() => {});
+        audioObj.play();
         isPlaying = true;
       }
       updatePlayerUI();
+    }
+
+    function updatePlayerUI() {
+      const icon = document.getElementById('player-play-icon');
+      const disc = document.getElementById('player-disc-icon');
+      if (isPlaying) {
+        icon.className = 'fa-solid fa-pause';
+        disc.style.animationPlayState = 'running';
+      } else {
+        icon.className = 'fa-solid fa-play';
+        disc.style.animationPlayState = 'paused';
+      }
       renderSongsTable();
     }
-    function updatePlayerUI() {
-      const playIcon = document.getElementById('player-play-icon');
-      const discIcon = document.getElementById('player-disc-icon');
-      if (isPlaying) {
-        playIcon.className = 'fa-solid fa-pause';
-        discIcon.style.animationPlayState = 'running';
-      } else {
-        playIcon.className = 'fa-solid fa-play';
-        discIcon.style.animationPlayState = 'paused';
+
+    function seekAudio(val) {
+      audioObj.currentTime = val;
+    }
+
+    function prevTrack() {
+      if (!songsData.length) return;
+      const idx = songsData.findIndex(s => s.id === currentPlayingTrackId);
+      const prevIdx = idx > 0 ? idx - 1 : songsData.length - 1;
+      playTrack(songsData[prevIdx].id);
+    }
+
+    function nextTrack() {
+      if (!songsData.length) return;
+      const idx = songsData.findIndex(s => s.id === currentPlayingTrackId);
+      const nextIdx = idx < songsData.length - 1 ? idx + 1 : 0;
+      playTrack(songsData[nextIdx].id);
+    }
+
+    function formatTime(seconds) {
+      const min = Math.floor(seconds / 60);
+      const sec = Math.floor(seconds % 60);
+      return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+    }
+
+    /* ================= CHARTS ================= */
+    function initCharts() {
+      const ctx1 = document.getElementById('progressChart')?.getContext('2d');
+      if (ctx1) {
+        progressChartInstance = new Chart(ctx1, {
+          type: 'bar',
+          data: {
+            labels: ['Mixage', 'Compositions', 'Communication', 'Live Prep'],
+            datasets: [{
+              label: 'Avancement (%)',
+              data: [68, 92, 55, 80],
+              backgroundColor: ['#E11D48', '#7C3AED', '#0284C7', '#059669'],
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: { y: { max: 100, beginAtZero: true } }
+          }
+        });
+      }
+
+      const ctx2 = document.getElementById('mixDoughnutChart')?.getContext('2d');
+      if (ctx2) {
+        doughnutChartInstance = new Chart(ctx2, {
+          type: 'doughnut',
+          data: {
+            labels: ['Masterisé', 'En Mixage', 'Maquette'],
+            datasets: [{
+              data: [4, 5, 3],
+              backgroundColor: ['#059669', '#D97706', '#94A3B8']
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false
+          }
+        });
       }
     }
-    function seekAudio(val) {
-      if (audioObj) audioObj.currentTime = val;
-    }
-    function formatTime(secs) {
-      const m = Math.floor(secs / 60);
-      const s = Math.floor(secs % 60);
-      return `${m}:${s < 10 ? '0' : ''}${s}`;
-    }
-    function prevTrack() {
-      if (songsData.length === 0) return;
-      let idx = songsData.findIndex(s => s.id === currentPlayingTrackId);
-      idx = (idx - 1 + songsData.length) % songsData.length;
-      playSongTrack(songsData[idx].id);
-    }
-    function nextTrack() {
-      if (songsData.length === 0) return;
-      let idx = songsData.findIndex(s => s.id === currentPlayingTrackId);
-      idx = (idx + 1) % songsData.length;
-      playSongTrack(songsData[idx].id);
-    }
-    /* STREAMING_CHUNK:Chart.js Rendering Engine... */
-    let progressChart, mixDoughnutChart;
-    function initCharts() {
-      const ctxProgress = document.getElementById('progressChart').getContext('2d');
-      progressChart = new Chart(ctxProgress, {
-        type: 'bar',
-        data: {
-          labels: ['Mixage Audio', 'Compositions', 'Communication', 'Répétitions', 'Logistique'],
-          datasets: [{
-            label: 'Avancement (%)',
-            data: [68, 92, 55, 80, 60],
-            backgroundColor: ['#E11D48', '#7C3AED', '#0284C7', '#059669', '#D97706'],
-            borderRadius: 8
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
-          scales: { y: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } } }
-        }
-      });
-      const ctxDoughnut = document.getElementById('mixDoughnutChart').getContext('2d');
-      mixDoughnutChart = new Chart(ctxDoughnut, {
-        type: 'doughnut',
-        data: {
-          labels: ['Masterisé', 'En Mixage', 'Maquette'],
-          datasets: [{
-            data: [1, 2, 1],
-            backgroundColor: ['#059669', '#E11D48', '#CBD5E1'],
-            borderWidth: 2
-          }]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          plugins: { legend: { position: 'bottom' } },
-          cutout: '70%'
-        }
-      });
-    }
+
     function renderCharts() {
-      if (!progressChart || !mixDoughnutChart) return;
-      const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (songsData.length || 1));
-      progressChart.data.datasets[0].data[0] = avgMix;
-      progressChart.update();
-      const masterised = songsData.filter(s => s.status === 'Masterisé').length;
-      const inMix = songsData.filter(s => s.status === 'En Mixage').length;
-      const maquette = songsData.filter(s => s.status === 'Maquette').length;
-      mixDoughnutChart.data.datasets[0].data = [masterised, inMix, maquette];
-      mixDoughnutChart.update();
+      if (progressChartInstance) {
+        const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (songsData.length || 1));
+        progressChartInstance.data.datasets[0].data[0] = avgMix;
+        progressChartInstance.update();
+      }
+
+      if (doughnutChartInstance) {
+        const master = songsData.filter(s => s.status === 'Masterisé').length;
+        const mix = songsData.filter(s => s.status === 'En Mixage').length;
+        const maq = songsData.filter(s => s.status === 'Maquette').length;
+        doughnutChartInstance.data.datasets[0].data = [master, mix, maq];
+        doughnutChartInstance.update();
+      }
     }
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    /* ================= MODAL HELPERS & EXPORT ================= */
+    function openModal(id) {
+      document.getElementById(id)?.classList.add('active');
+    }
+    function closeModal(id) {
+      document.getElementById(id)?.classList.remove('active');
+    }
     function exportSummaryPDF() {
       window.print();
     }
