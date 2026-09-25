@@ -1,15 +1,14 @@
-<!-- STREAMING_CHUNK:Configuring HTML head, fonts, and dependencies... -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ELIYAH — Gestion du Groupe & Suivi Production</title>
+  <title>ELIYAH — Gestion du Groupe &amp; Suivi Production</title>
   
   <!-- Typography & FontAwesome Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Space+Grotesk:wght@700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <!-- Chart.js for Pro Analytics -->
@@ -234,7 +233,6 @@
       gap: 24px;
     }
 
-    /* Top Bar Header */
     .top-header {
       display: flex;
       justify-content: space-between;
@@ -437,7 +435,7 @@
       margin-top: 2px;
     }
 
-    /* Chantiers (Hebdo / Mensuel) Cards */
+    /* Chantiers Cards */
     .chantier-card {
       background: white;
       border-radius: var(--radius-md);
@@ -471,7 +469,7 @@
       color: var(--text-dark);
     }
 
-    /* Tables Style (Suivi Mixage & Morceaux) */
+    /* Tables Style */
     .data-card {
       background: white;
       border-radius: var(--radius-lg);
@@ -590,16 +588,10 @@
       border-radius: 20px;
       border: 1px solid var(--border-color);
       background: white;
-      color: var(--text-muted);
       font-size: 12px;
       font-weight: 600;
+      color: var(--text-muted);
       cursor: pointer;
-      transition: all 0.2s;
-    }
-
-    .filter-btn:hover {
-      background: #F1F5F9;
-      color: var(--text-dark);
     }
 
     .filter-btn.active {
@@ -607,16 +599,246 @@
       color: white;
       border-color: var(--brand-red);
     }
+
+    /* Chat View */
+    .chat-container {
+      background: white;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      height: 500px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .chat-bubble {
+      max-width: 65%;
+      padding: 12px 16px;
+      border-radius: 16px;
+      font-size: 13px;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    .chat-bubble.received {
+      background: #F1F5F9;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+
+    .chat-bubble.sent {
+      background: var(--brand-red);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-bubble .meta {
+      font-size: 10px;
+      opacity: 0.7;
+      margin-top: 4px;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .chat-input-area {
+      padding: 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input {
+      flex: 1;
+      padding: 10px 16px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+      font-size: 13px;
+    }
+
+    /* Modal Styling */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background: white;
+      padding: 26px;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      box-shadow: var(--shadow-lg);
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 14px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      outline: none;
+    }
+
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+      border-color: var(--brand-red);
+    }
+
+    /* Global Persistent Audio Player */
+    .global-audio-player {
+      position: fixed;
+      bottom: 0;
+      left: 270px;
+      right: 0;
+      background: #0F172A;
+      color: white;
+      padding: 12px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
+    }
+
+    .player-track-info {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 250px;
+    }
+
+    .player-cover {
+      width: 42px;
+      height: 42px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand-red), #E11D48);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .player-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      flex: 1;
+      max-width: 500px;
+    }
+
+    .player-btns {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .player-btn {
+      background: none;
+      border: none;
+      color: #94A3B8;
+      font-size: 16px;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .player-btn:hover {
+      color: white;
+    }
+
+    .player-btn.play-main {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--brand-red);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .player-btn.play-main:hover {
+      background: var(--brand-red-hover);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      color: #94A3B8;
+    }
+
+    .progress-bar {
+      flex: 1;
+      height: 4px;
+      background: #334155;
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .progress-fill {
+      width: 35%;
+      height: 100%;
+      background: var(--brand-red);
+      border-radius: 2px;
+    }
+
+    @media (max-width: 992px) {
+      aside { width: 80px; padding: 16px 8px; }
+      .logo-text, .user-det, .nav-item span, .nav-badge { display: none; }
+      .global-audio-player { left: 80px; }
+      .charts-grid, .two-cols { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
-
 <body>
-  <!-- SIDEBAR NAVIGATION -->
+
+  <!-- ================= SIDEBAR ================= -->
   <aside>
     <div>
       <div class="brand-logo">
         <div class="logo-text">ELI<span>YAH</span></div>
-        <div class="logo-badge">Pro</div>
+        <div class="logo-badge">GROUPE</div>
       </div>
 
       <ul class="nav-menu">
@@ -626,16 +848,20 @@
         </li>
         <li class="nav-item" onclick="switchTab('chantiers', this)">
           <i class="fa-solid fa-list-check"></i>
-          <span>Suivi de Chantier</span>
+          <span>Suivi des Chantiers</span>
           <span class="nav-badge">4</span>
         </li>
-        <li class="nav-item" onclick="switchTab('production', this)">
+        <li class="nav-item" onclick="switchTab('mixage', this)">
           <i class="fa-solid fa-sliders"></i>
-          <span>Mixage & Morceaux</span>
+          <span>Suivi Mixage</span>
         </li>
-        <li class="nav-item" onclick="switchTab('agenda', this)">
-          <i class="fa-solid fa-calendar-days"></i>
-          <span>Planning & Live</span>
+        <li class="nav-item" onclick="switchTab('morceaux', this)">
+          <i class="fa-solid fa-music"></i>
+          <span>Répertoire &amp; MP3</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('chat', this)">
+          <i class="fa-solid fa-comments"></i>
+          <span>Discussion Groupe</span>
         </li>
       </ul>
     </div>
@@ -644,226 +870,328 @@
       <div class="user-info">
         <div class="avatar">E</div>
         <div class="user-det">
-          <span class="user-name">Groupe ELIYAH</span>
-          <span class="user-email">admin@eliyah-music.com</span>
-          <span class="role-badge admin">Administrateur</span>
+          <span class="user-name">Eliyah Production</span>
+          <span class="user-email">admin@eliyah-music.fr</span>
+          <span class="role-badge admin">ADMIN</span>
         </div>
       </div>
+      <i class="fa-solid fa-gear" style="color: var(--text-muted); cursor: pointer;" title="Paramètres"></i>
     </div>
   </aside>
 
-  <!-- MAIN VIEW CONTAINER -->
+  <!-- ================= MAIN CONTENT ================= -->
   <main>
-    <!-- TOP HEADER -->
+    
+    <!-- TOP BAR HEADER -->
     <div class="top-header">
       <div class="page-title">
-        <h1 id="view-title">Tableau de bord Général</h1>
-        <p id="view-subtitle">Aperçu analytique et activités récentes du groupe</p>
+        <h1 id="view-title">Tableau de Bord Général</h1>
+        <p id="view-subtitle">Aperçu global de l'avancement artistique, technique et organisationnel</p>
       </div>
+
       <div class="header-actions">
         <div class="group-tag">
-          <i class="fa-solid fa-compact-disc" style="color: var(--brand-red);"></i>
-          <span>Album : <strong>"Live Acoustique"</strong></span>
-          <span class="tag-pill">En Prod</span>
+          <i class="fa-solid fa-users" style="color: var(--brand-red);"></i>
+          <span>Groupe ELIYAH</span>
+          <span class="tag-pill">Album Live Acoustic</span>
         </div>
-        <button class="btn btn-primary" onclick="alert('Nouveau projet initié !')">
-          <i class="fa-solid fa-plus"></i> Nouveau Projet
+        <button class="btn btn-primary" onclick="openModal('modal-chantier')">
+          <i class="fa-solid fa-plus"></i> Nouveau Chantier
         </button>
       </div>
     </div>
 
-    <!-- VIEW 1: TABLEAU DE BORD -->
-    <div id="view-dashboard" class="view-content active">
+    <!-- ================= VIEW 1: DASHBOARD ================= -->
+    <div id="dashboard-view" class="view-content active">
+      
+      <!-- KPI Cards -->
       <div class="kpi-grid">
         <div class="kpi-card">
-          <div class="kpi-icon" style="background: #FFF1F2; color: #E11D48;">
-            <i class="fa-solid fa-music"></i>
+          <div class="kpi-icon" style="background: #FFF1F2; color: #8B1E2D;">
+            <i class="fa-solid fa-list-check"></i>
           </div>
           <div class="kpi-info">
-            <h4>Titres en Cours</h4>
-            <div class="val">12</div>
-            <div class="sub" style="color: #059669;"><i class="fa-solid fa-arrow-up"></i> 3 validés</div>
+            <h4>Chantiers Actifs</h4>
+            <div class="val">8</div>
+            <div class="sub" style="color: #059669;"><i class="fa-solid fa-arrow-up"></i> 2 ce mois-ci</div>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="background: #F0F9FF; color: #0284C7;">
+            <i class="fa-solid fa-sliders"></i>
+          </div>
+          <div class="kpi-info">
+            <h4>Mixages Validés</h4>
+            <div class="val">5 / 12</div>
+            <div class="sub" style="color: #0284C7;">42% d'avancement</div>
           </div>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-icon" style="background: #F3E8FF; color: #7C3AED;">
-            <i class="fa-solid fa-sliders"></i>
+            <i class="fa-solid fa-compact-disc"></i>
           </div>
           <div class="kpi-info">
-            <h4>Mixage Globale</h4>
-            <div class="val">68%</div>
-            <div class="sub" style="color: #D97706;">6/12 Finalisés</div>
-          </div>
-        </div>
-
-        <div class="kpi-card">
-          <div class="kpi-icon" style="background: #E0F2FE; color: #0284C7;">
-            <i class="fa-solid fa-bullhorn"></i>
-          </div>
-          <div class="kpi-info">
-            <h4>Com & Réseaux</h4>
-            <div class="val">85%</div>
-            <div class="sub" style="color: #059669;">Teasers prêts</div>
+            <h4>Morceaux à l'Album</h4>
+            <div class="val">12</div>
+            <div class="sub" style="color: #7C3AED;">Acoustique / Live</div>
           </div>
         </div>
 
         <div class="kpi-card">
           <div class="kpi-icon" style="background: #FEF3C7; color: #D97706;">
-            <i class="fa-solid fa-calendar-check"></i>
+            <i class="fa-solid fa-calendar-days"></i>
           </div>
           <div class="kpi-info">
-            <h4>Prochains Lives</h4>
-            <div class="val">2</div>
-            <div class="sub" style="color: #E11D48;">Prochain J-14</div>
+            <h4>Prochain Live</h4>
+            <div class="val" style="font-size: 16px; margin-top: 6px;">15 Oct. 2026</div>
+            <div class="sub" style="color: #D97706;">Session Enregistrement</div>
           </div>
         </div>
       </div>
 
-      <!-- CHARTS -->
+      <!-- Charts Row -->
       <div class="charts-grid">
         <div class="chart-box">
           <div class="box-header">
             <div class="box-title">
-              <h3>Avancement des Morceaux</h3>
-              <p>Progression par étape de production</p>
+              <h3>Avancement de la Production par Pôle</h3>
+              <p>Répartition du travail accompli et restant</p>
             </div>
           </div>
-          <canvas id="progressChart" height="110"></canvas>
+          <div style="height: 260px; position: relative;">
+            <canvas id="progressChart"></canvas>
+          </div>
         </div>
 
         <div class="chart-box">
           <div class="box-header">
             <div class="box-title">
-              <h3>Répartition Charge</h3>
-              <p>Domaines d'activité</p>
+              <h3>État des Mixages</h3>
+              <p>Validation finale titre par titre</p>
             </div>
           </div>
-          <canvas id="allocationChart" height="180"></canvas>
-        </div>
-      </div>
-    </div>
-
-    <!-- VIEW 2: SUIVI DE CHANTIER (Correction apportée ici) -->
-    <div id="view-chantiers" class="view-content">
-      <div class="box-header" style="margin-bottom: 0;">
-        <div class="box-title">
-          <h3>Feuille de Route des Chantiers</h3>
-          <p>Filtrer les tâches et objectifs par périodicité</p>
-        </div>
-        <!-- Boutons de filtre dynamiques -->
-        <div class="filter-group">
-          <button class="filter-btn active" onclick="filterChantiers('tous', this)">Tous</button>
-          <button class="filter-btn" onclick="filterChantiers('hebdo', this)">Hebdomadaire</button>
-          <button class="filter-btn" onclick="filterChantiers('mensuel', this)">Mensuel</button>
-          <button class="filter-btn" onclick="filterChantiers('trimestriel', this)">Trimestriel</button>
-          <button class="filter-btn" onclick="filterChantiers('annuel', this)">Annuel</button>
+          <div style="height: 260px; position: relative; display: flex; align-items: center; justify-content: center;">
+            <canvas id="mixStatusChart"></canvas>
+          </div>
         </div>
       </div>
 
+      <!-- Activity & Quick Actions -->
       <div class="two-cols">
-        <!-- Liste dynamique des chantiers avec data-period -->
-        <div id="chantiers-container">
-          <!-- Chantier 1: Hebdomadaire -->
-          <div class="chantier-card urgent" data-period="hebdo">
-            <div class="chantier-header">
-              <span class="chantier-title"><i class="fa-solid fa-fire" style="color: #EF4444;"></i> Validation Mixage Titre 3 & 4</span>
-              <span class="status-pill status-progress">Hebdomadaire</span>
+        <div class="chart-box">
+          <div class="box-header">
+            <div class="box-title">
+              <h3>Chantiers Prioritaires</h3>
+              <p>Actions nécessitant une attention immédiate</p>
             </div>
-            <p style="font-size: 13px; color: var(--text-muted);">Réviser la basse et les égalisations voix avant le master vendredi.</p>
+            <button class="btn btn-secondary btn-sm" onclick="switchTab('chantiers', document.querySelectorAll('.nav-item')[1])">Voir Tout</button>
           </div>
-
-          <!-- Chantier 2: Hebdomadaire -->
-          <div class="chantier-card normal" data-period="hebdo">
-            <div class="chantier-header">
-              <span class="chantier-title"><i class="fa-solid fa-video"></i> Publication Reels Teaser Instagram</span>
-              <span class="status-pill status-progress">Hebdomadaire</span>
+          <div class="feed-list">
+            <div class="chantier-card urgent">
+              <div class="chantier-header">
+                <span class="chantier-title">Validation Mix - Title "Shalom"</span>
+                <span class="status-pill status-progress">En Cours</span>
+              </div>
+              <p style="font-size: 12px; color: var(--text-muted);">Ajustement des réverbes violons et égalisation basse.</p>
             </div>
-            <p style="font-size: 13px; color: var(--text-muted);">Monter l'extrait vidéo des répètes de la semaine dernière.</p>
-          </div>
 
-          <!-- Chantier 3: Mensuel -->
-          <div class="chantier-card normal" data-period="mensuel">
-            <div class="chantier-header">
-              <span class="chantier-title"><i class="fa-solid fa-microphone-lines"></i> Répétition Générale Live Acoustique</span>
-              <span class="status-pill status-todo">Mensuel</span>
+            <div class="chantier-card normal">
+              <div class="chantier-header">
+                <span class="chantier-title">Préparation de la liste des invités Live</span>
+                <span class="status-pill status-todo">À Faire</span>
+              </div>
+              <p style="font-size: 12px; color: var(--text-muted);">Envoyer les invitations privées pour la captation acoustique.</p>
             </div>
-            <p style="font-size: 13px; color: var(--text-muted);">Session complète de 3h avec ingé son au studio principal.</p>
-          </div>
-
-          <!-- Chantier 4: Trimestriel -->
-          <div class="chantier-card normal" data-period="trimestriel">
-            <div class="chantier-header">
-              <span class="chantier-title"><i class="fa-solid fa-compact-disc"></i> Finalisation Artwork Album & Physical Print</span>
-              <span class="status-pill status-todo">Trimestriel</span>
-            </div>
-            <p style="font-size: 13px; color: var(--text-muted);">Envoyer les maquettes haute définition à l'imprimeur.</p>
-          </div>
-
-          <!-- Chantier 5: Annuel -->
-          <div class="chantier-card normal" data-period="annuel">
-            <div class="chantier-header">
-              <span class="chantier-title"><i class="fa-solid fa-calendar-star"></i> Planification Tournée 2027</span>
-              <span class="status-pill status-todo">Annuel</span>
-            </div>
-            <p style="font-size: 13px; color: var(--text-muted);">Réservation des salles et prise de contact avec les tourneurs.</p>
           </div>
         </div>
 
-        <!-- Section Flux d'activité -->
-        <div class="data-card" style="padding: 20px;">
-          <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 14px;">Dernières Actions</h3>
-          <div class="feed-list">
-            <div class="feed-item">
-              <div class="feed-item-icon"><i class="fa-solid fa-check"></i></div>
-              <div>
-                <strong>Titre "Acoustique 01"</strong> validé par le producteur.
-                <div class="feed-time">Il y a 2 heures</div>
-              </div>
+        <div class="chart-box">
+          <div class="box-header">
+            <div class="box-title">
+              <h3>Dernières Activités</h3>
+              <p>Historique des actions récentes du groupe</p>
             </div>
+          </div>
+          <div class="feed-list">
             <div class="feed-item">
               <div class="feed-item-icon"><i class="fa-solid fa-upload"></i></div>
               <div>
-                Nouveau stem de batterie versé dans l'espace partagé.
-                <div class="feed-time">Hier à 18:30</div>
+                <strong>Nouveau MP3 téléversé :</strong> "Grace &amp; Truth - V2_Mix.mp3"
+                <div class="feed-time">Il y a 2 heures par David</div>
+              </div>
+            </div>
+
+            <div class="feed-item">
+              <div class="feed-item-icon" style="background: #E0F2FE; color: #0284C7;"><i class="fa-solid fa-check"></i></div>
+              <div>
+                <strong>Validation Chantier :</strong> Commande câbles audio &amp; micro chœur terminée.
+                <div class="feed-time">Hier à 18:30 par Sarah</div>
+              </div>
+            </div>
+
+            <div class="feed-item">
+              <div class="feed-item-icon" style="background: #F3E8FF; color: #7C3AED;"><i class="fa-solid fa-comment"></i></div>
+              <div>
+                <strong>Nouveau commentaire :</strong> "On doit revoir l'intro au piano sur le titre 3."
+                <div class="feed-time">Il y a 2 jours par Michael</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
     </div>
 
-    <!-- VIEW 3: MIXAGE & PRODUCTION -->
-    <div id="view-production" class="view-content">
+    <!-- ================= VIEW 2: SUIVI DES CHANTIERS ================= -->
+    <div id="chantiers-view" class="view-content">
+      <div class="chart-box">
+        <div class="box-header">
+          <div class="box-title">
+            <h3>Liste des Chantiers &amp; Tâches Organisées</h3>
+            <p>Filtrer par périodicité pour un suivi fluide</p>
+          </div>
+          <div class="filter-group">
+            <button class="filter-btn active" onclick="filterChantiers('all', this)">Tous</button>
+            <button class="filter-btn" onclick="filterChantiers('hebdo', this)">Hebdomadaire</button>
+            <button class="filter-btn" onclick="filterChantiers('mensuel', this)">Mensuel</button>
+            <button class="filter-btn" onclick="filterChantiers('echeance', this)">À l'échéance</button>
+          </div>
+        </div>
+
+        <div id="chantiers-container" style="margin-top: 16px;">
+          <!-- Chantier 1: Hebdomadaire -->
+          <div class="chantier-card normal" data-frequence="hebdo">
+            <div class="chantier-header">
+              <span class="chantier-title"><i class="fa-solid fa-rotate-right" style="color: var(--brand-red); margin-right: 8px;"></i> Répétition Générale Groupe</span>
+              <div>
+                <span class="tag-pill" style="margin-right: 8px;">Hebdomadaire</span>
+                <span class="status-pill status-progress">Chaque Jeudi</span>
+              </div>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Calage des harmonisations vocales, calage tempo avec métronome et répétition des titres Acoustiques Live.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-light);">
+              <span>Responsable : Michael (Chef d'orchestre)</span>
+              <button class="btn btn-secondary btn-sm" onclick="alert('Détails du chantier')">Gérer</button>
+            </div>
+          </div>
+
+          <!-- Chantier 2: Mensuel -->
+          <div class="chantier-card normal" data-frequence="mensuel">
+            <div class="chantier-header">
+              <span class="chantier-title"><i class="fa-solid fa-sliders" style="color: #0284C7; margin-right: 8px;"></i> Bilan Mixage &amp; Écoute Globale</span>
+              <div>
+                <span class="tag-pill" style="background: #E0F2FE; color: #0284C7; margin-right: 8px;">Mensuel</span>
+                <span class="status-pill status-todo">Prochain: 30 du mois</span>
+              </div>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Session studio d'écoute comparative de toutes les pistes mixées durant le mois écoulé.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-light);">
+              <span>Responsable : Eliyah &amp; Ingé Son</span>
+              <button class="btn btn-secondary btn-sm" onclick="alert('Détails du chantier')">Gérer</button>
+            </div>
+          </div>
+
+          <!-- Chantier 3: Échéance -->
+          <div class="chantier-card urgent" data-frequence="echeance">
+            <div class="chantier-header">
+              <span class="chantier-title"><i class="fa-solid fa-triangle-exclamation" style="color: #EF4444; margin-right: 8px;"></i> Réservation Matériel Captation Vidéo 4K</span>
+              <div>
+                <span class="tag-pill" style="background: #FEE2E2; color: #991B1B; margin-right: 8px;">Échéance : 10 Octobre</span>
+                <span class="status-pill status-progress">Urgent</span>
+              </div>
+            </div>
+            <p style="font-size: 13px; color: var(--text-dark); margin-bottom: 12px;">Finaliser le devis pour la location de 3 caméras et de l'éclairage scénique pour le Live Acoustique.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted);">
+              <span>Responsable : Sarah (Logistique)</span>
+              <button class="btn btn-primary btn-sm" onclick="alert('Action prioritaire')">Valider la commande</button>
+            </div>
+          </div>
+
+          <!-- Chantier 4: Hebdomadaire -->
+          <div class="chantier-card normal" data-frequence="hebdo">
+            <div class="chantier-header">
+              <span class="chantier-title"><i class="fa-solid fa-bullhorn" style="color: #7C3AED; margin-right: 8px;"></i> Publication Teaser Réseaux Sociaux</span>
+              <div>
+                <span class="tag-pill" style="margin-right: 8px;">Hebdomadaire</span>
+                <span class="status-pill status-done">Terminé cette semaine</span>
+              </div>
+            </div>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 12px;">Partager une courte vidéo des coulisses de la création de l'album sur Instagram &amp; Facebook.</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-light);">
+              <span>Responsable : Com' Group</span>
+              <button class="btn btn-secondary btn-sm">Voir Post</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 3: SUIVI MIXAGE ================= -->
+    <div id="mixage-view" class="view-content">
       <div class="data-card">
+        <div class="box-header" style="padding: 20px;">
+          <div class="box-title">
+            <h3>Tableau d'Avancement des Mixages</h3>
+            <p>Suivi précis version par version des morceaux de l'album</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openModal('modal-mix')"><i class="fa-solid fa-plus"></i> Ajouter une version</button>
+        </div>
+
         <div class="table-wrapper">
           <table>
             <thead>
               <tr>
-                <th>Piste / Titre</th>
-                <th>Style</th>
-                <th>Enregistrement</th>
-                <th>Mixage</th>
-                <th>Mastering</th>
-                <th>Statut</th>
+                <th>Titre Morceau</th>
+                <th>Version Actuelle</th>
+                <th>Ingénieur Son</th>
+                <th>Dernière Modif.</th>
+                <th>Statut Mix</th>
+                <th>Audio Preview</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               <tr>
-                <td><strong>01. Ouverture Acoustique</strong></td>
-                <td>Gospel / Acoustique</td>
-                <td><span class="status-pill status-done">Terminé</span></td>
-                <td><span class="status-pill status-done">Terminé</span></td>
-                <td><span class="status-pill status-progress">En cours</span></td>
-                <td><span class="status-pill status-progress">Mastering</span></td>
+                <td><strong>01. Shalom (Acoustic)</strong></td>
+                <td><span class="tag-pill">V3_Final</span></td>
+                <td>David P.</td>
+                <td>24/09/2026</td>
+                <td><span class="status-pill status-done"><i class="fa-solid fa-check"></i> Validé</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="playAudio('01. Shalom (Acoustic)', 'David P.', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')">
+                    <i class="fa-solid fa-play"></i> Écouter
+                  </button>
+                </td>
+                <td><i class="fa-solid fa-ellipsis-vertical" style="cursor: pointer; color: var(--text-muted);"></i></td>
               </tr>
               <tr>
-                <td><strong>02. Live Session ELIYAH</strong></td>
-                <td>Live Worship</td>
-                <td><span class="status-pill status-done">Terminé</span></td>
-                <td><span class="status-pill status-progress">En cours</span></td>
-                <td><span class="status-pill status-todo">En attente</span></td>
-                <td><span class="status-pill status-progress">Mixage</span></td>
+                <td><strong>02. Higher Ground</strong></td>
+                <td><span class="tag-pill" style="background: #FEF3C7; color: #B45309;">V2_BassBoost</span></td>
+                <td>Marc L.</td>
+                <td>22/09/2026</td>
+                <td><span class="status-pill status-progress"><i class="fa-solid fa-clock"></i> En Retouche</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="playAudio('02. Higher Ground', 'Marc L.', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3')">
+                    <i class="fa-solid fa-play"></i> Écouter
+                  </button>
+                </td>
+                <td><i class="fa-solid fa-ellipsis-vertical" style="cursor: pointer; color: var(--text-muted);"></i></td>
+              </tr>
+              <tr>
+                <td><strong>03. Grace &amp; Truth</strong></td>
+                <td><span class="tag-pill" style="background: #F1F5F9; color: #475569;">V1_Raw</span></td>
+                <td>David P.</td>
+                <td>18/09/2026</td>
+                <td><span class="status-pill status-todo"><i class="fa-solid fa-hourglass-start"></i> À Valider</span></td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="playAudio('03. Grace & Truth', 'David P.', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3')">
+                    <i class="fa-solid fa-play"></i> Écouter
+                  </button>
+                </td>
+                <td><i class="fa-solid fa-ellipsis-vertical" style="cursor: pointer; color: var(--text-muted);"></i></td>
               </tr>
             </tbody>
           </table>
@@ -871,51 +1199,268 @@
       </div>
     </div>
 
-    <!-- VIEW 4: PLANNING & LIVE -->
-    <div id="view-agenda" class="view-content">
-      <div class="data-card" style="padding: 24px;">
-        <h3>Agenda du Groupe</h3>
-        <p style="color: var(--text-muted); font-size: 13px; margin-top: 4px;">Planning des événements à venir.</p>
+    <!-- ================= VIEW 4: MORCEAUX & REPERTOIRE ================= -->
+    <div id="morceaux-view" class="view-content">
+      <div class="data-card">
+        <div class="box-header" style="padding: 20px;">
+          <div class="box-title">
+            <h3>Répertoire des Titres &amp; Fichiers Audio MP3</h3>
+            <p>Accès direct aux maquettes, partitions et enregistrements bruts</p>
+          </div>
+          <button class="btn btn-primary btn-sm"><i class="fa-solid fa-upload"></i> Téléverser un MP3</button>
+        </div>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Morceau</th>
+                <th>Tonalité</th>
+                <th>BPM</th>
+                <th>Durée</th>
+                <th>Fichiers / Ressources</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Shalom (Live Acoustique)</strong></td>
+                <td><span class="tag-pill" style="background: #F3E8FF; color: #7C3AED;">G Major</span></td>
+                <td>72 BPM</td>
+                <td>04:45</td>
+                <td>
+                  <a href="#" style="color: var(--brand-red); text-decoration: none; font-weight: 600; margin-right: 10px;"><i class="fa-solid fa-file-pdf"></i> Partition PDF</a>
+                  <a href="#" style="color: #0284C7; text-decoration: none; font-weight: 600;"><i class="fa-solid fa-file-audio"></i> Pistes Séparées</a>
+                </td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="playAudio('Shalom (Live Acoustique)', 'Maquette Groupe', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3')">
+                    <i class="fa-solid fa-play"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td><strong>Higher Ground</strong></td>
+                <td><span class="tag-pill" style="background: #F3E8FF; color: #7C3AED;">E Minor</span></td>
+                <td>118 BPM</td>
+                <td>03:50</td>
+                <td>
+                  <a href="#" style="color: var(--brand-red); text-decoration: none; font-weight: 600; margin-right: 10px;"><i class="fa-solid fa-file-pdf"></i> Grille Accords</a>
+                </td>
+                <td>
+                  <button class="btn btn-secondary btn-sm" onclick="playAudio('Higher Ground', 'Maquette V1', 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3')">
+                    <i class="fa-solid fa-play"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
+
+    <!-- ================= VIEW 5: CHAT GROUPE ================= -->
+    <div id="chat-view" class="view-content">
+      <div class="chat-container">
+        <div class="chat-messages" id="chat-messages">
+          <div class="chat-bubble received">
+            <strong>David (Ingé Son)</strong><br>
+            Salut l'équipe ! J'ai uploadé la V3 du morceau Shalom. Les réverbes sont beaucoup plus douces. Dites-moi ce que vous en pensez.
+            <div class="meta"><span>10:42 AM</span></div>
+          </div>
+
+          <div class="chat-bubble sent">
+            <strong>Moi (Eliyah)</strong><br>
+            Super travail David ! Je viens d'écouter sur le lecteur, c'est beaucoup plus équilibré pour la version acoustique.
+            <div class="meta"><span>10:45 AM</span></div>
+          </div>
+
+          <div class="chat-bubble received">
+            <strong>Sarah (Logistique)</strong><br>
+            N'oubliez pas de valider la liste du matériel vidéo avant ce soir pour l'échéance du 10 Octobre !
+            <div class="meta"><span>11:15 AM</span></div>
+          </div>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" id="chat-input" class="chat-input" placeholder="Écrivez votre message au groupe ELIYAH...">
+          <button class="btn btn-primary" onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+        </div>
+      </div>
+    </div>
+
   </main>
 
-  <!-- JAVASCRIPT & INTERACTIONS -->
+  <!-- ================= GLOBAL AUDIO PLAYER ================= -->
+  <div class="global-audio-player">
+    <div class="player-track-info">
+      <div class="player-cover">
+        <i class="fa-solid fa-music"></i>
+      </div>
+      <div>
+        <div id="player-title" style="font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Aucun morceau sélectionné</div>
+        <div id="player-artist" style="font-size: 11px; color: #94A3B8;">Eliyah Production</div>
+      </div>
+    </div>
+
+    <div class="player-controls">
+      <div class="player-btns">
+        <button class="player-btn"><i class="fa-solid fa-backward-step"></i></button>
+        <button class="player-btn play-main" id="play-btn" onclick="togglePlay()"><i class="fa-solid fa-play"></i></button>
+        <button class="player-btn"><i class="fa-solid fa-forward-step"></i></button>
+      </div>
+      <div class="progress-bar-container">
+        <span id="current-time">0:00</span>
+        <div class="progress-bar" onclick="seekAudio(event)">
+          <div class="progress-fill" id="progress-fill"></div>
+        </div>
+        <span id="total-duration">0:00</span>
+      </div>
+    </div>
+
+    <div style="display: flex; align-items: center; gap: 12px; width: 150px; justify-content: flex-end;">
+      <i class="fa-solid fa-volume-high" style="color: #94A3B8; font-size: 14px;"></i>
+      <input type="range" min="0" max="1" step="0.01" value="0.8" onchange="setVolume(this.value)" style="width: 80px; accent-color: var(--brand-red);">
+    </div>
+  </div>
+
+  <!-- HTML5 Audio Object (Hidden) -->
+  <audio id="main-audio" style="display: none;"></audio>
+
+  <!-- ================= MODAL: NOUVEAU CHANTIER ================= -->
+  <div class="modal-overlay" id="modal-chantier">
+    <div class="modal-box">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="font-size: 18px; font-weight: 800;">Créer un Nouveau Chantier</h3>
+        <i class="fa-solid fa-xmark" style="cursor: pointer; font-size: 20px; color: var(--text-muted);" onclick="closeModal('modal-chantier')"></i>
+      </div>
+
+      <div class="form-group">
+        <label>Nom du chantier / projet</label>
+        <input type="text" placeholder="Ex: Préparation captation vidéo">
+      </div>
+
+      <div class="form-group">
+        <label>Périodicité / Type</label>
+        <select>
+          <option value="hebdo">Hebdomadaire</option>
+          <option value="mensuel">Mensuel</option>
+          <option value="echeance">À l'échéance (Ponctuel)</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Responsable principal</label>
+        <input type="text" placeholder="Ex: Michael, Sarah, Eliyah...">
+      </div>
+
+      <div class="form-group">
+        <label>Description des objectifs</label>
+        <textarea rows="3" placeholder="Détails des tâches à accomplir..."></textarea>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-chantier')">Annuler</button>
+        <button class="btn btn-primary" onclick="closeModal('modal-chantier'); alert('Chantier créé !');">Créer le chantier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= JAVASCRIPT & INTERACTIONS ================= -->
   <script>
-    // Navigation entre onglets principaux
-    function switchTab(viewId, element) {
-      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
-      document.querySelectorAll('.view-content').forEach(view => view.classList.remove('active'));
+    // Audio Player State
+    const audioElement = document.getElementById('main-audio');
+    const playBtn = document.getElementById('play-btn');
+    const progressFill = document.getElementById('progress-fill');
+    const currentTimeEl = document.getElementById('current-time');
+    const totalDurationEl = document.getElementById('total-duration');
 
-      element.classList.add('active');
-      document.getElementById('view-' + viewId).classList.add('active');
+    function playAudio(title, artist, url) {
+      document.getElementById('player-title').innerText = title;
+      document.getElementById('player-artist').innerText = artist;
+      
+      audioElement.src = url;
+      audioElement.play();
+      playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+    }
 
-      const titles = {
-        'dashboard': { title: 'Tableau de bord Général', sub: 'Aperçu analytique et activités récentes du groupe' },
-        'chantiers': { title: 'Suivi de Chantier', sub: 'Gestion des objectifs hebdomadaires, mensuels et annuels' },
-        'production': { title: 'Mixage & Avancement des Morceaux', sub: 'Suivi étape par étape de chaque piste d\'album' },
-        'agenda': { title: 'Planning & Sessions Live', sub: 'Dates de concerts, répétitions et enregistrements' }
-      };
+    function togglePlay() {
+      if (!audioElement.src) return;
 
-      if (titles[viewId]) {
-        document.getElementById('view-title').innerText = titles[viewId].title;
-        document.getElementById('view-subtitle').innerText = titles[viewId].sub;
+      if (audioElement.paused) {
+        audioElement.play();
+        playBtn.innerHTML = '<i class="fa-solid fa-pause"></i>';
+      } else {
+        audioElement.pause();
+        playBtn.innerHTML = '<i class="fa-solid fa-play"></i>';
       }
     }
 
-    // FONCTION DE FILTRAGE DES CHANTIERS (Correction spécifique demandée)
-    function filterChantiers(period, btnElement) {
-      // 1. Mettre à jour l'apparence des boutons de filtre
-      const buttons = document.querySelectorAll('.filter-group .filter-btn');
+    audioElement.addEventListener('timeupdate', () => {
+      if (audioElement.duration) {
+        const progress = (audioElement.currentTime / audioElement.duration) * 100;
+        progressFill.style.width = `${progress}%`;
+        
+        currentTimeEl.innerText = formatTime(audioElement.currentTime);
+        totalDurationEl.innerText = formatTime(audioElement.duration);
+      }
+    });
+
+    function formatTime(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = Math.floor(seconds % 60);
+      return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function seekAudio(e) {
+      if (!audioElement.duration) return;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const width = rect.width;
+      audioElement.currentTime = (clickX / width) * audioElement.duration;
+    }
+
+    function setVolume(val) {
+      audioElement.volume = val;
+    }
+
+    // View Switching Logic
+    function switchTab(tabId, navElement) {
+      // Remove active from all nav items
+      document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+      navElement.classList.add('active');
+
+      // Hide all views
+      document.querySelectorAll('.view-content').forEach(view => view.classList.remove('active'));
+
+      // Update titles
+      const titles = {
+        'dashboard': { main: 'Tableau de Bord Général', sub: "Aperçu global de l'avancement artistique, technique et organisationnel" },
+        'chantiers': { main: 'Suivi des Chantiers', sub: 'Organisation des tâches hebdomadaires, mensuelles et projets à échéance' },
+        'mixage': { main: 'Suivi Mixage & Validaion', sub: 'Pistes audio, retours ingénieur son et validation des versions' },
+        'morceaux': { main: 'Répertoire & Maquettes MP3', sub: 'Partitions, tonalités, BPM et ressources téléchargeables' },
+        'chat': { main: 'Discussion Groupe ELIYAH', sub: 'Canal de communication interne en direct' }
+      };
+
+      if (titles[tabId]) {
+        document.getElementById('view-title').innerText = titles[tabId].main;
+        document.getElementById('view-subtitle').innerText = titles[tabId].sub;
+      }
+
+      // Show selected view
+      document.getElementById(`${tabId}-view`).classList.add('active');
+    }
+
+    // Dynamic Filter for Chantiers (Hebdomadaire, Mensuel, Échéance)
+    function filterChantiers(frequence, btnElement) {
+      // Manage active filter buttons
+      const buttons = btnElement.parentElement.querySelectorAll('.filter-btn');
       buttons.forEach(btn => btn.classList.remove('active'));
       btnElement.classList.add('active');
 
-      // 2. Filtrer les cartes de chantiers
+      // Filter cards by data-frequence attribute
       const cards = document.querySelectorAll('#chantiers-container .chantier-card');
       cards.forEach(card => {
-        const cardPeriod = card.getAttribute('data-period');
-        
-        if (period === 'tous' || cardPeriod === period) {
+        if (frequence === 'all' || card.getAttribute('data-frequence') === frequence) {
           card.style.display = 'block';
         } else {
           card.style.display = 'none';
@@ -923,36 +1468,85 @@
       });
     }
 
-    // INITIALISATION DES GRAPHIQUES CHART.JS
+    // Chat functionality
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const message = input.value.trim();
+      if (!message) return;
+
+      const chatContainer = document.getElementById('chat-messages');
+      const newBubble = document.createElement('div');
+      newBubble.className = 'chat-bubble sent';
+      newBubble.innerHTML = `
+        <strong>Moi (Eliyah)</strong><br>${message}
+        <div class="meta"><span>À l'instant</span></div>
+      `;
+
+      chatContainer.appendChild(newBubble);
+      input.value = '';
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Modal Handlers
+    function openModal(id) {
+      document.getElementById(id).classList.add('active');
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // Initialize Chart.js Analytics
     window.addEventListener('DOMContentLoaded', () => {
-      // Graphique Barres
-      const ctxProgress = document.getElementById('progressChart').getContext('2d');
-      new Chart(ctxProgress, {
+      // Progress Bar Chart
+      const ctx1 = document.getElementById('progressChart').getContext('2d');
+      new Chart(ctx1, {
         type: 'bar',
         data: {
-          labels: ['Enreg.', 'Édition', 'Mixage', 'Mastering', 'Validation'],
+          labels: ['Mixage Audio', 'Composition / Arrt', 'Communication', 'Live & Prépa', 'Planning'],
           datasets: [{
-            label: 'Titres',
-            data: [12, 10, 6, 2, 3],
-            backgroundColor: '#8B1E2D',
-            borderRadius: 6
+            label: 'Avancement (%)',
+            data: [42, 85, 60, 75, 90],
+            backgroundColor: [
+              '#E11D48',
+              '#7C3AED',
+              '#0284C7',
+              '#059669',
+              '#D97706'
+            ],
+            borderRadius: 8
           }]
         },
-        options: { responsive: true, plugins: { legend: { display: false } } }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { beginAtZero: true, max: 100 }
+          }
+        }
       });
 
-      // Graphique Donut
-      const ctxAlloc = document.getElementById('allocationChart').getContext('2d');
-      new Chart(ctxAlloc, {
+      // Mix Status Doughnut Chart
+      const ctx2 = document.getElementById('mixStatusChart').getContext('2d');
+      new Chart(ctx2, {
         type: 'doughnut',
         data: {
-          labels: ['Mixage', 'Composition', 'Com', 'Live'],
+          labels: ['Validés', 'En Retouche', 'À Faire'],
           datasets: [{
-            data: [40, 25, 20, 15],
-            backgroundColor: ['#E11D48', '#7C3AED', '#0284C7', '#059669']
+            data: [5, 4, 3],
+            backgroundColor: ['#059669', '#D97706', '#94A3B8'],
+            borderWidth: 0
           }]
         },
-        options: { responsive: true, cutout: '70%' }
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom' }
+          },
+          cutout: '70%'
+        }
       });
     });
   </script>
