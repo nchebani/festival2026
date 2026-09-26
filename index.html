@@ -1,4 +1,3 @@
-<!-- STREAMING_CHUNK:Configuring HTML head, fonts, and dependencies... -->
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -14,6 +13,9 @@
   
   <!-- Chart.js for Pro Analytics -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- jsPDF for real Report Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   
   <style>
     :root {
@@ -53,9 +55,12 @@
     body {
       background-color: var(--bg-main);
       color: var(--text-dark);
-      display: flex;
       height: 100vh;
       overflow: hidden;
+    }
+    #app-shell {
+      display: flex;
+      height: 100vh;
     }
     /* ================= SIDEBAR ================= */
     aside {
@@ -732,9 +737,123 @@
         padding-bottom: 120px;
       }
     }
+
+    /* ================= LOGIN SCREEN ================= */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 500;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg-main);
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--bg-card);
+      width: 100%;
+      max-width: 400px;
+      padding: 36px 32px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      border: 1px solid var(--border-color);
+      text-align: center;
+    }
+    .login-card .brand-logo {
+      justify-content: center;
+      margin-bottom: 6px;
+    }
+    .login-subtitle {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-bottom: 26px;
+    }
+    .login-card .form-group {
+      text-align: left;
+    }
+    .login-error {
+      display: none;
+      background: var(--brand-red-light);
+      color: var(--brand-red);
+      font-size: 12px;
+      font-weight: 700;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      margin-bottom: 14px;
+    }
+    .login-hint {
+      display: none;
+      background: #ECFDF5;
+      color: #047857;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 10px 12px;
+      border-radius: var(--radius-md);
+      margin-bottom: 14px;
+    }
+    .login-card .btn {
+      width: 100%;
+      justify-content: center;
+      padding: 11px 16px;
+      margin-top: 6px;
+    }
+    .login-foot {
+      margin-top: 18px;
+      font-size: 11px;
+      color: var(--text-light);
+    }
+
+    /* ================= UPLOAD PROGRESS ================= */
+    .upload-progress-wrap {
+      display: none;
+      height: 6px;
+      background: #E2E8F0;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .upload-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: var(--brand-red);
+      transition: width 0.2s;
+    }
+    .upload-hint {
+      font-size: 10.5px;
+      color: var(--text-light);
+      margin-top: 4px;
+      display: block;
+    }
   </style>
 </head>
 <body>
+
+  <!-- ================= LOGIN SCREEN ================= -->
+  <div id="login-screen">
+    <div class="login-card">
+      <div class="brand-logo">
+        <div class="logo-text">ΣLIY<span>Δ</span>H.</div>
+        <span class="logo-badge">PRO</span>
+      </div>
+      <p class="login-subtitle">Connectez-vous avec votre identifiant membre</p>
+
+      <div class="login-error" id="login-error-box"></div>
+      <div class="login-hint" id="login-hint-box"></div>
+
+      <div class="form-group">
+        <label>Adresse Email</label>
+        <input type="email" id="login-email" placeholder="votre@email.com" autocomplete="username" onkeypress="if(event.key==='Enter') document.getElementById('login-password').focus()">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeypress="if(event.key==='Enter') attemptLogin()">
+      </div>
+      <button class="btn btn-primary" id="login-submit-btn" onclick="attemptLogin()"><i class="fa-solid fa-right-to-bracket"></i> Se connecter</button>
+      <p class="login-foot">Identifiants oubliés ? Demandez à votre administrateur de réinitialiser votre mot de passe.</p>
+    </div>
+  </div>
+
+  <div id="app-shell" style="display:none;">
   <!-- ================= SIDEBAR ================= -->
   <aside>
     <div>
@@ -772,7 +891,7 @@
           <i class="fa-solid fa-folder-open"></i>
           <span>Documents & Medias</span>
         </li>
-        <li class="nav-item" onclick="switchTab('admin', this)">
+        <li class="nav-item" id="nav-admin-item" onclick="switchTab('admin', this)">
           <i class="fa-solid fa-crown"></i>
           <span>Espace Admin</span>
         </li>
@@ -789,9 +908,6 @@
         </div>
       </div>
       <div class="user-actions">
-        <button class="action-icon-btn" title="Inverser Rôle (Test Admin/User)" onclick="toggleUserRole()">
-          <i class="fa-solid fa-user-shield"></i>
-        </button>
         <button class="action-icon-btn logout" title="Déconnexion" onclick="logoutUser()">
           <i class="fa-solid fa-right-from-bracket"></i>
         </button>
@@ -1052,8 +1168,9 @@
       <div class="box-header">
         <div class="box-title">
           <h3>👑 Espace Administration & Droits Membres</h3>
-          <p>Gestion des rôles et autorisations des utilisateurs</p>
+          <p>Gestion des comptes, identifiants et autorisations des utilisateurs</p>
         </div>
+        <button class="btn btn-primary" onclick="openModal('modal-add-user')"><i class="fa-solid fa-user-plus"></i> Ajouter un Membre</button>
       </div>
       <div class="data-card">
         <div class="table-wrapper">
@@ -1064,6 +1181,7 @@
                 <th>Adresse Email</th>
                 <th>Rôle Actuel</th>
                 <th>Changer Rôle</th>
+                <th>Mot de Passe</th>
                 <th>Actions Admin</th>
               </tr>
             </thead>
@@ -1184,6 +1302,8 @@
       <div class="form-group">
         <label>Fichier Audio (MP3/WAV)</label>
         <input type="file" id="new-song-file" accept="audio/*">
+        <span class="upload-hint">Taille max. 50 Mo</span>
+        <div class="upload-progress-wrap" id="song-upload-progress"><div class="upload-progress-bar" id="song-upload-progress-bar"></div></div>
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-add-song')">Annuler</button>
@@ -1233,7 +1353,7 @@
       </div>
       <div class="form-group">
         <label>Type de Média</label>
-        <select id="new-doc-type">
+        <select id="new-doc-type" onchange="updateDocUploadHint()">
           <option value="pdf">Document PDF</option>
           <option value="wav">Fichier Audio WAV/MP3</option>
           <option value="video">Vidéo MP4 / Concert</option>
@@ -1242,10 +1362,12 @@
       <div class="form-group">
         <label>Fichier à Joindre</label>
         <input type="file" id="new-doc-file">
+        <span class="upload-hint" id="doc-upload-hint">Taille max. 20 Mo (PDF)</span>
+        <div class="upload-progress-wrap" id="doc-upload-progress"><div class="upload-progress-bar" id="doc-upload-progress-bar"></div></div>
       </div>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-add-doc')">Annuler</button>
-        <button class="btn btn-primary" onclick="addNewDocument()">Ajouter au Kit</button>
+        <button class="btn btn-primary" id="doc-modal-submit" onclick="addNewDocument()">Ajouter au Kit</button>
       </div>
     </div>
   </div>
@@ -1272,9 +1394,58 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-add-user">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 16px; font-weight: 800;">Ajouter un Membre</h3>
+      <div class="form-group">
+        <label>Nom du Membre</label>
+        <input type="text" id="new-user-name" placeholder="Ex: Marie Chant">
+      </div>
+      <div class="form-group">
+        <label>Adresse Email (identifiant de connexion)</label>
+        <input type="email" id="new-user-email" placeholder="Ex: marie@eliyah.band">
+      </div>
+      <div class="form-group">
+        <label>Rôle</label>
+        <select id="new-user-role">
+          <option value="user">Membre du Groupe</option>
+          <option value="admin">Administrateur</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Mot de passe initial (optionnel)</label>
+        <input type="password" id="new-user-password" placeholder="Laisser vide : le membre le définira à sa 1ère connexion">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-add-user')">Annuler</button>
+        <button class="btn btn-primary" onclick="addNewUser()">Ajouter le Membre</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-reset-password">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 16px; font-weight: 800;">Réinitialiser le Mot de Passe</h3>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+        Membre : <strong id="reset-pwd-user-name"></strong>
+      </p>
+      <div class="form-group">
+        <label>Nouveau mot de passe (optionnel)</label>
+        <input type="password" id="reset-pwd-value" placeholder="Laisser vide pour que le membre le redéfinisse lui-même">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-reset-password')">Annuler</button>
+        <button class="btn btn-primary" onclick="confirmResetPassword()">Valider</button>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /app-shell -->
+
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
   <script>
     /* ================= FIREBASE SETUP ================= */
@@ -1289,6 +1460,47 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const storage = firebase.storage();
+
+    /* ================= UPLOAD HELPERS (taille max + progression) ================= */
+    const MAX_FILE_MB = { pdf: 20, wav: 50, video: 200, audio: 50 };
+
+    function validateFileSize(file, kind) {
+      const maxMb = MAX_FILE_MB[kind] || 50;
+      if (file.size > maxMb * 1024 * 1024) {
+        alert(`Fichier trop volumineux (${(file.size / (1024*1024)).toFixed(1)} Mo). Taille max autorisée : ${maxMb} Mo.`);
+        return false;
+      }
+      return true;
+    }
+
+    function uploadFileWithProgress(fileRef, file, progressWrapEl, progressBarEl) {
+      return new Promise((resolve, reject) => {
+        if (progressWrapEl) progressWrapEl.style.display = 'block';
+        if (progressBarEl) progressBarEl.style.width = '0%';
+        const task = fileRef.put(file);
+        task.on('state_changed', snap => {
+          const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
+          if (progressBarEl) progressBarEl.style.width = pct + '%';
+        }, err => {
+          if (progressWrapEl) progressWrapEl.style.display = 'none';
+          reject(err);
+        }, async () => {
+          try {
+            const url = await task.snapshot.ref.getDownloadURL();
+            if (progressWrapEl) progressWrapEl.style.display = 'none';
+            resolve(url);
+          } catch (e) { reject(e); }
+        });
+      });
+    }
+
+    function updateDocUploadHint() {
+      const type = document.getElementById('new-doc-type').value;
+      const hint = document.getElementById('doc-upload-hint');
+      const labels = { pdf: 'PDF (max 20 Mo)', wav: 'Audio WAV/MP3 (max 50 Mo)', video: 'Vidéo MP4 (max 200 Mo)' };
+      hint.textContent = 'Taille max. ' + (MAX_FILE_MB[type] || 50) + ' Mo — ' + (labels[type] || '');
+    }
 
     const songsCol = db.collection('songs');
     const chantiersCol = db.collection('chantiers');
@@ -1296,14 +1508,11 @@
     const documentsCol = db.collection('documents');
     const chatCol = db.collection('chat');
     const usersCol = db.collection('users');
+    const activitiesCol = db.collection('activities');
     const setlistDocRef = db.collection('appState').doc('setlist');
 
     /* ================= APP STATE MANAGEMENT ================= */
-    let currentUser = {
-      name: 'N. Chebani',
-      email: 'nchebani@gmail.com',
-      role: 'admin'
-    };
+    let currentUser = null;
 
     let songsData = [];
     let chantiersData = [];
@@ -1312,11 +1521,7 @@
     let chatData = [];
     let usersData = [];
     let setlistOrder = [];
-    let activitiesData = [
-      { id: 1, author: 'Lucas (Guitare)', text: 'a mis à jour la prise de guitare sur "Lumière dans l\'Ombre"', time: 'Aujourd\'hui à 14:20', icon: 'fa-guitar' },
-      { id: 2, author: 'N. Chebani (Admin)', text: 'a ajusté le mixage global à 75% sur le Titre 02', time: 'Hier à 18:45', icon: 'fa-sliders' },
-      { id: 3, author: 'Sarah (Voix)', text: 'a posé la seconde harmonie vocale sur "Souffle Nouveau"', time: '25 Sept. à 11:30', icon: 'fa-microphone' }
-    ];
+    let activitiesData = [];
 
     let editingSongId = null;
     let editingEventId = null;
@@ -1350,21 +1555,13 @@
     ];
     const DEFAULT_SETLIST_ORDER = DEFAULT_SONGS.map(s => s.id);
     const DEFAULT_USERS = [
-      { name: 'N. Chebani', email: 'nchebani@gmail.com', role: 'admin' },
-      { name: 'Lucas Guitare', email: 'lucas@eliyah.band', role: 'user' },
-      { name: 'Sarah Voix', email: 'sarah@eliyah.band', role: 'user' }
+      { name: 'N. Chebani', email: 'nchebani@gmail.com', role: 'admin', passwordHash: '' },
+      { name: 'Lucas Guitare', email: 'lucas@eliyah.band', role: 'user', passwordHash: '' },
+      { name: 'Sarah Voix', email: 'sarah@eliyah.band', role: 'user', passwordHash: '' }
     ];
 
     /* ================= INITIALIZATION & FIRESTORE SYNC ================= */
     window.addEventListener('DOMContentLoaded', () => {
-      initCharts();
-      initFirebaseSync();
-
-      setTimeout(() => {
-        renderConnNotification();
-        openModal('modal-conn-notif');
-      }, 400);
-
       audioObj.addEventListener('timeupdate', () => {
         if (audioObj.duration) {
           document.getElementById('audio-seek-slider').max = audioObj.duration;
@@ -1377,7 +1574,109 @@
         isPlaying = false;
         updatePlayerUI();
       });
+
+      checkExistingSession();
     });
+
+    /* ================= AUTHENTIFICATION ================= */
+    function showLoginError(msg) {
+      const box = document.getElementById('login-error-box');
+      const hint = document.getElementById('login-hint-box');
+      hint.style.display = 'none';
+      box.textContent = msg;
+      box.style.display = 'block';
+    }
+
+    function showLoginHint(msg) {
+      const box = document.getElementById('login-error-box');
+      const hint = document.getElementById('login-hint-box');
+      box.style.display = 'none';
+      hint.textContent = msg;
+      hint.style.display = 'block';
+    }
+
+    function checkExistingSession() {
+      const savedId = localStorage.getItem('eliyah_session_docId');
+      if (!savedId) return;
+      usersCol.doc(savedId).get().then(doc => {
+        if (doc.exists) {
+          const data = doc.data();
+          currentUser = { docId: doc.id, name: data.name, email: data.email, role: data.role };
+          startApp();
+        } else {
+          localStorage.removeItem('eliyah_session_docId');
+        }
+      }).catch(() => localStorage.removeItem('eliyah_session_docId'));
+    }
+
+    async function attemptLogin() {
+      const emailInput = document.getElementById('login-email');
+      const pwdInput = document.getElementById('login-password');
+      const email = emailInput.value.trim().toLowerCase();
+      const password = pwdInput.value;
+      const btn = document.getElementById('login-submit-btn');
+
+      if (!email || !password) {
+        showLoginError('Merci de renseigner votre email et votre mot de passe.');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connexion...';
+
+      try {
+        const snap = await usersCol.where('email', '==', email).limit(1).get();
+        if (snap.empty) {
+          showLoginError('Aucun compte trouvé avec cet email. Contactez votre administrateur.');
+          return;
+        }
+        const doc = snap.docs[0];
+        const data = doc.data();
+        const enteredHash = await hashPassword(password);
+
+        if (!data.passwordHash) {
+          // Première connexion : on définit ce mot de passe comme mot de passe du compte
+          await usersCol.doc(doc.id).update({ passwordHash: enteredHash });
+          currentUser = { docId: doc.id, name: data.name, email: data.email, role: data.role };
+          localStorage.setItem('eliyah_session_docId', doc.id);
+          startApp();
+          return;
+        }
+
+        if (data.passwordHash !== enteredHash) {
+          showLoginError('Mot de passe incorrect.');
+          return;
+        }
+
+        currentUser = { docId: doc.id, name: data.name, email: data.email, role: data.role };
+        localStorage.setItem('eliyah_session_docId', doc.id);
+        startApp();
+      } catch (err) {
+        console.error(err);
+        showLoginError('Erreur de connexion. Vérifiez votre connexion internet et réessayez.');
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Se connecter';
+      }
+    }
+
+    function startApp() {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-shell').style.display = 'flex';
+
+      document.getElementById('user-name-display').textContent = currentUser.name;
+      document.getElementById('user-email-display').textContent = currentUser.email;
+      document.getElementById('user-avatar').textContent = (currentUser.name || '?').charAt(0).toUpperCase();
+      updateRoleBadge();
+
+      initCharts();
+      initFirebaseSync();
+
+      setTimeout(() => {
+        renderConnNotification();
+        openModal('modal-conn-notif');
+      }, 400);
+    }
 
     function seedCollectionIfEmpty(colRef, defaultItems, useAutoId = false) {
       colRef.limit(1).get().then(snap => {
@@ -1448,37 +1747,48 @@
           renderAll();
         }
       });
+
+      activitiesCol.orderBy('timestamp', 'desc').limit(20).onSnapshot(snap => {
+        activitiesData = snap.docs.map(d => d.data());
+        renderActivityFeed();
+      });
     }
 
-    /* ================= LOGOUT & ROLE FUNCTIONS ================= */
+    function logActivity(text, icon) {
+      const newId = Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+      activitiesCol.doc(newId).set({
+        id: newId,
+        author: `${currentUser.name} (${currentUser.role === 'admin' ? 'Admin' : 'Membre'})`,
+        text,
+        icon: icon || 'fa-circle-check',
+        timestamp: Date.now(),
+        time: new Date().toLocaleString('fr-FR', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+      }).catch(err => console.error('Erreur log activité :', err));
+    }
+
+    /* ================= LOGOUT FUNCTION ================= */
     function logoutUser() {
       if (confirm('Voulez-vous vraiment vous déconnecter de l\'application ?')) {
-        alert('Vous avez été déconnecté avec succès.');
+        localStorage.removeItem('eliyah_session_docId');
         window.location.reload();
       }
-    }
-
-    function toggleUserRole() {
-      const newRole = currentUser.role === 'admin' ? 'user' : 'admin';
-      const myProfile = usersData.find(u => u.email === currentUser.email);
-      if (myProfile) {
-        usersCol.doc(myProfile.docId).update({ role: newRole });
-      } else {
-        usersCol.add({ name: currentUser.name, email: currentUser.email, role: newRole });
-      }
-      currentUser.role = newRole;
-      updateRoleBadge();
-      renderAll();
     }
 
     function updateRoleBadge() {
       const roleDisplay = document.getElementById('user-role-display');
       roleDisplay.textContent = currentUser.role === 'admin' ? 'ADMINISTRATEUR' : 'MEMBRE GROUPE';
       roleDisplay.className = 'role-badge ' + (currentUser.role === 'admin' ? 'admin' : '');
+
+      const adminNavItem = document.getElementById('nav-admin-item');
+      if (adminNavItem) adminNavItem.style.display = (currentUser.role === 'admin') ? 'flex' : 'none';
     }
 
     /* ================= NAVIGATION ================= */
     function switchTab(viewId, element) {
+      if (viewId === 'admin' && currentUser.role !== 'admin') {
+        alert('Accès réservé aux administrateurs.');
+        return;
+      }
       document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       
@@ -1620,6 +1930,7 @@
       const item = chantiersData.find(c => c.id === id);
       if (item) {
         chantiersCol.doc(String(id)).update({ done: !item.done });
+        logActivity(`a marqué le chantier "${item.title}" comme ${!item.done ? 'terminé' : 'à refaire'}`, 'fa-list-check');
       }
     }
 
@@ -1640,6 +1951,7 @@
       chantiersCol.doc(String(newId)).set({
         id: newId, title, type, urgent, assign, done: false
       });
+      logActivity(`a créé le chantier "${title}"`, 'fa-list-check');
       closeModal('modal-add-chantier');
       document.getElementById('new-chantier-title').value = '';
     }
@@ -1693,13 +2005,7 @@
         const status = document.getElementById('edit-mix-status').value;
 
         songsCol.doc(String(id)).update({ mixPct, guitar, clavier, voix, status });
-        activitiesData.unshift({
-          id: Date.now(),
-          author: `${currentUser.name} (${currentUser.role.toUpperCase()})`,
-          text: `a mis à jour le mixage du titre "${song.title}" (${mixPct}%)`,
-          time: 'À l\'instant',
-          icon: 'fa-sliders'
-        });
+        logActivity(`a mis à jour le mixage du titre "${song.title}" (${mixPct}%)`, 'fa-sliders');
         closeModal('modal-edit-mix');
       }
     }
@@ -1722,7 +2028,7 @@
             </button>
           </td>
           <td>
-            ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> DL</a>` : '<span style="font-size:11px; color:var(--text-light);">Aucun fichier</span>'}
+            ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> DL</a>` : '<span style="font-size:11px; color:var(--text-light);">Aucun fichier</span>'}
           </td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openEditSongModal(${s.id})"><i class="fa-solid fa-pen"></i></button>
@@ -1758,36 +2064,61 @@
       openModal('modal-add-song');
     }
 
-    function saveSong() {
+    async function saveSong() {
       const title = document.getElementById('new-song-title').value.trim();
       if (!title) return alert('Veuillez entrer un titre.');
       const key = document.getElementById('new-song-key').value.trim() || 'Am';
       const bpm = parseInt(document.getElementById('new-song-bpm').value) || 120;
       const duration = document.getElementById('new-song-duration').value.trim() || '03:30';
       const fileInput = document.getElementById('new-song-file');
+      const submitBtn = document.getElementById('song-modal-submit');
 
+      const newId = editingSongId || Date.now();
       let fileUrl = '';
+
       if (fileInput.files.length > 0) {
-        fileUrl = URL.createObjectURL(fileInput.files[0]);
+        const file = fileInput.files[0];
+        if (!validateFileSize(file, 'audio')) return;
+
+        submitBtn.disabled = true;
+        const originalLabel = submitBtn.textContent;
+        submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi du fichier...';
+        try {
+          const fileRef = storage.ref('songs/' + newId + '_' + file.name);
+          fileUrl = await uploadFileWithProgress(fileRef, file, document.getElementById('song-upload-progress'), document.getElementById('song-upload-progress-bar'));
+        } catch (err) {
+          console.error(err);
+          alert('Erreur lors de l\'envoi du fichier audio. Réessayez.');
+          submitBtn.disabled = false;
+          submitBtn.textContent = originalLabel;
+          return;
+        }
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalLabel;
       }
 
       if (editingSongId) {
         const payload = { title, key, bpm, duration };
         if (fileUrl) payload.fileUrl = fileUrl;
         songsCol.doc(String(editingSongId)).update(payload);
+        logActivity(`a modifié le morceau "${title}"`, 'fa-music');
       } else {
-        const newId = Date.now();
         songsCol.doc(String(newId)).set({
           id: newId, title, key, bpm, duration,
           mixPct: 0, guitar: 'À enregistrer', clavier: 'À enregistrer', voix: 'À enregistrer',
           status: 'Maquette', fileUrl
         });
+        logActivity(`a ajouté un nouveau morceau : "${title}"`, 'fa-music');
       }
       closeModal('modal-add-song');
     }
 
     function deleteSong(id) {
       if (confirm('Supprimer définitivement ce morceau ?')) {
+        const song = songsData.find(s => s.id === id);
+        if (song && song.fileUrl) {
+          storage.refFromURL(song.fileUrl).delete().catch(() => {});
+        }
         songsCol.doc(String(id)).delete();
       }
     }
@@ -1842,6 +2173,7 @@
       } else {
         const newId = Date.now();
         eventsCol.doc(String(newId)).set({ id: newId, title, date, location });
+        logActivity(`a ajouté un nouvel événement : "${title}"`, 'fa-calendar-plus');
       }
       closeModal('modal-add-event');
     }
@@ -1933,17 +2265,24 @@
             </div>
           </div>
           <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:12px; border-top:1px solid #F1F5F9; padding-top:10px;">
-            <a href="#" class="btn btn-secondary btn-sm" onclick="alert('Téléchargement du fichier : ${d.title}')"><i class="fa-solid fa-download"></i> Télécharger</a>
+            ${d.fileUrl
+              ? `<a href="${d.fileUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Télécharger</a>`
+              : `<span style="font-size:11px; color:var(--text-light);"><i class="fa-solid fa-triangle-exclamation"></i> Fichier indisponible</span>`}
             ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </div>
         </div>
       `).join('');
     }
 
-    function addNewDocument() {
+    async function addNewDocument() {
       const title = document.getElementById('new-doc-title').value.trim();
       if (!title) return alert('Titre requis.');
       const type = document.getElementById('new-doc-type').value;
+      const fileInput = document.getElementById('new-doc-file');
+
+      if (!fileInput.files.length) return alert('Merci de sélectionner un fichier à joindre.');
+      const file = fileInput.files[0];
+      if (!validateFileSize(file, type)) return;
 
       let icon = 'fa-file-pdf';
       let color = '#E11D48';
@@ -1951,14 +2290,36 @@
       if (type === 'video') { icon = 'fa-file-video'; color = '#7C3AED'; }
 
       const newId = Date.now();
-      documentsCol.doc(String(newId)).set({
-        id: newId, title, type, desc: 'Fichier ajouté à la médiathèque', icon, color
-      });
-      closeModal('modal-add-doc');
+      const submitBtn = document.getElementById('doc-modal-submit');
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Envoi...';
+
+      try {
+        const fileRef = storage.ref('docs/' + newId + '_' + file.name);
+        const fileUrl = await uploadFileWithProgress(fileRef, file, document.getElementById('doc-upload-progress'), document.getElementById('doc-upload-progress-bar'));
+
+        await documentsCol.doc(String(newId)).set({
+          id: newId, title, type, desc: 'Fichier ajouté à la médiathèque', icon, color, fileUrl
+        });
+        closeModal('modal-add-doc');
+        document.getElementById('new-doc-title').value = '';
+        document.getElementById('new-doc-file').value = '';
+        logActivity(`a ajouté le document "${title}"`, 'fa-folder-plus');
+      } catch (err) {
+        console.error(err);
+        alert('Erreur lors de l\'envoi du fichier. Réessayez.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Ajouter au Kit';
+      }
     }
 
     function deleteDoc(id) {
       if (confirm('Supprimer ce document ?')) {
+        const doc = documentsData.find(d => d.id === id);
+        if (doc && doc.fileUrl) {
+          storage.refFromURL(doc.fileUrl).delete().catch(() => {});
+        }
         documentsCol.doc(String(id)).delete();
       }
     }
@@ -1977,6 +2338,11 @@
             </button>
           </td>
           <td>
+            <button class="btn btn-secondary btn-sm" onclick="openResetPasswordModal('${u.docId}', '${(u.name || '').replace(/'/g, "\\'")}')">
+              <i class="fa-solid fa-key"></i> Réinitialiser
+            </button>
+          </td>
+          <td>
             <button class="btn btn-danger btn-sm" onclick="deleteAdminUser('${u.docId}')"><i class="fa-solid fa-user-xmark"></i> Retirer</button>
           </td>
         </tr>
@@ -1989,9 +2355,55 @@
     }
 
     function deleteAdminUser(docId) {
-      if (confirm('Retirer cet utilisateur ?')) {
+      if (confirm('Retirer cet utilisateur ? Il ne pourra plus se connecter.')) {
         usersCol.doc(docId).delete();
       }
+    }
+
+    /* ================= COMPTES MEMBRES : AJOUT & MOTS DE PASSE ================= */
+    async function hashPassword(plain) {
+      const enc = new TextEncoder().encode(plain);
+      const digest = await crypto.subtle.digest('SHA-256', enc);
+      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function addNewUser() {
+      const name = document.getElementById('new-user-name').value.trim();
+      const email = document.getElementById('new-user-email').value.trim().toLowerCase();
+      const role = document.getElementById('new-user-role').value;
+      const pwd = document.getElementById('new-user-password').value;
+
+      if (!name || !email) return alert('Le nom et l\'email sont obligatoires.');
+      const exists = usersData.find(u => u.email.toLowerCase() === email);
+      if (exists) return alert('Un membre existe déjà avec cet email.');
+
+      const payload = { name, email, role, passwordHash: '' };
+      if (pwd) payload.passwordHash = await hashPassword(pwd);
+
+      await usersCol.add(payload);
+      document.getElementById('new-user-name').value = '';
+      document.getElementById('new-user-email').value = '';
+      document.getElementById('new-user-password').value = '';
+      closeModal('modal-add-user');
+      logActivity(`a ajouté "${name}" comme nouveau membre du groupe`, 'fa-user-plus');
+      alert(pwd ? 'Membre ajouté avec son mot de passe.' : 'Membre ajouté. Il pourra définir son mot de passe lors de sa 1ère connexion avec son email.');
+    }
+
+    let resetPwdDocId = null;
+    function openResetPasswordModal(docId, name) {
+      resetPwdDocId = docId;
+      document.getElementById('reset-pwd-user-name').textContent = name;
+      document.getElementById('reset-pwd-value').value = '';
+      openModal('modal-reset-password');
+    }
+
+    async function confirmResetPassword() {
+      if (!resetPwdDocId) return;
+      const newPwd = document.getElementById('reset-pwd-value').value;
+      const passwordHash = newPwd ? await hashPassword(newPwd) : '';
+      await usersCol.doc(resetPwdDocId).update({ passwordHash });
+      closeModal('modal-reset-password');
+      alert(newPwd ? 'Mot de passe mis à jour.' : 'Mot de passe effacé : le membre devra en redéfinir un à sa prochaine connexion.');
     }
 
     /* ================= AUDIO PLAYER ================= */
@@ -2133,7 +2545,101 @@
       document.getElementById(id)?.classList.remove('active');
     }
     function exportSummaryPDF() {
-      window.print();
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const brandRed = [139, 30, 45];
+      const dark = [15, 23, 42];
+      const muted = [100, 116, 139];
+      let y = 20;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(20);
+      doc.setTextColor(...brandRed);
+      doc.text('ELIYAH — Synthèse de Production', 14, y);
+      y += 7;
+      doc.setFontSize(10);
+      doc.setTextColor(...muted);
+      doc.setFont('helvetica', 'normal');
+      doc.text('Généré le ' + new Date().toLocaleString('fr-FR'), 14, y);
+      y += 12;
+
+      const totalSongs = songsData.length;
+      const mixedSongs = songsData.filter(s => s.status === 'Masterisé').length;
+      const avgMix = totalSongs ? Math.round(songsData.reduce((a, s) => a + (s.mixPct || 0), 0) / totalSongs) : 0;
+      const urgentCount = chantiersData.filter(c => c.urgent === 'urgent' && !c.done).length;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(...dark);
+      doc.text('Indicateurs clés', 14, y);
+      y += 7;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(11);
+      doc.text(`• Avancement moyen du mixage : ${avgMix}%`, 16, y); y += 6;
+      doc.text(`• Titres masterisés : ${mixedSongs} / ${totalSongs}`, 16, y); y += 6;
+      doc.text(`• Chantiers urgents en attente : ${urgentCount}`, 16, y); y += 6;
+      doc.text(`• Prochains événements : ${eventsData.length}`, 16, y); y += 12;
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.text('Suivi des morceaux', 14, y);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      songsData.forEach(s => {
+        if (y > 275) { doc.addPage(); y = 20; }
+        doc.setTextColor(...dark);
+        doc.text(`${s.title}`, 16, y);
+        doc.setTextColor(...muted);
+        doc.text(`${s.status} — Mix ${s.mixPct}% — ${s.bpm} BPM — ${s.duration}`, 16, y + 4.5);
+        y += 11;
+      });
+
+      y += 4;
+      if (y > 260) { doc.addPage(); y = 20; }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(...dark);
+      doc.text('Chantiers prioritaires', 14, y);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      const urgentList = chantiersData.filter(c => c.urgent === 'urgent' && !c.done);
+      if (!urgentList.length) {
+        doc.setTextColor(...muted);
+        doc.text('Aucun chantier urgent en attente.', 16, y);
+        y += 8;
+      } else {
+        urgentList.forEach(c => {
+          if (y > 275) { doc.addPage(); y = 20; }
+          doc.setTextColor(...dark);
+          doc.text(`${c.title}`, 16, y);
+          doc.setTextColor(...muted);
+          doc.text(`Responsable(s) : ${c.assign}`, 16, y + 4.5);
+          y += 11;
+        });
+      }
+
+      y += 4;
+      if (y > 260) { doc.addPage(); y = 20; }
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(...dark);
+      doc.text('Agenda', 14, y);
+      y += 8;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      eventsData.forEach(e => {
+        if (y > 275) { doc.addPage(); y = 20; }
+        doc.setTextColor(...dark);
+        doc.text(`${e.title}`, 16, y);
+        doc.setTextColor(...muted);
+        doc.text(`${e.date} — ${e.location}`, 16, y + 4.5);
+        y += 11;
+      });
+
+      doc.save(`ELIYAH_Synthese_${new Date().toISOString().slice(0, 10)}.pdf`);
+      logActivity('a exporté une synthèse PDF de la production', 'fa-file-pdf');
     }
   </script>
 </body>
