@@ -1453,8 +1453,17 @@
     /* ================= LOGOUT & ROLE FUNCTIONS ================= */
     function logoutUser() {
       if (confirm('Voulez-vous vraiment vous déconnecter de l\'application ?')) {
+        currentUser = {
+          name: 'Invité',
+          email: '',
+          role: 'user'
+        };
+        document.getElementById('user-name-display').textContent = 'Invité';
+        document.getElementById('user-email-display').textContent = 'Non connecté';
+        document.getElementById('user-avatar').textContent = '?';
+        updateRoleBadge();
+        renderAll();
         alert('Vous avez été déconnecté avec succès.');
-        window.location.reload();
       }
     }
 
