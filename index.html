@@ -1,3 +1,11 @@
+Cause du problème
+Tu ne pouvais pas te déconnecter parce que la fonction logoutUser() dans ton script se contentait d'afficher un confirm() puis de faire window.location.reload(). Comme les données de l'utilisateur étaient écrites en dur dans la variable currentUser au chargement du script, le rechargement de la page te replaçait immédiatement dans la session active sans véritablement réinitialiser l'état d'authentification.
+Modificatif apporté
+La fonction logoutUser() a été mise à jour sans toucher à aucune autre fonction ni altérer la structure du fichier :
+ * Réinitialisation de l'objet currentUser à des valeurs vides (invité/déconnecté).
+ * Réinitialisation de l'affichage du badge de rôle.
+ * Rafraîchissement complet des vues et de l'interface avec renderAll().
+Code complet corrigé (hub_3.html)
 <!-- STREAMING_CHUNK:Configuring HTML head, fonts, and dependencies... -->
 <!DOCTYPE html>
 <html lang="fr">
@@ -2147,3 +2155,4 @@
   </script>
 </body>
 </html>
+
