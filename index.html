@@ -742,6 +742,123 @@
       }
     }
 
+    /* ================= MOBILE (TÉLÉPHONE) ================= */
+    @media (max-width: 640px) {
+      :root {
+        box-sizing: border-box;
+      }
+      #app-shell {
+        flex-direction: column;
+        height: 100dvh;
+      }
+
+      /* Barre de navigation basse (façon app mobile), au lieu de la sidebar verticale */
+      aside {
+        position: fixed;
+        bottom: 0; left: 0; right: 0;
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        padding: 4px calc(4px + env(safe-area-inset-right)) calc(4px + env(safe-area-inset-bottom)) calc(4px + env(safe-area-inset-left));
+        border-right: none;
+        border-top: 1px solid var(--border-color);
+        z-index: 60;
+      }
+      aside > div:first-child { width: 100%; }
+      .brand-logo { display: none; }
+      .nav-menu {
+        flex-direction: row;
+        margin-top: 0;
+        gap: 2px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      .nav-menu::-webkit-scrollbar { display: none; }
+      .nav-item {
+        flex-direction: column;
+        justify-content: center;
+        padding: 6px 12px;
+        gap: 3px;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .nav-item span {
+        display: inline-block !important;
+        font-size: 9px;
+        font-weight: 700;
+      }
+      .nav-item i {
+        font-size: 16px;
+        width: auto;
+      }
+      .nav-badge {
+        position: absolute;
+        top: 2px;
+        right: 6px;
+        margin-left: 0;
+        font-size: 9px;
+        padding: 1px 5px;
+      }
+
+      /* Profil + déconnexion : repositionnés en bandeau fixe en haut d'écran */
+      .user-card {
+        display: flex !important;
+        position: fixed;
+        top: 0; left: 0; right: 0;
+        z-index: 60;
+        border-radius: 0;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: calc(10px + env(safe-area-inset-top)) 14px 10px 14px;
+      }
+      .user-det { display: flex !important; }
+      .user-email { display: none; }
+
+      main {
+        padding: 66px 14px calc(150px + env(safe-area-inset-bottom)) 14px;
+      }
+
+      .kpi-grid { grid-template-columns: 1fr; }
+
+      .top-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .top-header > div:last-child,
+      .top-header > button {
+        width: 100%;
+      }
+
+      .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+      }
+      .modal-box {
+        width: 100%;
+        max-width: 100%;
+        max-height: 92dvh;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding-bottom: calc(26px + env(safe-area-inset-bottom));
+      }
+
+      table { font-size: 12px; }
+      th, td { padding: 10px 8px; }
+
+      /* Lecteur audio : au-dessus de la barre de nav mobile, en 2 lignes compactes */
+      .global-audio-player {
+        left: 0;
+        bottom: calc(58px + env(safe-area-inset-bottom));
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 10px 14px;
+      }
+      .player-track-info { min-width: 0; flex: 1 1 auto; }
+      #player-track-sub { display: none; }
+      .player-controls { order: 3; max-width: 100%; flex-basis: 100%; }
+      .player-volume { display: none; }
+    }
+
     /* ================= LOGIN SCREEN ================= */
     #login-screen {
       position: fixed;
@@ -1216,7 +1333,7 @@
         <span style="font-size: 11px;" id="audio-dur-time">0:00</span>
       </div>
     </div>
-    <div style="display: flex; align-items: center; gap: 10px;">
+    <div class="player-volume" style="display: flex; align-items: center; gap: 10px;">
       <i class="fa-solid fa-volume-high" style="font-size: 14px;"></i>
       <input type="range" min="0" max="1" step="0.05" value="0.8" style="width: 70px; accent-color: var(--brand-red);" oninput="if(audioObj) audioObj.volume = this.value">
     </div>
