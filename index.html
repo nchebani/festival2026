@@ -1182,6 +1182,7 @@
                 <th>Rôle Actuel</th>
                 <th>Changer Rôle</th>
                 <th>Mot de Passe</th>
+                <th>Modifier</th>
                 <th>Actions Admin</th>
               </tr>
             </thead>
@@ -1442,6 +1443,24 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-edit-user">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 16px; font-weight: 800;">Modifier le Membre</h3>
+      <div class="form-group">
+        <label>Nom affiché</label>
+        <input type="text" id="edit-user-name" placeholder="Ex: Lucas Guitare">
+      </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-top:-8px;">
+        Email : <strong id="edit-user-email-display"></strong><br>
+        <i class="fa-solid fa-circle-info"></i> L'email n'est pas modifiable ici : il est lié au compte Firebase Authentication du membre.
+      </p>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-edit-user')">Annuler</button>
+        <button class="btn btn-primary" onclick="confirmEditUserName()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
   </div><!-- /app-shell -->
 
   <!-- Firebase Scripts -->
@@ -1634,15 +1653,27 @@
     async function loadOrMigrateUserProfile(user) {
       const directRef = usersCol.doc(user.uid);
       const directSnap = await directRef.get();
-      if (directSnap.exists) return { data: directSnap.data(), created: false };
+      if (directSnap.exists) {
+        const data = directSnap.data();
+        if (!data.name || data.name === 'undefined') {
+          data.name = (user.email || 'Membre').split('@')[0];
+          await directRef.update({ name: data.name });
+        }
+        return { data, created: false };
+      }
 
       const legacySnap = await usersCol.where('email', '==', user.email).limit(1).get();
       if (!legacySnap.empty) {
         const legacyDoc = legacySnap.docs[0];
         const legacyData = legacyDoc.data();
+        if (!legacyData.name || legacyData.name === 'undefined') {
+          legacyData.name = (user.email || 'Membre').split('@')[0];
+        }
         if (legacyDoc.id !== user.uid) {
           await usersCol.doc(user.uid).set(legacyData);
           await usersCol.doc(legacyDoc.id).delete();
+        } else {
+          await usersCol.doc(user.uid).update({ name: legacyData.name });
         }
         return { data: legacyData, created: false };
       }
@@ -2385,26 +2416,35 @@
     function renderAdminUsers() {
       const tbody = document.getElementById('admin-users-table');
       if (!tbody) return;
-      tbody.innerHTML = usersData.map(u => `
+      tbody.innerHTML = usersData.map(u => {
+        const displayName = (u.name && u.name !== 'undefined') ? u.name : `(sans nom)`;
+        const safeName = (u.name || '').replace(/'/g, "\\'");
+        return `
         <tr>
-          <td><strong>${u.name}</strong></td>
+          <td><strong>${displayName}</strong></td>
           <td>${u.email}</td>
-          <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${u.role.toUpperCase()}</span></td>
+          <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${(u.role || 'user').toUpperCase()}</span></td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="toggleUserRoleInAdmin('${u.docId}', '${u.role}')">
               Basculer en ${u.role === 'admin' ? 'Membre' : 'Admin'}
             </button>
           </td>
           <td>
-            <button class="btn btn-secondary btn-sm" onclick="openResetPasswordModal('${u.docId}', '${(u.name || '').replace(/'/g, "\\'")}', '${u.email}')">
+            <button class="btn btn-secondary btn-sm" onclick="openResetPasswordModal('${u.docId}', '${safeName}', '${u.email}')">
               <i class="fa-solid fa-key"></i> Réinitialiser
+            </button>
+          </td>
+          <td>
+            <button class="btn btn-secondary btn-sm" onclick="openEditUserModal('${u.docId}', '${safeName}', '${u.email}')">
+              <i class="fa-solid fa-pen"></i> Modifier
             </button>
           </td>
           <td>
             <button class="btn btn-danger btn-sm" onclick="deleteAdminUser('${u.docId}')"><i class="fa-solid fa-user-xmark"></i> Retirer</button>
           </td>
         </tr>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function toggleUserRoleInAdmin(docId, currentRole) {
@@ -2480,6 +2520,23 @@
         console.error(err);
         alert("Impossible d'envoyer l'email de réinitialisation. Vérifiez l'adresse.");
       }
+    }
+
+    let editUserDocId = null;
+    function openEditUserModal(docId, name, email) {
+      editUserDocId = docId;
+      document.getElementById('edit-user-name').value = (name && name !== 'undefined') ? name : '';
+      document.getElementById('edit-user-email-display').textContent = email;
+      openModal('modal-edit-user');
+    }
+
+    async function confirmEditUserName() {
+      if (!editUserDocId) return;
+      const newName = document.getElementById('edit-user-name').value.trim();
+      if (!newName) return alert('Le nom ne peut pas être vide.');
+      await usersCol.doc(editUserDocId).update({ name: newName });
+      closeModal('modal-edit-user');
+      logActivity(`a mis à jour le profil d'un membre`, 'fa-pen');
     }
 
     /* ================= AUDIO PLAYER ================= */
