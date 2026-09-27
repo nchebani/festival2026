@@ -849,7 +849,7 @@
         <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password" onkeypress="if(event.key==='Enter') attemptLogin()">
       </div>
       <button class="btn btn-primary" id="login-submit-btn" onclick="attemptLogin()"><i class="fa-solid fa-right-to-bracket"></i> Se connecter</button>
-      <p class="login-foot">Identifiants oubliés ? Demandez à votre administrateur de réinitialiser votre mot de passe.</p>
+      <p class="login-foot">Mot de passe oublié ? <a href="#" onclick="event.preventDefault(); resetPasswordFromLogin();" style="color:var(--brand-red); font-weight:600; text-decoration:underline;">Recevoir un lien par email</a></p>
     </div>
   </div>
 
@@ -1413,12 +1413,15 @@
         </select>
       </div>
       <div class="form-group">
-        <label>Mot de passe initial (optionnel)</label>
-        <input type="password" id="new-user-password" placeholder="Laisser vide : le membre le définira à sa 1ère connexion">
+        <label>Mot de passe initial (obligatoire, 6 caractères min.)</label>
+        <input type="password" id="new-user-password" placeholder="Ex: EliyahLive2026">
       </div>
+      <p style="font-size:12px; color:var(--text-muted); margin-top:-8px; margin-bottom:6px;">
+        <i class="fa-solid fa-circle-info"></i> Un compte Firebase Authentication est créé immédiatement : le membre peut se connecter tout de suite avec cet email et ce mot de passe.
+      </p>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-add-user')">Annuler</button>
-        <button class="btn btn-primary" onclick="addNewUser()">Ajouter le Membre</button>
+        <button class="btn btn-primary" id="add-user-submit-btn" onclick="addNewUser()">Ajouter le Membre</button>
       </div>
     </div>
   </div>
@@ -1427,15 +1430,14 @@
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Réinitialiser le Mot de Passe</h3>
       <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
-        Membre : <strong id="reset-pwd-user-name"></strong>
+        Membre : <strong id="reset-pwd-user-name"></strong> (<span id="reset-pwd-user-email"></span>)
       </p>
-      <div class="form-group">
-        <label>Nouveau mot de passe (optionnel)</label>
-        <input type="password" id="reset-pwd-value" placeholder="Laisser vide pour que le membre le redéfinisse lui-même">
-      </div>
+      <p style="font-size:13px; color:var(--text-muted); margin-bottom:14px;">
+        Un email contenant un lien de réinitialisation sera envoyé à cette adresse. Le membre pourra alors choisir lui-même un nouveau mot de passe.
+      </p>
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-reset-password')">Annuler</button>
-        <button class="btn btn-primary" onclick="confirmResetPassword()">Valider</button>
+        <button class="btn btn-primary" onclick="confirmResetPassword()"><i class="fa-solid fa-paper-plane"></i> Envoyer l'email</button>
       </div>
     </div>
   </div>
@@ -1445,6 +1447,7 @@
   <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
 
   <script>
@@ -1459,8 +1462,15 @@
       measurementId: "G-MNHRC2MSBH"
     };
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
     const storage = firebase.storage();
+
+    // Instance Firebase secondaire : sert uniquement à l'administrateur pour créer
+    // un compte Firebase Authentication pour un nouveau membre SANS perdre sa propre
+    // session (limitation du SDK client : créer un compte connecte automatiquement dessus).
+    const secondaryApp = firebase.initializeApp(firebaseConfig, "Secondary");
+    const secondaryAuth = secondaryApp.auth();
 
     /* ================= UPLOAD HELPERS (taille max + progression) ================= */
     const MAX_FILE_MB = { pdf: 20, wav: 50, video: 200, audio: 50 };
@@ -1554,11 +1564,11 @@
       { id: 2, title: 'Concert Live Officiel', date: 'Samedi 12 Octobre — 21h00', location: 'Salle de Spectacle • Setlist 45min' }
     ];
     const DEFAULT_SETLIST_ORDER = DEFAULT_SONGS.map(s => s.id);
-    const DEFAULT_USERS = [
-      { name: 'N. Chebani', email: 'nchebani@gmail.com', role: 'admin', passwordHash: '' },
-      { name: 'Lucas Guitare', email: 'lucas@eliyah.band', role: 'user', passwordHash: '' },
-      { name: 'Sarah Voix', email: 'sarah@eliyah.band', role: 'user', passwordHash: '' }
-    ];
+    // Remarque : il n'y a plus de "DEFAULT_USERS" à pré-remplir automatiquement.
+    // Avec Firebase Authentication, chaque membre doit d'abord avoir un compte
+    // Auth (créé depuis l'Espace Admin ou la console Firebase), puis un profil
+    // Firestore dans "users" DONT L'ID DU DOCUMENT EST SON UID FIREBASE AUTH.
+    // C'est addNewUser() qui fait les deux étapes automatiquement.
 
     /* ================= INITIALIZATION & FIRESTORE SYNC ================= */
     window.addEventListener('DOMContentLoaded', () => {
@@ -1574,11 +1584,9 @@
         isPlaying = false;
         updatePlayerUI();
       });
-
-      checkExistingSession();
     });
 
-    /* ================= AUTHENTIFICATION ================= */
+    /* ================= AUTHENTIFICATION (Firebase Authentication) ================= */
     function showLoginError(msg) {
       const box = document.getElementById('login-error-box');
       const hint = document.getElementById('login-hint-box');
@@ -1595,19 +1603,53 @@
       hint.style.display = 'block';
     }
 
-    function checkExistingSession() {
-      const savedId = localStorage.getItem('eliyah_session_docId');
-      if (!savedId) return;
-      usersCol.doc(savedId).get().then(doc => {
-        if (doc.exists) {
-          const data = doc.data();
-          currentUser = { docId: doc.id, name: data.name, email: data.email, role: data.role };
-          startApp();
-        } else {
-          localStorage.removeItem('eliyah_session_docId');
-        }
-      }).catch(() => localStorage.removeItem('eliyah_session_docId'));
+    function translateAuthError(code) {
+      switch (code) {
+        case 'auth/user-not-found':
+        case 'auth/invalid-email':
+          return 'Aucun compte trouvé avec cet email. Contactez votre administrateur.';
+        case 'auth/wrong-password':
+        case 'auth/invalid-credential':
+          return 'Mot de passe incorrect.';
+        case 'auth/too-many-requests':
+          return 'Trop de tentatives. Réessayez dans quelques minutes.';
+        case 'auth/user-disabled':
+          return 'Ce compte a été désactivé. Contactez votre administrateur.';
+        case 'auth/network-request-failed':
+          return 'Erreur réseau. Vérifiez votre connexion internet.';
+        default:
+          return 'Erreur de connexion. Vérifiez votre connexion internet et réessayez.';
+      }
     }
+
+    // Point d'entrée unique de l'authentification : Firebase Auth notifie ici
+    // à chaque connexion, déconnexion, et à chaque rechargement de page (session persistée).
+    auth.onAuthStateChanged(async (user) => {
+      const btn = document.getElementById('login-submit-btn');
+      if (user) {
+        try {
+          const snap = await usersCol.doc(user.uid).get();
+          if (!snap.exists) {
+            showLoginError("Ce compte existe mais n'a pas encore de profil dans l'application. Demandez à votre administrateur de vous ajouter depuis l'Espace Admin.");
+            await auth.signOut();
+            return;
+          }
+          const data = snap.data();
+          currentUser = { docId: user.uid, name: data.name, email: user.email, role: data.role };
+          startApp();
+        } catch (err) {
+          console.error(err);
+          showLoginError('Erreur de connexion. Vérifiez votre connexion internet et réessayez.');
+          await auth.signOut();
+        } finally {
+          if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Se connecter'; }
+        }
+      } else {
+        currentUser = null;
+        document.getElementById('app-shell').style.display = 'none';
+        document.getElementById('login-screen').style.display = 'flex';
+      }
+    });
 
     async function attemptLogin() {
       const emailInput = document.getElementById('login-email');
@@ -1625,39 +1667,28 @@
       btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Connexion...';
 
       try {
-        const snap = await usersCol.where('email', '==', email).limit(1).get();
-        if (snap.empty) {
-          showLoginError('Aucun compte trouvé avec cet email. Contactez votre administrateur.');
-          return;
-        }
-        const doc = snap.docs[0];
-        const data = doc.data();
-        const enteredHash = await hashPassword(password);
-
-        if (!data.passwordHash) {
-          // Première connexion : on définit ce mot de passe comme mot de passe du compte
-          await usersCol.doc(doc.id).update({ passwordHash: enteredHash });
-          currentUser = { docId: doc.id, name: data.name, email: data.email, role: data.role };
-          localStorage.setItem('eliyah_session_docId', doc.id);
-          startApp();
-          return;
-        }
-
-        if (data.passwordHash !== enteredHash) {
-          showLoginError('Mot de passe incorrect.');
-          return;
-        }
-
-        currentUser = { docId: doc.id, name: data.name, email: data.email, role: data.role };
-        localStorage.setItem('eliyah_session_docId', doc.id);
-        startApp();
+        await auth.signInWithEmailAndPassword(email, password);
+        // La suite (chargement du profil + démarrage de l'appli) est gérée par onAuthStateChanged.
       } catch (err) {
         console.error(err);
-        showLoginError('Erreur de connexion. Vérifiez votre connexion internet et réessayez.');
-      } finally {
         btn.disabled = false;
         btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Se connecter';
+        showLoginError(translateAuthError(err.code));
       }
+    }
+
+    function resetPasswordFromLogin() {
+      const email = document.getElementById('login-email').value.trim().toLowerCase();
+      if (!email) {
+        showLoginError('Saisissez votre email dans le champ ci-dessus puis cliquez à nouveau sur ce lien.');
+        return;
+      }
+      auth.sendPasswordResetEmail(email)
+        .then(() => showLoginHint('Un email de réinitialisation a été envoyé à ' + email + '. Pensez à vérifier vos spams.'))
+        .catch((err) => {
+          console.error(err);
+          showLoginError("Impossible d'envoyer l'email de réinitialisation. Vérifiez l'adresse ou contactez votre administrateur.");
+        });
     }
 
     function startApp() {
@@ -1702,7 +1733,6 @@
       seedCollectionIfEmpty(chantiersCol, DEFAULT_CHANTIERS);
       seedCollectionIfEmpty(documentsCol, DEFAULT_DOCUMENTS);
       seedCollectionIfEmpty(eventsCol, DEFAULT_EVENTS);
-      seedCollectionIfEmpty(usersCol, DEFAULT_USERS, true);
       seedSetlistIfEmpty();
 
       songsCol.onSnapshot(snap => {
@@ -1769,8 +1799,7 @@
     /* ================= LOGOUT FUNCTION ================= */
     function logoutUser() {
       if (confirm('Voulez-vous vraiment vous déconnecter de l\'application ?')) {
-        localStorage.removeItem('eliyah_session_docId');
-        window.location.reload();
+        auth.signOut().then(() => window.location.reload());
       }
     }
 
@@ -2338,7 +2367,7 @@
             </button>
           </td>
           <td>
-            <button class="btn btn-secondary btn-sm" onclick="openResetPasswordModal('${u.docId}', '${(u.name || '').replace(/'/g, "\\'")}')">
+            <button class="btn btn-secondary btn-sm" onclick="openResetPasswordModal('${u.docId}', '${(u.name || '').replace(/'/g, "\\'")}', '${u.email}')">
               <i class="fa-solid fa-key"></i> Réinitialiser
             </button>
           </td>
@@ -2355,55 +2384,73 @@
     }
 
     function deleteAdminUser(docId) {
-      if (confirm('Retirer cet utilisateur ? Il ne pourra plus se connecter.')) {
+      if (confirm("Retirer cet utilisateur de l'application ? Il perdra immédiatement l'accès à ELIYAH Hub.\n\nNote : son compte Firebase Authentication restera visible dans la console Firebase (email/mot de passe). Pour le supprimer totalement, allez dans Firebase Console > Authentication.")) {
         usersCol.doc(docId).delete();
+        logActivity("a retiré l'accès d'un membre à l'application", 'fa-user-xmark');
       }
     }
 
-    /* ================= COMPTES MEMBRES : AJOUT & MOTS DE PASSE ================= */
-    async function hashPassword(plain) {
-      const enc = new TextEncoder().encode(plain);
-      const digest = await crypto.subtle.digest('SHA-256', enc);
-      return Array.from(new Uint8Array(digest)).map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-
+    /* ================= COMPTES MEMBRES : AJOUT (Firebase Authentication) ================= */
     async function addNewUser() {
       const name = document.getElementById('new-user-name').value.trim();
       const email = document.getElementById('new-user-email').value.trim().toLowerCase();
       const role = document.getElementById('new-user-role').value;
       const pwd = document.getElementById('new-user-password').value;
+      const btn = document.getElementById('add-user-submit-btn');
 
-      if (!name || !email) return alert('Le nom et l\'email sont obligatoires.');
+      if (!name || !email || !pwd) return alert('Le nom, l\'email et le mot de passe sont obligatoires.');
+      if (pwd.length < 6) return alert('Le mot de passe doit contenir au moins 6 caractères.');
       const exists = usersData.find(u => u.email.toLowerCase() === email);
       if (exists) return alert('Un membre existe déjà avec cet email.');
 
-      const payload = { name, email, role, passwordHash: '' };
-      if (pwd) payload.passwordHash = await hashPassword(pwd);
+      if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Création...'; }
 
-      await usersCol.add(payload);
-      document.getElementById('new-user-name').value = '';
-      document.getElementById('new-user-email').value = '';
-      document.getElementById('new-user-password').value = '';
-      closeModal('modal-add-user');
-      logActivity(`a ajouté "${name}" comme nouveau membre du groupe`, 'fa-user-plus');
-      alert(pwd ? 'Membre ajouté avec son mot de passe.' : 'Membre ajouté. Il pourra définir son mot de passe lors de sa 1ère connexion avec son email.');
+      try {
+        // On crée le compte Firebase Authentication via l'instance SECONDAIRE :
+        // cela évite de déconnecter l'administrateur actuellement connecté sur l'instance principale.
+        const cred = await secondaryAuth.createUserWithEmailAndPassword(email, pwd);
+        const newUid = cred.user.uid;
+        await secondaryAuth.signOut();
+
+        // Le profil (nom + rôle) est stocké dans Firestore, avec l'UID Firebase Auth comme ID de document.
+        await usersCol.doc(newUid).set({ name, email, role });
+
+        document.getElementById('new-user-name').value = '';
+        document.getElementById('new-user-email').value = '';
+        document.getElementById('new-user-password').value = '';
+        closeModal('modal-add-user');
+        logActivity(`a ajouté "${name}" comme nouveau membre du groupe`, 'fa-user-plus');
+        alert('Membre ajouté avec succès. Il peut se connecter dès maintenant avec son email et son mot de passe.');
+      } catch (err) {
+        console.error(err);
+        let msg = 'Erreur lors de la création du compte.';
+        if (err.code === 'auth/email-already-in-use') msg = 'Un compte Firebase Authentication existe déjà avec cet email (vérifiez la console Firebase).';
+        else if (err.code === 'auth/invalid-email') msg = 'Adresse email invalide.';
+        else if (err.code === 'auth/weak-password') msg = 'Mot de passe trop faible (6 caractères minimum).';
+        alert(msg);
+      } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = 'Ajouter le Membre'; }
+      }
     }
 
-    let resetPwdDocId = null;
-    function openResetPasswordModal(docId, name) {
-      resetPwdDocId = docId;
+    let resetPwdEmail = null;
+    function openResetPasswordModal(docId, name, email) {
+      resetPwdEmail = email;
       document.getElementById('reset-pwd-user-name').textContent = name;
-      document.getElementById('reset-pwd-value').value = '';
+      document.getElementById('reset-pwd-user-email').textContent = email;
       openModal('modal-reset-password');
     }
 
     async function confirmResetPassword() {
-      if (!resetPwdDocId) return;
-      const newPwd = document.getElementById('reset-pwd-value').value;
-      const passwordHash = newPwd ? await hashPassword(newPwd) : '';
-      await usersCol.doc(resetPwdDocId).update({ passwordHash });
-      closeModal('modal-reset-password');
-      alert(newPwd ? 'Mot de passe mis à jour.' : 'Mot de passe effacé : le membre devra en redéfinir un à sa prochaine connexion.');
+      if (!resetPwdEmail) return;
+      try {
+        await auth.sendPasswordResetEmail(resetPwdEmail);
+        closeModal('modal-reset-password');
+        alert('Email de réinitialisation envoyé à ' + resetPwdEmail + '.');
+      } catch (err) {
+        console.error(err);
+        alert("Impossible d'envoyer l'email de réinitialisation. Vérifiez l'adresse.");
+      }
     }
 
     /* ================= AUDIO PLAYER ================= */
