@@ -1623,25 +1623,35 @@
     }
 
     // Récupère le profil Firestore d'un utilisateur Auth.
-    // Gère aussi la migration automatique des anciens profils créés AVANT le
-    // passage à Firebase Authentication (où l'ID du document ne correspond pas
-    // encore à l'UID Auth) : dans ce cas on retrouve le profil par email,
-    // on le recopie sous le bon ID (uid), puis on supprime l'ancien document.
+    // 1) Cherche d'abord un document users/{uid} (cas normal).
+    // 2) Sinon, cherche un ancien document créé avant le passage à Firebase
+    //    Authentication (ID différent de l'UID) via l'email, le migre au bon
+    //    endroit (users/{uid}) et supprime l'ancien.
+    // 3) Sinon (compte créé directement dans la console Firebase sans jamais
+    //    passer par l'app, ex: Luca), auto-provisionne un profil par défaut
+    //    minimal (rôle "user", le plus restrictif) pour ne jamais bloquer un
+    //    compte Auth valide. L'admin peut ensuite ajuster nom/rôle depuis l'Espace Admin.
     async function loadOrMigrateUserProfile(user) {
       const directRef = usersCol.doc(user.uid);
       const directSnap = await directRef.get();
-      if (directSnap.exists) return directSnap.data();
+      if (directSnap.exists) return { data: directSnap.data(), created: false };
 
       const legacySnap = await usersCol.where('email', '==', user.email).limit(1).get();
-      if (legacySnap.empty) return null;
-
-      const legacyDoc = legacySnap.docs[0];
-      const legacyData = legacyDoc.data();
-      if (legacyDoc.id !== user.uid) {
-        await usersCol.doc(user.uid).set(legacyData);
-        await usersCol.doc(legacyDoc.id).delete();
+      if (!legacySnap.empty) {
+        const legacyDoc = legacySnap.docs[0];
+        const legacyData = legacyDoc.data();
+        if (legacyDoc.id !== user.uid) {
+          await usersCol.doc(user.uid).set(legacyData);
+          await usersCol.doc(legacyDoc.id).delete();
+        }
+        return { data: legacyData, created: false };
       }
-      return legacyData;
+
+      // Aucun profil trouvé nulle part : auto-provisionnement par défaut.
+      const defaultName = (user.email || 'Nouveau membre').split('@')[0];
+      const newData = { name: defaultName, email: user.email, role: 'user' };
+      await usersCol.doc(user.uid).set(newData);
+      return { data: newData, created: true };
     }
 
     // Point d'entrée unique de l'authentification : Firebase Auth notifie ici
@@ -1650,14 +1660,12 @@
       const btn = document.getElementById('login-submit-btn');
       if (user) {
         try {
-          const data = await loadOrMigrateUserProfile(user);
-          if (!data) {
-            showLoginError("Ce compte existe mais n'a pas encore de profil dans l'application. Demandez à votre administrateur de vous ajouter depuis l'Espace Admin.");
-            await auth.signOut();
-            return;
-          }
+          const { data, created } = await loadOrMigrateUserProfile(user);
           currentUser = { docId: user.uid, name: data.name, email: user.email, role: data.role };
           startApp();
+          if (created) {
+            logActivity(`s'est connecté(e) pour la 1ère fois — profil créé automatiquement (rôle Membre par défaut)`, 'fa-user-plus');
+          }
         } catch (err) {
           console.error(err);
           showLoginError('Erreur de connexion. Vérifiez votre connexion internet et réessayez.');
