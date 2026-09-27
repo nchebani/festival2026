@@ -1348,7 +1348,7 @@
           <option value="general">Général</option>
           <option value="communication">Communication / Presse</option>
           <option value="technique">Technique / Son</option>
-          <option value="logistique">Logistique</option>
+          <option value="logistique">Logistique (Prépa Live)</option>
         </select>
       </div>
       <div class="form-group">
@@ -1837,6 +1837,7 @@
       chantiersCol.onSnapshot(snap => {
         chantiersData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         renderAll();
+        renderCharts();
       });
 
       documentsCol.onSnapshot(snap => {
@@ -2058,7 +2059,7 @@
       if (filter === 'mensuel') filtered = chantiersData.filter(c => c.type === 'mensuel');
       if (filter === 'urgent') filtered = chantiersData.filter(c => c.urgent === 'urgent');
 
-      const categoryLabels = { general: 'Général', communication: 'Communication', technique: 'Technique', logistique: 'Logistique' };
+      const categoryLabels = { general: 'Général', communication: 'Communication', technique: 'Technique', logistique: 'Prépa Live' };
       const soonThreshold = new Date();
       soonThreshold.setDate(soonThreshold.getDate() + 3);
 
@@ -2750,8 +2751,17 @@
 
     function renderCharts() {
       if (progressChartInstance) {
-        const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (songsData.length || 1));
-        progressChartInstance.data.datasets[0].data[0] = avgMix;
+        const totalSongs = songsData.length;
+        const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (totalSongs || 1));
+        const avgComp = Math.round(songsData.reduce((acc, s) => acc + (s.compPct || 0), 0) / (totalSongs || 1));
+
+        const commChantiers = chantiersData.filter(c => c.category === 'communication');
+        const commPct = commChantiers.length ? Math.round((commChantiers.filter(c => c.done).length / commChantiers.length) * 100) : 0;
+
+        const livePrepChantiers = chantiersData.filter(c => c.category === 'logistique');
+        const livePrepPct = livePrepChantiers.length ? Math.round((livePrepChantiers.filter(c => c.done).length / livePrepChantiers.length) * 100) : 0;
+
+        progressChartInstance.data.datasets[0].data = [avgMix, avgComp, commPct, livePrepPct];
         progressChartInstance.update();
       }
 
