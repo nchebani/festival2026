@@ -207,6 +207,10 @@
       background: #FEE2E2;
       color: #991B1B;
     }
+    .role-badge.moderator {
+      background: #FEF3C7;
+      color: #92400E;
+    }
     .user-actions {
       display: flex;
       align-items: center;
@@ -927,7 +931,7 @@
         <div class="group-tag">
           <i class="fa-solid fa-users" style="color: var(--brand-red);"></i>
           <span>Formation :</span>
-          <span class="tag-pill">1 Guitare • 1 Clavier • 2 Voix</span>
+          <span class="tag-pill">1 Guitare • 1 Clavier • 3 Voix</span>
         </div>
       </div>
     </div>
@@ -952,7 +956,7 @@
           <div class="kpi-info">
             <h4>Compositions</h4>
             <div class="val" id="kpi-comp-pct">92%</div>
-            <div class="sub" style="color: #7C3AED;">11 Titres finalisés</div>
+            <div class="sub" style="color: #7C3AED;" id="kpi-comp-sub">11 Titres finalisés</div>
           </div>
         </div>
         <div class="kpi-card">
@@ -961,8 +965,8 @@
           </div>
           <div class="kpi-info">
             <h4>Communication</h4>
-            <div class="val">55%</div>
-            <div class="sub" style="color: #0284C7;">Presse & Kit médias</div>
+            <div class="val" id="kpi-comm-pct">55%</div>
+            <div class="sub" style="color: #0284C7;" id="kpi-comm-sub">Presse & Kit médias</div>
           </div>
         </div>
         <div class="kpi-card">
@@ -1242,6 +1246,10 @@
         <input type="number" id="edit-mix-pct" min="0" max="100" step="5">
       </div>
       <div class="form-group">
+        <label>Progression de la Composition / Écriture (%)</label>
+        <input type="number" id="edit-comp-pct" min="0" max="100" step="5">
+      </div>
+      <div class="form-group">
         <label>Statut Prise Guitare</label>
         <select id="edit-mix-guitar">
           <option value="Prise OK">Prise OK</option>
@@ -1335,6 +1343,19 @@
         </select>
       </div>
       <div class="form-group">
+        <label>Catégorie</label>
+        <select id="new-chantier-category">
+          <option value="general">Général</option>
+          <option value="communication">Communication / Presse</option>
+          <option value="technique">Technique / Son</option>
+          <option value="logistique">Logistique</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Échéance (optionnel)</label>
+        <input type="date" id="new-chantier-duedate">
+      </div>
+      <div class="form-group">
         <label>Responsables</label>
         <input type="text" id="new-chantier-assign" placeholder="Ex: Lucas, N. Chebani">
       </div>
@@ -1410,6 +1431,7 @@
         <label>Rôle</label>
         <select id="new-user-role">
           <option value="user">Membre du Groupe</option>
+          <option value="moderator">Modérateur (gère le contenu)</option>
           <option value="admin">Administrateur</option>
         </select>
       </div>
@@ -1484,6 +1506,17 @@
     const auth = firebase.auth();
     const db = firebase.firestore();
     const storage = firebase.storage();
+
+    // Mode hors-ligne basique : Firestore garde en cache local les dernières données
+    // synchronisées, consultables même sans connexion (ex: setlist en loge sans réseau).
+    // Les écritures faites hors-ligne seront automatiquement envoyées au retour du réseau.
+    db.enablePersistence({ synchronizeTabs: true }).catch((err) => {
+      if (err.code === 'failed-precondition') {
+        console.warn('Persistance hors-ligne désactivée : plusieurs onglets ouverts.');
+      } else if (err.code === 'unimplemented') {
+        console.warn('Persistance hors-ligne non supportée par ce navigateur.');
+      }
+    });
 
     // Instance Firebase secondaire : sert uniquement à l'administrateur pour créer
     // un compte Firebase Authentication pour un nouveau membre SANS perdre sa propre
@@ -1562,16 +1595,16 @@
 
     /* Default Data */
     const DEFAULT_SONGS = [
-      { id: 1, title: '01. Prelude / Eil', key: 'Am', bpm: 120, duration: '04:15', mixPct: 100, guitar: 'Prise OK', clavier: 'Prise OK', voix: '3/3 Posées', status: 'Masterisé', fileUrl: '' },
-      { id: 2, title: '02. Lumière dans l\'Ombre', key: 'D', bpm: 95, duration: '03:48', mixPct: 75, guitar: 'Prise OK', clavier: 'Prise OK', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' },
-      { id: 3, title: '03. Horizon Eliyah', key: 'Em', bpm: 128, duration: '05:10', mixPct: 30, guitar: 'Re-take', clavier: 'Prise OK', voix: 'À enregistrer', status: 'Maquette', fileUrl: '' },
-      { id: 4, title: '04. Souffle Nouveau', key: 'G', bpm: 110, duration: '04:02', mixPct: 60, guitar: 'Prise OK', clavier: 'Re-take', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' }
+      { id: 1, title: '01. Prelude / Eil', key: 'Am', bpm: 120, duration: '04:15', mixPct: 100, compPct: 100, guitar: 'Prise OK', clavier: 'Prise OK', voix: '3/3 Posées', status: 'Masterisé', fileUrl: '' },
+      { id: 2, title: '02. Lumière dans l\'Ombre', key: 'D', bpm: 95, duration: '03:48', mixPct: 75, compPct: 100, guitar: 'Prise OK', clavier: 'Prise OK', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' },
+      { id: 3, title: '03. Horizon Eliyah', key: 'Em', bpm: 128, duration: '05:10', mixPct: 30, compPct: 85, guitar: 'Re-take', clavier: 'Prise OK', voix: 'À enregistrer', status: 'Maquette', fileUrl: '' },
+      { id: 4, title: '04. Souffle Nouveau', key: 'G', bpm: 110, duration: '04:02', mixPct: 60, compPct: 100, guitar: 'Prise OK', clavier: 'Re-take', voix: '2/3 Posées', status: 'En Mixage', fileUrl: '' }
     ];
     const DEFAULT_CHANTIERS = [
-      { id: 1, title: 'Validation du master stéréo des 4 premiers titres', type: 'hebdo', urgent: 'urgent', assign: 'N. Chebani', done: false },
-      { id: 2, title: 'Shooting photo officiel pour la pochette de l\'album', type: 'mensuel', urgent: 'urgent', assign: 'Équipe Visuel', done: false },
-      { id: 3, title: 'Préparation du kit de communication et dossier de presse', type: 'mensuel', urgent: 'normal', assign: 'Sarah & Lucas', done: true },
-      { id: 4, title: 'Raccord des effets claviers et synthés pour le live', type: 'hebdo', urgent: 'normal', assign: 'Claviériste', done: false }
+      { id: 1, title: 'Validation du master stéréo des 4 premiers titres', type: 'hebdo', urgent: 'urgent', assign: 'N. Chebani', done: false, category: 'technique', dueDate: '' },
+      { id: 2, title: 'Shooting photo officiel pour la pochette de l\'album', type: 'mensuel', urgent: 'urgent', assign: 'Équipe Visuel', done: false, category: 'communication', dueDate: '' },
+      { id: 3, title: 'Préparation du kit de communication et dossier de presse', type: 'mensuel', urgent: 'normal', assign: 'Sarah & Lucas', done: true, category: 'communication', dueDate: '' },
+      { id: 4, title: 'Raccord des effets claviers et synthés pour le live', type: 'hebdo', urgent: 'normal', assign: 'Claviériste', done: false, category: 'technique', dueDate: '' }
     ];
     const DEFAULT_DOCUMENTS = [
       { id: 1, title: 'Fiche_Technique_Eliyah_2026.pdf', type: 'pdf', desc: 'Patch scène 1 Guitare, 1 Clavier, 3 Micro Voix', icon: 'fa-file-pdf', color: '#E11D48' },
@@ -1863,10 +1896,17 @@
       }
     }
 
+    // Un modérateur peut gérer le contenu (chantiers/morceaux/events/docs) comme un admin,
+    // mais n'a pas accès à l'Espace Admin (gestion des membres réservée à 'admin').
+    function canManageContent() {
+      return currentUser && (currentUser.role === 'admin' || currentUser.role === 'moderator');
+    }
+
     function updateRoleBadge() {
       const roleDisplay = document.getElementById('user-role-display');
-      roleDisplay.textContent = currentUser.role === 'admin' ? 'ADMINISTRATEUR' : 'MEMBRE GROUPE';
-      roleDisplay.className = 'role-badge ' + (currentUser.role === 'admin' ? 'admin' : '');
+      const labels = { admin: 'ADMINISTRATEUR', moderator: 'MODÉRATEUR', user: 'MEMBRE GROUPE' };
+      roleDisplay.textContent = labels[currentUser.role] || 'MEMBRE GROUPE';
+      roleDisplay.className = 'role-badge ' + (currentUser.role === 'admin' ? 'admin' : currentUser.role === 'moderator' ? 'moderator' : '');
 
       const adminNavItem = document.getElementById('nav-admin-item');
       if (adminNavItem) adminNavItem.style.display = (currentUser.role === 'admin') ? 'flex' : 'none';
@@ -1928,11 +1968,34 @@
       const totalSongs = songsData.length;
       const mixedSongs = songsData.filter(s => s.mixPct >= 100).length;
       const avgMix = Math.round(songsData.reduce((acc, s) => acc + s.mixPct, 0) / (totalSongs || 1));
-      
+
       document.getElementById('kpi-mix-pct').textContent = avgMix + '%';
       document.getElementById('kpi-mix-count').textContent = `${mixedSongs} / ${totalSongs} Titres terminés`;
-      
-      const urgentCount = chantiersData.filter(c => c.urgent === 'urgent' && !c.done).length;
+
+      // Compositions : moyenne de compPct sur tous les morceaux (écriture/arrangement)
+      const finalizedSongs = songsData.filter(s => (s.compPct || 0) >= 100).length;
+      const avgComp = Math.round(songsData.reduce((acc, s) => acc + (s.compPct || 0), 0) / (totalSongs || 1));
+      const compPctEl = document.getElementById('kpi-comp-pct');
+      if (compPctEl) compPctEl.textContent = avgComp + '%';
+      const compSubEl = document.getElementById('kpi-comp-sub');
+      if (compSubEl) compSubEl.textContent = `${finalizedSongs} Titres finalisés`;
+
+      // Communication : % des chantiers de catégorie "communication" marqués terminés
+      const commChantiers = chantiersData.filter(c => c.category === 'communication');
+      const commDone = commChantiers.filter(c => c.done).length;
+      const commPct = commChantiers.length ? Math.round((commDone / commChantiers.length) * 100) : 0;
+      const commPctEl = document.getElementById('kpi-comm-pct');
+      if (commPctEl) commPctEl.textContent = commChantiers.length ? commPct + '%' : '—';
+      const commSubEl = document.getElementById('kpi-comm-sub');
+      if (commSubEl) commSubEl.textContent = commChantiers.length ? `${commDone} / ${commChantiers.length} chantiers Presse & Comm.` : 'Aucun chantier "Communication"';
+
+      // Chantiers urgents : marqués "urgent" manuellement, OU avec échéance à 3 jours ou moins
+      const soonThreshold = new Date();
+      soonThreshold.setDate(soonThreshold.getDate() + 3);
+      const urgentCount = chantiersData.filter(c => !c.done && (
+        c.urgent === 'urgent' ||
+        (c.dueDate && new Date(c.dueDate) <= soonThreshold)
+      )).length;
       document.getElementById('urgent-count-badge').textContent = urgentCount;
     }
 
@@ -1995,24 +2058,36 @@
       if (filter === 'mensuel') filtered = chantiersData.filter(c => c.type === 'mensuel');
       if (filter === 'urgent') filtered = chantiersData.filter(c => c.urgent === 'urgent');
 
-      container.innerHTML = filtered.map(c => `
-        <div class="chantier-card ${c.urgent === 'urgent' ? 'urgent' : 'normal'}">
+      const categoryLabels = { general: 'Général', communication: 'Communication', technique: 'Technique', logistique: 'Logistique' };
+      const soonThreshold = new Date();
+      soonThreshold.setDate(soonThreshold.getDate() + 3);
+
+      container.innerHTML = filtered.map(c => {
+        const isDueSoon = !c.done && c.dueDate && new Date(c.dueDate) <= soonThreshold;
+        const dueDateLabel = c.dueDate ? new Date(c.dueDate).toLocaleDateString('fr-FR') : '';
+        return `
+        <div class="chantier-card ${(c.urgent === 'urgent' || isDueSoon) ? 'urgent' : 'normal'}">
           <div class="chantier-header">
             <div style="display: flex; align-items: center; gap: 10px;">
               <input type="checkbox" ${c.done ? 'checked' : ''} style="width:18px; height:18px; accent-color: var(--brand-red);" onclick="toggleChantierDone(${c.id})">
               <span class="chantier-title" style="${c.done ? 'text-decoration: line-through; opacity:0.6;' : ''}">${c.title}</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
+              ${c.category && c.category !== 'general' ? `<span class="status-pill status-todo">${categoryLabels[c.category] || c.category}</span>` : ''}
               <span class="status-pill ${c.type === 'hebdo' ? 'status-progress' : 'status-todo'}">${c.type.toUpperCase()}</span>
-              ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteChantier(${c.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+              ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteChantier(${c.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
           </div>
           <div style="font-size: 12px; color: var(--text-muted); display:flex; justify-content:space-between; margin-top:8px;">
             <span><i class="fa-solid fa-user-gear"></i> Responsables : <strong>${c.assign}</strong></span>
-            <span>${c.done ? '<strong style="color:#047857;">Terminé</strong>' : 'En cours'}</span>
+            <span>
+              ${dueDateLabel ? `<span style="${isDueSoon ? 'color:#B91C1C; font-weight:700;' : ''}"><i class="fa-solid fa-calendar-days"></i> ${dueDateLabel}${isDueSoon ? ' (bientôt)' : ''}</span> · ` : ''}
+              ${c.done ? '<strong style="color:#047857;">Terminé</strong>' : 'En cours'}
+            </span>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function toggleChantierDone(id) {
@@ -2034,15 +2109,18 @@
       if (!title) return alert('Veuillez remplir le titre.');
       const type = document.getElementById('new-chantier-type').value;
       const urgent = document.getElementById('new-chantier-urgent').value;
+      const category = document.getElementById('new-chantier-category').value;
+      const dueDate = document.getElementById('new-chantier-duedate').value || '';
       const assign = document.getElementById('new-chantier-assign').value.trim() || 'Non assigné';
 
       const newId = Date.now();
       chantiersCol.doc(String(newId)).set({
-        id: newId, title, type, urgent, assign, done: false
+        id: newId, title, type, urgent, category, dueDate, assign, done: false
       });
       logActivity(`a créé le chantier "${title}"`, 'fa-list-check');
       closeModal('modal-add-chantier');
       document.getElementById('new-chantier-title').value = '';
+      document.getElementById('new-chantier-duedate').value = '';
     }
 
     function renderMixTable() {
@@ -2064,7 +2142,7 @@
           <td><span class="status-pill ${s.status === 'Masterisé' ? 'status-done' : (s.status === 'En Mixage' ? 'status-progress' : 'status-todo')}">${s.status}</span></td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openEditMixModal(${s.id})"><i class="fa-solid fa-pen"></i> Éditer</button>
-            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+            ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </td>
         </tr>
       `).join('');
@@ -2076,6 +2154,7 @@
       document.getElementById('edit-mix-song-id').value = song.id;
       document.getElementById('modal-mix-song-title').textContent = song.title;
       document.getElementById('edit-mix-pct').value = song.mixPct;
+      document.getElementById('edit-comp-pct').value = song.compPct || 0;
       document.getElementById('edit-mix-guitar').value = song.guitar;
       document.getElementById('edit-mix-clavier').value = song.clavier;
       document.getElementById('edit-mix-voix').value = song.voix;
@@ -2088,12 +2167,13 @@
       const song = songsData.find(s => s.id === id);
       if (song) {
         const mixPct = parseInt(document.getElementById('edit-mix-pct').value) || 0;
+        const compPct = parseInt(document.getElementById('edit-comp-pct').value) || 0;
         const guitar = document.getElementById('edit-mix-guitar').value;
         const clavier = document.getElementById('edit-mix-clavier').value;
         const voix = document.getElementById('edit-mix-voix').value;
         const status = document.getElementById('edit-mix-status').value;
 
-        songsCol.doc(String(id)).update({ mixPct, guitar, clavier, voix, status });
+        songsCol.doc(String(id)).update({ mixPct, compPct, guitar, clavier, voix, status });
         logActivity(`a mis à jour le mixage du titre "${song.title}" (${mixPct}%)`, 'fa-sliders');
         closeModal('modal-edit-mix');
       }
@@ -2118,10 +2198,11 @@
           </td>
           <td>
             ${s.fileUrl ? `<a href="${s.fileUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> DL</a>` : '<span style="font-size:11px; color:var(--text-light);">Aucun fichier</span>'}
+            ${s.previousFileUrl ? `<a href="${s.previousFileUrl}" target="_blank" rel="noopener" title="Version précédente du ${s.previousFileDate || ''}" style="font-size:11px; color:var(--text-muted); margin-left:6px; text-decoration:underline;"><i class="fa-solid fa-clock-rotate-left"></i> Version préc.</a>` : ''}
           </td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openEditSongModal(${s.id})"><i class="fa-solid fa-pen"></i></button>
-            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+            ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </td>
         </tr>
       `).join('');
@@ -2188,13 +2269,22 @@
 
       if (editingSongId) {
         const payload = { title, key, bpm, duration };
-        if (fileUrl) payload.fileUrl = fileUrl;
+        if (fileUrl) {
+          // Historique de version : on garde le lien de l'ancien fichier au lieu de le perdre,
+          // pour pouvoir revenir en arrière si le nouveau mix ne convient pas.
+          const oldSong = songsData.find(s => s.id === editingSongId);
+          if (oldSong && oldSong.fileUrl && oldSong.fileUrl !== fileUrl) {
+            payload.previousFileUrl = oldSong.fileUrl;
+            payload.previousFileDate = new Date().toLocaleDateString('fr-FR');
+          }
+          payload.fileUrl = fileUrl;
+        }
         songsCol.doc(String(editingSongId)).update(payload);
         logActivity(`a modifié le morceau "${title}"`, 'fa-music');
       } else {
         songsCol.doc(String(newId)).set({
           id: newId, title, key, bpm, duration,
-          mixPct: 0, guitar: 'À enregistrer', clavier: 'À enregistrer', voix: 'À enregistrer',
+          mixPct: 0, compPct: 0, guitar: 'À enregistrer', clavier: 'À enregistrer', voix: 'À enregistrer',
           status: 'Maquette', fileUrl
         });
         logActivity(`a ajouté un nouveau morceau : "${title}"`, 'fa-music');
@@ -2223,7 +2313,7 @@
           </div>
           <div style="display:flex; gap:4px;">
             <button class="btn btn-secondary btn-sm" onclick="openEditEventModal(${e.id})"><i class="fa-solid fa-pen"></i></button>
-            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+            ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </div>
         </div>
       `).join('');
@@ -2357,7 +2447,7 @@
             ${d.fileUrl
               ? `<a href="${d.fileUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Télécharger</a>`
               : `<span style="font-size:11px; color:var(--text-light);"><i class="fa-solid fa-triangle-exclamation"></i> Fichier indisponible</span>`}
-            ${currentUser.role === 'admin' ? `<button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+            ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteDoc(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </div>
         </div>
       `).join('');
@@ -2419,15 +2509,19 @@
       tbody.innerHTML = usersData.map(u => {
         const displayName = (u.name && u.name !== 'undefined') ? u.name : `(sans nom)`;
         const safeName = (u.name || '').replace(/'/g, "\\'");
+        const role = u.role || 'user';
+        const badgeClass = role === 'admin' ? 'admin' : role === 'moderator' ? 'moderator' : '';
         return `
         <tr>
           <td><strong>${displayName}</strong></td>
           <td>${u.email}</td>
-          <td><span class="role-badge ${u.role === 'admin' ? 'admin' : ''}">${(u.role || 'user').toUpperCase()}</span></td>
+          <td><span class="role-badge ${badgeClass}">${role.toUpperCase()}</span></td>
           <td>
-            <button class="btn btn-secondary btn-sm" onclick="toggleUserRoleInAdmin('${u.docId}', '${u.role}')">
-              Basculer en ${u.role === 'admin' ? 'Membre' : 'Admin'}
-            </button>
+            <select class="input-select" style="padding:6px 8px; font-size:12px;" onchange="changeUserRoleInAdmin('${u.docId}', this.value)">
+              <option value="user" ${role === 'user' ? 'selected' : ''}>Membre</option>
+              <option value="moderator" ${role === 'moderator' ? 'selected' : ''}>Modérateur</option>
+              <option value="admin" ${role === 'admin' ? 'selected' : ''}>Admin</option>
+            </select>
           </td>
           <td>
             <button class="btn btn-secondary btn-sm" onclick="openResetPasswordModal('${u.docId}', '${safeName}', '${u.email}')">
@@ -2447,9 +2541,9 @@
       }).join('');
     }
 
-    function toggleUserRoleInAdmin(docId, currentRole) {
-      const newRole = currentRole === 'admin' ? 'user' : 'admin';
+    function changeUserRoleInAdmin(docId, newRole) {
       usersCol.doc(docId).update({ role: newRole });
+      logActivity(`a changé le rôle d'un membre en "${newRole}"`, 'fa-user-gear');
     }
 
     function deleteAdminUser(docId) {
