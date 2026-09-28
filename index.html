@@ -784,6 +784,15 @@
     .member-chip .m-sub { font-size: 11px; color: var(--text-muted); }
     .count-pill { background: #D1FAE5; color: #047857; font-size: 11px; font-weight: 800; padding: 3px 10px; border-radius: 20px; }
     .event-past { opacity: .55; }
+    .chat-quote { border-left: 3px solid rgba(0,0,0,.25); background: rgba(0,0,0,.06); padding: 4px 8px; border-radius: 6px; font-size: 11px; margin-bottom: 6px; }
+    .chat-bubble.sent .chat-quote { border-left-color: rgba(255,255,255,.65); background: rgba(255,255,255,.16); }
+    .chat-reactions { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+    .react-chip { border: 1px solid rgba(0,0,0,.12); background: rgba(255,255,255,.75); color: #0F172A; border-radius: 12px; padding: 1px 7px; font-size: 11px; cursor: pointer; }
+    .react-chip.mine { border-color: var(--brand-red); background: #FEE2E2; }
+    .chat-actions { display: flex; gap: 2px; opacity: .6; }
+    .chat-actions:hover { opacity: 1; }
+    .chat-act { background: none; border: none; cursor: pointer; font-size: 13px; padding: 0 3px; color: inherit; }
+    #chat-reply-bar { display: none; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 16px; background: #F1F5F9; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); }
 
     /* ================= MOBILE (TÉLÉPHONE) ================= */
     @media (max-width: 640px) {
@@ -1309,7 +1318,7 @@
               <h3>Setlist Live Officielle</h3>
               <p>Durée Totale : <strong style="color: var(--brand-red);" id="setlist-total-time">42 min</strong></p>
             </div>
-            <button class="btn btn-secondary btn-sm" onclick="alert('Setlist sauvegardée pour le concert !')"><i class="fa-solid fa-floppy-disk"></i> Enregistrer</button>
+            <button class="btn btn-secondary btn-sm" onclick="exportSetlistPDF()"><i class="fa-solid fa-file-pdf"></i> Exporter PDF</button>
           </div>
           <div class="feed-list" id="setlist-items-container"></div>
         </div>
@@ -1322,9 +1331,13 @@
         <h3>Espace de Discussion du Groupe ELIYAH</h3>
         <p>Échangez directement avec l'équipe sur les arrangements et le mix</p>
       </div>
-      <div id="chat-online-strip" style="font-size:12px; color:var(--text-muted); margin:-6px 0 10px 0;"></div>
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin:-6px 0 10px 0; flex-wrap:wrap;">
+        <div id="chat-online-strip" style="font-size:12px; color:var(--text-muted);"></div>
+        <button id="notif-toggle-btn" class="btn btn-secondary btn-sm" onclick="toggleNotifications()" style="display:none;"></button>
+      </div>
       <div class="chat-container">
         <div class="chat-messages" id="chat-messages-box"></div>
+        <div id="chat-reply-bar"></div>
         <div class="chat-input-area">
           <input type="text" id="chat-text-input" class="chat-input" placeholder="Écrivez votre message..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
           <button class="btn btn-primary" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
@@ -2007,6 +2020,7 @@
       initCharts();
       initFirebaseSync();
       startPresence();
+      updateNotifButton();
 
       setTimeout(() => {
         renderConnNotification();
@@ -2078,6 +2092,7 @@
       chatCol.onSnapshot(snap => {
         chatData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         renderChat();
+        if (chatBaselineReady) notifyNewChat(snap.docChanges());
         handleChatSnapshot();
       });
 
@@ -2676,6 +2691,9 @@
           <div class="feed-time">${items.length} titre${items.length > 1 ? 's' : ''} dans la setlist</div></div>
         </div>`;
 
+      const totalEl = document.getElementById('setlist-total-time');
+      if (totalEl) totalEl.textContent = formatTotalDuration(totalSec);
+
       container.innerHTML = summary + items.map((s, idx) => `
         <div class="feed-item" style="justify-content:space-between;">
           <div style="display:flex; align-items:center; gap:12px;">
@@ -2740,20 +2758,106 @@
       return String(str == null ? '' : str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
 
+    const REACTIONS = { like: '👍', heart: '❤️', laugh: '😂', fire: '🔥', clap: '👏' };
+
     function renderChat() {
       const box = document.getElementById('chat-messages-box');
       if (!box) return;
       const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
-      box.innerHTML = chatData.map(c => `
-        <div class="chat-bubble ${c.sender === currentUser.name ? 'sent' : 'received'}">
+      box.innerHTML = chatData.map(c => {
+        const mine = c.sender === currentUser.name;
+        const reactions = c.reactions || {};
+        const chips = Object.keys(REACTIONS).filter(k => (reactions[k] || []).length).map(k => {
+          const names = reactions[k];
+          const iMine = names.includes(currentUser.name);
+          return `<button class="react-chip ${iMine ? 'mine' : ''}" title="${escapeHTML(names.join(', '))}" onclick="toggleReaction(${c.id}, '${k}')">${REACTIONS[k]} ${names.length}</button>`;
+        }).join('');
+        const actions = Object.keys(REACTIONS).map(k => `<button class="chat-act" onclick="toggleReaction(${c.id}, '${k}')" title="Réagir">${REACTIONS[k]}</button>`).join('')
+          + `<button class="chat-act" onclick="startReply(${c.id})" title="Répondre"><i class="fa-solid fa-reply"></i></button>`;
+        return `
+        <div class="chat-bubble ${mine ? 'sent' : 'received'}">
           <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${escapeHTML(c.sender)}${chatInstrumentIcon(c.sender)}</div>
+          ${c.replyTo ? `<div class="chat-quote"><strong>${escapeHTML(c.replyTo.sender)}</strong><br>${escapeHTML(c.replyTo.text)}</div>` : ''}
           <div>${escapeHTML(c.text)}</div>
-          <div class="meta"><span>${escapeHTML(c.time)}</span></div>
-        </div>
-      `).join('');
+          ${chips ? `<div class="chat-reactions">${chips}</div>` : ''}
+          <div class="meta"><span>${escapeHTML(c.time)}</span><span class="chat-actions">${actions}</span></div>
+        </div>`;
+      }).join('');
       if (nearBottom || !chatRenderedOnce) box.scrollTop = box.scrollHeight;
       chatRenderedOnce = true;
     }
+
+    let replyingTo = null;
+    function startReply(id) {
+      const msg = chatData.find(c => c.id === id);
+      if (!msg) return;
+      replyingTo = { id: msg.id, sender: msg.sender, text: String(msg.text || '').slice(0, 90) };
+      const bar = document.getElementById('chat-reply-bar');
+      bar.innerHTML = `<span><i class="fa-solid fa-reply"></i> Réponse à <strong>${escapeHTML(replyingTo.sender)}</strong> : ${escapeHTML(replyingTo.text)}</span>
+        <button class="chat-act" onclick="cancelReply()" title="Annuler"><i class="fa-solid fa-xmark"></i></button>`;
+      bar.style.display = 'flex';
+      document.getElementById('chat-text-input').focus();
+    }
+    function cancelReply() {
+      replyingTo = null;
+      const bar = document.getElementById('chat-reply-bar');
+      if (bar) { bar.style.display = 'none'; bar.innerHTML = ''; }
+    }
+    function toggleReaction(id, key) {
+      const msg = chatData.find(c => c.id === id);
+      if (!msg || !REACTIONS[key]) return;
+      const names = (msg.reactions && msg.reactions[key]) || [];
+      const op = names.includes(currentUser.name)
+        ? firebase.firestore.FieldValue.arrayRemove(currentUser.name)
+        : firebase.firestore.FieldValue.arrayUnion(currentUser.name);
+      chatCol.doc(String(id)).update('reactions.' + key, op).catch(err => console.error(err));
+    }
+
+    /* ===== Notifications navigateur (nouveaux messages quand l'app est en arrière-plan) ===== */
+    function notifSupported() { return 'Notification' in window; }
+    function notifEnabled() {
+      let pref = null;
+      try { pref = localStorage.getItem('eliyah_notif'); } catch (e) {}
+      return notifSupported() && Notification.permission === 'granted' && pref !== 'off';
+    }
+    function updateNotifButton() {
+      const btn = document.getElementById('notif-toggle-btn');
+      if (!btn) return;
+      if (!notifSupported()) { btn.style.display = 'none'; return; }
+      btn.style.display = '';
+      btn.innerHTML = notifEnabled()
+        ? '<i class="fa-solid fa-bell"></i> Notifications activées'
+        : '<i class="fa-solid fa-bell-slash"></i> Activer les notifications';
+    }
+    async function toggleNotifications() {
+      if (!notifSupported()) return;
+      if (Notification.permission === 'denied') {
+        alert("Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages de votre navigateur, puis réessayez.");
+        return;
+      }
+      if (Notification.permission !== 'granted') {
+        const res = await Notification.requestPermission();
+        if (res !== 'granted') { updateNotifButton(); return; }
+        try { localStorage.setItem('eliyah_notif', 'on'); } catch (e) {}
+      } else {
+        let pref = null;
+        try { pref = localStorage.getItem('eliyah_notif'); } catch (e) {}
+        try { localStorage.setItem('eliyah_notif', pref === 'off' ? 'on' : 'off'); } catch (e) {}
+      }
+      updateNotifButton();
+    }
+    function notifyNewChat(changes) {
+      if (!notifEnabled() || !currentUser) return;
+      if (!document.hidden && isChatViewActive()) return;
+      changes.filter(ch => ch.type === 'added').forEach(ch => {
+        const m = ch.doc.data();
+        if (m.sender === currentUser.name) return;
+        try {
+          new Notification('ELIYAH — ' + m.sender, { body: String(m.text || '').slice(0, 120), tag: 'eliyah-chat' });
+        } catch (e) {}
+      });
+    }
+
     let chatRenderedOnce = false;
 
     /* ===== Messages non lus ===== */
@@ -2868,13 +2972,16 @@
       if (!text) return;
 
       const newId = Date.now();
-      chatCol.doc(String(newId)).set({
+      const payload = {
         id: newId,
         sender: currentUser.name,
         text: text,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      });
+      };
+      if (replyingTo) payload.replyTo = replyingTo;
+      chatCol.doc(String(newId)).set(payload);
       input.value = '';
+      cancelReply();
     }
 
     function renderDocsGrid() {
@@ -3243,6 +3350,49 @@
     function closeModal(id) {
       document.getElementById(id)?.classList.remove('active');
     }
+    function exportSetlistPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const brandRed = [139, 30, 45], dark = [15, 23, 42], muted = [100, 116, 139];
+      const items = getOrderedSetlist();
+      const totalSec = items.reduce((acc, x) => acc + parseDurationSec(x.duration), 0);
+      const now = Date.now();
+      const next = sortedEvents().find(e => e.dateISO && new Date(e.dateISO).getTime() >= now);
+      let y = 20;
+
+      doc.setFont('helvetica', 'bold'); doc.setFontSize(20); doc.setTextColor(...brandRed);
+      doc.text('ELIYAH — Setlist Live', 14, y); y += 8;
+      doc.setFont('helvetica', 'normal'); doc.setFontSize(10); doc.setTextColor(...muted);
+      if (next) { doc.text(`${next.title} • ${formatEventDate(next.dateISO)} • ${next.location}`, 14, y); y += 6; }
+      doc.text(`${items.length} titres • Durée totale : ${formatTotalDuration(totalSec)} • Généré le ${new Date().toLocaleString('fr-FR')}`, 14, y);
+      y += 10;
+
+      const header = () => {
+        doc.setFont('helvetica', 'bold'); doc.setFontSize(10); doc.setTextColor(...dark);
+        doc.text('#', 14, y); doc.text('Titre', 24, y); doc.text('Tonalité', 118, y); doc.text('BPM', 142, y); doc.text('Durée', 160, y); doc.text('Cumul', 182, y);
+        y += 2; doc.setDrawColor(...brandRed); doc.line(14, y, 196, y); y += 6;
+      };
+      header();
+
+      let cumul = 0;
+      doc.setFont('helvetica', 'normal');
+      items.forEach((sg, i) => {
+        if (y > 275) { doc.addPage(); y = 20; header(); doc.setFont('helvetica', 'normal'); }
+        cumul += parseDurationSec(sg.duration);
+        doc.setFontSize(10); doc.setTextColor(...dark);
+        doc.text(String(i + 1), 14, y);
+        doc.text(String(sg.title).slice(0, 55), 24, y);
+        doc.text(String(sg.key || ''), 118, y);
+        doc.text(String(sg.bpm || ''), 142, y);
+        doc.text(String(sg.duration || ''), 160, y);
+        doc.setTextColor(...muted);
+        doc.text(formatTotalDuration(cumul).replace(' min ', 'm ').replace(' s', 's'), 182, y);
+        y += 8;
+      });
+
+      doc.save('setlist-eliyah.pdf');
+    }
+
     function exportSummaryPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
