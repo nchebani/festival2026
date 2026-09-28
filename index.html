@@ -3,6 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#8B1E2D">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <title>ELIYAH — Gestion du Groupe & Suivi Production</title>
   
   <!-- Typography & FontAwesome Icons -->
@@ -997,7 +1002,27 @@
       margin-top: 4px;
       display: block;
     }
-  </style>
+  
+    /* ===== Toasts & badges chantiers ===== */
+    #toast-host { position: fixed; top: 16px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; max-width: 360px; }
+    .toast { display: flex; align-items: center; gap: 10px; background: #0F172A; color: #fff; padding: 12px 14px; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,.25); font-size: 13px; animation: toastIn .25s ease; }
+    .toast-body { flex: 1; line-height: 1.35; }
+    .toast-action { background: var(--brand-red); color: #fff; border: none; border-radius: 10px; padding: 6px 10px; font-weight: 700; font-size: 12px; cursor: pointer; }
+    .toast-close { background: none; border: none; color: #94A3B8; font-size: 18px; cursor: pointer; line-height: 1; }
+    @keyframes toastIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: none; } }
+    .nav-badge + .nav-badge { margin-left: 6px; }
+    #chantiers-new-badge { background: #2563EB; }
+    .brief-title { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; color: var(--text-muted); margin: 6px 0 8px; }
+    .brief-tag { display: inline-block; font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 10px; margin-left: 4px; }
+    .brief-tag.new { background: #DBEAFE; color: #1D4ED8; }
+    .brief-tag.urgent { background: #FEE2E2; color: #B91C1C; }
+    .brief-tag.due { background: #FEF3C7; color: #92400E; }
+    .brief-tag.mine { background: #D1FAE5; color: #047857; }
+    @media (max-width: 640px) {
+      #toast-host { top: calc(env(safe-area-inset-top, 0px) + 72px); left: 12px; right: 12px; max-width: none; }
+      #chantiers-new-badge { right: 22px; }
+    }
+</style>
 </head>
 <body>
 
@@ -1043,6 +1068,7 @@
           <i class="fa-solid fa-list-check"></i>
           <span>Chantiers & Rappels</span>
           <span class="nav-badge" id="urgent-count-badge">2</span>
+          <span class="nav-badge" id="chantiers-new-badge" style="display:none;" title="Nouveaux chantiers">0</span>
         </li>
         <li class="nav-item" onclick="switchTab('mix', this)">
           <i class="fa-solid fa-sliders"></i>
@@ -1420,11 +1446,13 @@
         <div style="width: 56px; height: 56px; background: var(--brand-red-light); color: var(--brand-red); border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 24px;">
           <i class="fa-solid fa-bell"></i>
         </div>
-        <h3 style="margin-top: 10px; font-weight: 800; font-size: 20px;">Récents Avancements du Groupe</h3>
-        <p style="font-size: 13px; color: var(--text-muted);">Voici ce qui a changé depuis votre dernière connexion :</p>
+        <h3 style="margin-top: 10px; font-weight: 800; font-size: 20px;">Récapitulatif du Groupe</h3>
+        <p style="font-size: 13px; color: var(--text-muted);">Chantiers à suivre et derniers avancements :</p>
       </div>
-      <div class="feed-list" id="conn-notif-list" style="margin-bottom: 20px;"></div>
-      <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="closeModal('modal-conn-notif')">Compris, Accéder au Projet</button>
+      <div id="conn-chantiers-list" style="margin-bottom: 12px;"></div>
+      <div class="brief-title">Derniers avancements</div>
+      <div class="feed-list" id="conn-notif-list" style="margin-bottom: 20px; max-height: 220px; overflow-y: auto;"></div>
+      <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="closeBriefing()">Compris, Accéder au Projet</button>
     </div>
   </div>
 
@@ -1705,6 +1733,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-storage-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging-compat.js"></script>
 
   <script>
     /* ================= FIREBASE SETUP ================= */
@@ -2021,11 +2050,12 @@
       initFirebaseSync();
       startPresence();
       updateNotifButton();
+      loadChantiersSeen();
+      if (notifEnabled()) registerPushToken(); else scheduleNotifPrompt();
+      bindDeepLinks();
 
-      setTimeout(() => {
-        renderConnNotification();
-        openModal('modal-conn-notif');
-      }, 400);
+      // Le récap de connexion s'affiche quand les données sont arrivées (ou après 3 s au plus tard).
+      setTimeout(() => { briefingFlags.chantiers = true; briefingFlags.activities = true; maybeShowBriefing(); }, 3000);
     }
 
     // Sème une collection avec des données de démo UNE SEULE FOIS pour tout le projet
@@ -2076,6 +2106,7 @@
         chantiersData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         renderAll();
         renderCharts();
+        handleChantiersSnapshot();
       });
 
       documentsCol.onSnapshot(snap => {
@@ -2122,6 +2153,7 @@
 
       activitiesCol.orderBy('timestamp', 'desc').limit(20).onSnapshot(snap => {
         activitiesData = snap.docs.map(d => d.data());
+        briefingFlags.activities = true; maybeShowBriefing();
         renderActivityFeed();
       });
     }
@@ -2213,6 +2245,7 @@
       };
 
       if (viewId === 'chat' && currentUser) markChatRead();
+      if (viewId === 'chantiers' && currentUser && chantiersSeen) markChantiersSeen();
 
       if (titles[viewId]) {
         document.getElementById('view-title').textContent = titles[viewId].title;
@@ -2344,6 +2377,7 @@
               <span class="chantier-title" style="${c.done ? 'text-decoration: line-through; opacity:0.6;' : ''}">${escapeHTML(c.title)}</span>
             </div>
             <div style="display:flex; align-items:center; gap:8px;">
+              ${isChantierNew(c) ? '<span class="brief-tag new">Nouveau</span>' : ''}
               ${c.category && c.category !== 'general' ? `<span class="status-pill status-todo">${categoryLabels[c.category] || c.category}</span>` : ''}
               <span class="status-pill ${c.type === 'hebdo' ? 'status-progress' : 'status-todo'}">${c.type.toUpperCase()}</span>
               ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteChantier(${c.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
@@ -2386,7 +2420,7 @@
 
       const newId = Date.now();
       chantiersCol.doc(String(newId)).set({
-        id: newId, title, type, urgent, category, dueDate, assign, done: false
+        id: newId, title, type, urgent, category, dueDate, assign, done: false, createdBy: currentUser.name
       });
       logActivity(`a créé le chantier "${title}"`, 'fa-list-check');
       closeModal('modal-add-chantier');
@@ -2650,7 +2684,7 @@
       } else {
         const newId = Date.now();
         const date = dateISO ? formatEventDate(dateISO) : 'À déterminer';
-        eventsCol.doc(String(newId)).set({ id: newId, title, date, dateISO, location });
+        eventsCol.doc(String(newId)).set({ id: newId, title, date, dateISO, location, createdBy: currentUser.name });
         logActivity(`a ajouté un nouvel événement : "${title}"`, 'fa-calendar-plus');
       }
       closeModal('modal-add-event');
@@ -2823,31 +2857,234 @@
     function updateNotifButton() {
       const btn = document.getElementById('notif-toggle-btn');
       if (!btn) return;
-      if (!notifSupported()) { btn.style.display = 'none'; return; }
       btn.style.display = '';
+      if (!notifSupported()) {
+        btn.innerHTML = '<i class="fa-solid fa-bell-slash"></i> Notifications : installer l\'app';
+        return;
+      }
       btn.innerHTML = notifEnabled()
         ? '<i class="fa-solid fa-bell"></i> Notifications activées'
         : '<i class="fa-solid fa-bell-slash"></i> Activer les notifications';
     }
+
     async function toggleNotifications() {
-      if (!notifSupported()) return;
-      if (Notification.permission === 'denied') {
-        alert("Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages de votre navigateur, puis réessayez.");
+      if (!notifSupported()) {
+        alert("Ce navigateur n'autorise pas les notifications.\n\nSur iPhone : ouvrez l'app dans Safari, touchez Partager puis « Sur l'écran d'accueil », et rouvrez-la depuis l'icône.");
         return;
       }
+      if (Notification.permission === 'denied') {
+        alert("Les notifications sont bloquées pour ce site. Autorisez-les dans les réglages du navigateur, puis réessayez.");
+        return;
+      }
+      let pref = null;
+      try { pref = localStorage.getItem('eliyah_notif'); } catch (e) {}
       if (Notification.permission !== 'granted') {
         const res = await Notification.requestPermission();
         if (res !== 'granted') { updateNotifButton(); return; }
         try { localStorage.setItem('eliyah_notif', 'on'); } catch (e) {}
+        await registerPushToken();
+      } else if (pref === 'off') {
+        try { localStorage.setItem('eliyah_notif', 'on'); } catch (e) {}
+        await registerPushToken();
       } else {
-        let pref = null;
-        try { pref = localStorage.getItem('eliyah_notif'); } catch (e) {}
-        try { localStorage.setItem('eliyah_notif', pref === 'off' ? 'on' : 'off'); } catch (e) {}
+        try { localStorage.setItem('eliyah_notif', 'off'); } catch (e) {}
+        await unregisterPushToken();
       }
       updateNotifButton();
     }
+
+    /* ===== Notifications push serveur (Firebase Cloud Messaging) ===== */
+    // Clé « Web Push » : Firebase Console > Paramètres du projet > Cloud Messaging > Certificats Web Push
+    const VAPID_KEY = 'COLLE_ICI_VOTRE_CLE_VAPID';
+    let fcmMessaging = null;
+    let currentPushToken = null;
+
+    async function registerPushToken() {
+      try {
+        if (!currentUser || !('serviceWorker' in navigator) || !firebase.messaging || !firebase.messaging.isSupported()) return false;
+        if (!VAPID_KEY || VAPID_KEY.startsWith('COLLE_')) { console.warn('Clé VAPID non renseignée : push serveur désactivé.'); return false; }
+        const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
+        await navigator.serviceWorker.ready;
+        fcmMessaging = fcmMessaging || firebase.messaging();
+        const token = await fcmMessaging.getToken({ vapidKey: VAPID_KEY, serviceWorkerRegistration: reg });
+        if (!token) return false;
+        await usersCol.doc(currentUser.docId).set({ fcmTokens: firebase.firestore.FieldValue.arrayUnion(token) }, { merge: true });
+        currentPushToken = token;
+        return true;
+      } catch (e) {
+        console.error('Push non activé :', e);
+        return false;
+      }
+    }
+
+    async function unregisterPushToken() {
+      try {
+        if (fcmMessaging && currentPushToken) {
+          await usersCol.doc(currentUser.docId).set({ fcmTokens: firebase.firestore.FieldValue.arrayRemove(currentPushToken) }, { merge: true });
+          await fcmMessaging.deleteToken();
+        }
+      } catch (e) { console.error(e); }
+      currentPushToken = null;
+    }
+
+    function scheduleNotifPrompt() {
+      if (!notifSupported() || Notification.permission !== 'default') return;
+      let dismissed = null;
+      try { dismissed = localStorage.getItem('eliyah_notif_prompt'); } catch (e) {}
+      if (dismissed) return;
+      setTimeout(() => {
+        showToast('Activez les notifications pour ne rien manquer (messages, chantiers, événements).', {
+          actionLabel: 'Activer', duration: 15000,
+          onAction: () => toggleNotifications(),
+          onClose: () => { try { localStorage.setItem('eliyah_notif_prompt', '1'); } catch (e) {} }
+        });
+      }, 6000);
+    }
+
+    function handleDeepLink(view) {
+      const v = view || (location.hash || '').replace('#', '');
+      if (v && document.getElementById('view-' + v) && currentUser) switchTab(v, null);
+    }
+    function bindDeepLinks() {
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.view) handleDeepLink(e.data.view); });
+      }
+      if (location.hash) setTimeout(() => handleDeepLink(), 500);
+    }
+
+    /* ===== Toasts ===== */
+    function showToast(text, opts = {}) {
+      let host = document.getElementById('toast-host');
+      if (!host) { host = document.createElement('div'); host.id = 'toast-host'; document.body.appendChild(host); }
+      const el = document.createElement('div');
+      el.className = 'toast';
+      el.innerHTML = `<div class="toast-body">${escapeHTML(text)}</div>`
+        + (opts.actionLabel ? `<button class="toast-action">${escapeHTML(opts.actionLabel)}</button>` : '')
+        + `<button class="toast-close" aria-label="Fermer">&times;</button>`;
+      const remove = () => { if (el.parentNode) el.parentNode.removeChild(el); };
+      el.querySelector('.toast-close').onclick = () => { remove(); if (opts.onClose) opts.onClose(); };
+      const act = el.querySelector('.toast-action');
+      if (act) act.onclick = () => { remove(); if (opts.onAction) opts.onAction(); };
+      host.appendChild(el);
+      setTimeout(remove, opts.duration || 8000);
+    }
+
+    /* ===== Chantiers : nouveautés, alertes et récap de connexion ===== */
+    let chantiersSeen = null;   // Set des ids déjà vus (null = jamais initialisé)
+    const chantiersToasted = new Set();
+    const briefingFlags = { chantiers: false, activities: false, shown: false };
+    function chSeenKey() { return 'eliyah_ch_seen_' + (currentUser ? currentUser.docId : ''); }
+    function loadChantiersSeen() {
+      try {
+        const raw = localStorage.getItem(chSeenKey());
+        chantiersSeen = raw ? new Set(JSON.parse(raw)) : null;
+      } catch (e) { chantiersSeen = null; }
+    }
+    function saveChantiersSeen() {
+      try { localStorage.setItem(chSeenKey(), JSON.stringify([...chantiersSeen])); } catch (e) {}
+    }
+    function isChantierNew(c) {
+      return !!(chantiersSeen && !chantiersSeen.has(c.id) && c.createdBy !== currentUser.name);
+    }
+    function isChantierMine(c) {
+      const a = String(c.assign || '').toLowerCase();
+      const name = String(currentUser.name || '').toLowerCase();
+      const mail = String(currentUser.email || '').split('@')[0].toLowerCase();
+      return !!a && ((name && a.includes(name)) || (mail && a.includes(mail)));
+    }
+    function isDueSoon(c) {
+      if (!c.dueDate) return false;
+      const lim = new Date(); lim.setDate(lim.getDate() + 3); lim.setHours(23, 59, 59, 999);
+      return new Date(c.dueDate) <= lim;
+    }
+    function markChantiersSeen() {
+      chantiersSeen = new Set(chantiersData.map(c => c.id));
+      saveChantiersSeen();
+      updateChantiersNewBadge();
+      renderChantiersList();
+    }
+    function updateChantiersNewBadge() {
+      const badge = document.getElementById('chantiers-new-badge');
+      if (!badge || !currentUser) return;
+      const n = chantiersData.filter(isChantierNew).length;
+      badge.textContent = n;
+      badge.style.display = n ? 'inline-block' : 'none';
+    }
+    function isChantiersViewActive() {
+      const v = document.getElementById('view-chantiers');
+      return !!(v && v.classList.contains('active'));
+    }
+    function handleChantiersSnapshot() {
+      if (!currentUser) return;
+      if (!chantiersSeen) {
+        // Première ouverture sur cet appareil : tout l'existant est considéré comme vu.
+        markChantiersSeen();
+      } else {
+        // Ce que j'ai créé moi-même n'est jamais « nouveau ».
+        chantiersData.forEach(c => { if (c.createdBy === currentUser.name && !chantiersSeen.has(c.id)) chantiersSeen.add(c.id); });
+        saveChantiersSeen();
+        if (isChantiersViewActive() && !document.hidden) { markChantiersSeen(); }
+        else {
+          updateChantiersNewBadge();
+          if (briefingFlags.shown) {
+            chantiersData.filter(c => isChantierNew(c) && !chantiersToasted.has(c.id)).forEach(c => {
+              chantiersToasted.add(c.id);
+              const mine = isChantierMine(c);
+              const msg = (mine ? 'Chantier pour vous : ' : 'Nouveau chantier : ') + c.title + (c.createdBy ? ' (par ' + c.createdBy + ')' : '');
+              showToast(msg, { actionLabel: 'Voir', onAction: () => switchTab('chantiers', null) });
+              if (document.hidden && notifEnabled() && !currentPushToken) {
+                try { new Notification('ELIYAH — Nouveau chantier', { body: c.title, tag: 'eliyah-chantier' }); } catch (e) {}
+              }
+            });
+          }
+        }
+      }
+      renderChantiersList();
+      briefingFlags.chantiers = true;
+      maybeShowBriefing();
+    }
+
+    function maybeShowBriefing() {
+      if (briefingFlags.shown || !briefingFlags.chantiers || !briefingFlags.activities || !currentUser) return;
+      briefingFlags.shown = true;
+      renderBriefing();
+      const hasContent = chantiersData.some(c => !c.done) || activitiesData.length;
+      if (hasContent) openModal('modal-conn-notif');
+    }
+
+    function renderBriefing() {
+      renderConnNotification();
+      const box = document.getElementById('conn-chantiers-list');
+      if (!box) return;
+      const pending = chantiersData.filter(c => !c.done);
+      if (!pending.length) {
+        box.innerHTML = '<div class="brief-title">Chantiers</div><p style="font-size:13px; color:var(--text-muted);">✅ Aucun chantier en attente.</p>';
+        return;
+      }
+      const score = c => (isChantierNew(c) ? 8 : 0) + (isChantierMine(c) ? 4 : 0) + (c.urgent === 'urgent' ? 2 : 0) + (isDueSoon(c) ? 1 : 0);
+      const sorted = [...pending].sort((x, y) => score(y) - score(x));
+      const urgents = pending.filter(c => c.urgent === 'urgent' || isDueSoon(c)).length;
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      box.innerHTML = `<div class="brief-title">${pending.length} chantier${pending.length > 1 ? 's' : ''} en cours${urgents ? ' • ' + urgents + ' urgent' + (urgents > 1 ? 's' : '') + ' / proche' + (urgents > 1 ? 's' : '') : ''}</div>`
+        + sorted.slice(0, 6).map(c => {
+          const tags = [
+            isChantierNew(c) ? '<span class="brief-tag new">Nouveau</span>' : '',
+            isChantierMine(c) ? '<span class="brief-tag mine">Pour vous</span>' : '',
+            c.urgent === 'urgent' ? '<span class="brief-tag urgent">Urgent</span>' : '',
+            isDueSoon(c) ? `<span class="brief-tag due">${new Date(c.dueDate) < today ? 'En retard' : 'Échéance ' + new Date(c.dueDate).toLocaleDateString('fr-FR')}</span>` : ''
+          ].join('');
+          return `<div class="feed-item"><div class="feed-item-icon"><i class="fa-solid fa-list-check"></i></div><div><div>${escapeHTML(c.title)}${tags}</div><div class="feed-time">Responsables : ${escapeHTML(c.assign)}</div></div></div>`;
+        }).join('')
+        + (sorted.length > 6 ? `<p style="font-size:12px; color:var(--text-muted); margin-top:6px;">… et ${sorted.length - 6} autre(s) dans « Chantiers & Rappels ».</p>` : '');
+    }
+
+    function closeBriefing() {
+      closeModal('modal-conn-notif');
+      markChantiersSeen();
+    }
+
     function notifyNewChat(changes) {
-      if (!notifEnabled() || !currentUser) return;
+      if (!notifEnabled() || !currentUser || currentPushToken) return; // le push serveur s'en charge
       if (!document.hidden && isChatViewActive()) return;
       changes.filter(ch => ch.type === 'added').forEach(ch => {
         const m = ch.doc.data();
