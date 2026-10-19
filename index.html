@@ -1022,6 +1022,46 @@
       #toast-host { top: calc(env(safe-area-inset-top, 0px) + 72px); left: 12px; right: 12px; max-width: none; }
       #chantiers-new-badge { right: 22px; }
     }
+    /* ===== Rétroplanning ===== */
+    .retro-chip { background: #F1F5F9; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .retro-scroll { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 14px; background: #fff; }
+    .retro-grid { position: relative; --rl: 190px; }
+    .retro-row { display: flex; align-items: stretch; border-bottom: 1px solid #F1F5F9; }
+    .retro-label { position: sticky; left: 0; z-index: 3; width: var(--rl); min-width: var(--rl); flex: none; background: #fff; padding: 6px 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; border-right: 1px solid #E2E8F0; overflow: hidden; white-space: nowrap; cursor: pointer; }
+    .retro-label.group { background: #F8FAFC; font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: .05em; color: var(--text-muted); cursor: default; }
+    .retro-track { position: relative; flex: none; height: 34px; background-image: linear-gradient(to right, #F1F5F9 1px, transparent 1px); }
+    .retro-bar { position: absolute; top: 6px; height: 22px; border-radius: 7px; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; padding: 0 6px; cursor: pointer; overflow: hidden; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+    .retro-overlay { position: absolute; top: 0; bottom: 0; left: var(--rl); right: 0; pointer-events: none; z-index: 2; }
+    .retro-today, .retro-target { position: absolute; top: 0; bottom: 0; width: 2px; }
+    .retro-today { background: #2563EB; }
+    .retro-target { background: #8B1E2D; }
+    .retro-flag { position: absolute; font-size: 10px; font-weight: 800; padding: 2px 6px; border-radius: 6px; color: #fff; white-space: nowrap; z-index: 4; }
+    .retro-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 11px; color: var(--text-muted); margin-bottom: 10px; }
+    .retro-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
+
+    /* ===== Séances & sondages ===== */
+    .poll-card { border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; margin-bottom: 14px; background: #fff; }
+    .poll-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
+    .poll-banner { margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: #FEF3C7; color: #92400E; font-size: 13px; }
+    .poll-banner.all { background: #D1FAE5; color: #047857; }
+    .poll-slot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 12px; margin-top: 8px; }
+    .poll-slot.best { border-color: #10B981; background: #ECFDF5; }
+    .poll-slot.chosen { border-color: #8B1E2D; background: #FEF2F2; }
+    .poll-stats { display: flex; gap: 6px; font-size: 12px; font-weight: 700; margin-top: 4px; }
+    .poll-stats span { padding: 2px 8px; border-radius: 10px; background: #F1F5F9; }
+    .vote-btn { border: 1px solid #E2E8F0; background: #fff; border-radius: 10px; padding: 6px 10px; font-size: 14px; cursor: pointer; }
+    .vote-btn.on-yes { background: #D1FAE5; border-color: #10B981; }
+    .vote-btn.on-maybe { background: #FEF3C7; border-color: #F59E0B; }
+    .vote-btn.on-no { background: #FEE2E2; border-color: #EF4444; }
+    .vote-btn:disabled { opacity: .5; cursor: default; }
+    .poll-matrix { font-size: 12px; border-collapse: collapse; width: 100%; margin-top: 8px; }
+    .poll-matrix th, .poll-matrix td { padding: 6px 8px; border-bottom: 1px solid #F1F5F9; white-space: nowrap; text-align: left; }
+    .poll-slot-row { display: flex; gap: 6px; margin-bottom: 6px; }
+    .poll-slot-row input { flex: 1; }
+    @media (max-width: 640px) {
+      .retro-grid { --rl: 120px; }
+      .poll-slot { flex-direction: column; align-items: stretch; }
+    }
 </style>
 </head>
 <body>
@@ -1070,6 +1110,10 @@
           <span class="nav-badge" id="urgent-count-badge">2</span>
           <span class="nav-badge" id="chantiers-new-badge" style="display:none;" title="Nouveaux chantiers">0</span>
         </li>
+        <li class="nav-item" onclick="switchTab('retro', this)">
+          <i class="fa-solid fa-timeline"></i>
+          <span>Rétroplanning</span>
+        </li>
         <li class="nav-item" onclick="switchTab('mix', this)">
           <i class="fa-solid fa-sliders"></i>
           <span>Suivi & Mixage</span>
@@ -1081,6 +1125,11 @@
         <li class="nav-item" onclick="switchTab('agenda', this)">
           <i class="fa-solid fa-calendar-days"></i>
           <span>Agenda & Setlist</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('planning', this)">
+          <i class="fa-solid fa-calendar-check"></i>
+          <span>Planning & Séances</span>
+          <span class="nav-badge" id="polls-pending-badge" style="display:none;" title="Sondages en attente de votre réponse">0</span>
         </li>
         <li class="nav-item" onclick="switchTab('chat', this)">
           <i class="fa-solid fa-comments"></i>
@@ -1352,6 +1401,38 @@
     </section>
 
     <!-- VIEW 6: CHAT -->
+    <section id="view-retro" class="view-content">
+      <div class="chart-box" style="margin-bottom: 16px;">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-timeline" style="color: var(--brand-red);"></i> Rétroplanning</h3>
+            <p>Tous les chantiers placés à rebours à partir de votre objectif.</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <select id="retro-target" onchange="onRetroTargetChange()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:#fff; max-width:260px;"></select>
+            <button class="btn btn-primary btn-sm" id="retro-mode-gantt" onclick="setRetroMode('gantt')">Frise</button>
+            <button class="btn btn-secondary btn-sm" id="retro-mode-list" onclick="setRetroMode('list')">Par semaine</button>
+            <button class="btn btn-secondary btn-sm" onclick="openModal('modal-add-chantier')"><i class="fa-solid fa-plus"></i> Chantier</button>
+          </div>
+        </div>
+        <div id="retro-summary"></div>
+        <div id="retro-container"></div>
+      </div>
+    </section>
+
+    <section id="view-planning" class="view-content">
+      <div class="chart-box">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-calendar-check" style="color: #059669;"></i> Séances & Sondages</h3>
+            <p>Proposez des créneaux, chacun indique ses disponibilités, on retient le meilleur.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openPollModal()"><i class="fa-solid fa-plus"></i> Proposer une séance</button>
+        </div>
+        <div id="polls-container"></div>
+      </div>
+    </section>
+
     <section id="view-chat" class="view-content">
       <div class="box-title">
         <h3>Espace de Discussion du Groupe ELIYAH</h3>
@@ -1450,6 +1531,7 @@
         <p style="font-size: 13px; color: var(--text-muted);">Chantiers à suivre et derniers avancements :</p>
       </div>
       <div id="conn-chantiers-list" style="margin-bottom: 12px;"></div>
+      <div id="conn-polls-list" style="margin-bottom: 12px;"></div>
       <div class="brief-title">Derniers avancements</div>
       <div class="feed-list" id="conn-notif-list" style="margin-bottom: 20px; max-height: 220px; overflow-y: auto;"></div>
       <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="closeBriefing()">Compris, Accéder au Projet</button>
@@ -1581,6 +1663,86 @@
       <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-add-chantier')">Annuler</button>
         <button class="btn btn-primary" onclick="addNewChantier()">Créer Chantier</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-edit-chantier">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 16px; font-weight: 800;">Modifier le Chantier</h3>
+      <input type="hidden" id="edit-chantier-id">
+      <div class="form-group">
+        <label>Intitulé</label>
+        <input type="text" id="edit-chantier-title">
+      </div>
+      <div class="form-group">
+        <label>Périodicité</label>
+        <select id="edit-chantier-type">
+          <option value="hebdo">Hebdomadaire</option>
+          <option value="mensuel">Mensuel</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Niveau d'Urgence</label>
+        <select id="edit-chantier-urgent">
+          <option value="normal">Normal</option>
+          <option value="urgent">🚨 Urgent / À finir en priorité</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Catégorie</label>
+        <select id="edit-chantier-category">
+          <option value="general">Général</option>
+          <option value="communication">Communication / Presse</option>
+          <option value="technique">Technique / Son</option>
+          <option value="logistique">Logistique (Prépa Live)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Début (optionnel — sinon date de création)</label>
+        <input type="date" id="edit-chantier-startdate">
+      </div>
+      <div class="form-group">
+        <label>Échéance</label>
+        <input type="date" id="edit-chantier-duedate">
+      </div>
+      <div class="form-group">
+        <label>Responsables</label>
+        <input type="text" id="edit-chantier-assign">
+      </div>
+      <label style="display:flex; gap:8px; align-items:center; font-size:13px; margin-top:6px;">
+        <input type="checkbox" id="edit-chantier-done" style="width:18px; height:18px; accent-color: var(--brand-red);"> Chantier terminé
+      </label>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-edit-chantier')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveEditedChantier()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-poll">
+    <div class="modal-box">
+      <h3 style="margin-bottom: 16px; font-weight: 800;">Proposer une séance</h3>
+      <div class="form-group">
+        <label>Intitulé</label>
+        <input type="text" id="poll-title" placeholder="Ex: Répétition générale">
+      </div>
+      <div class="form-group">
+        <label>Lieu</label>
+        <input type="text" id="poll-location" placeholder="Ex: Studio, salle de répète…">
+      </div>
+      <div class="form-group">
+        <label>Infos (optionnel)</label>
+        <input type="text" id="poll-notes" placeholder="Ex: apporter les in-ears, 3h de session">
+      </div>
+      <div class="form-group">
+        <label>Créneaux proposés</label>
+        <div id="poll-slots-list"></div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addPollSlotInput()"><i class="fa-solid fa-plus"></i> Ajouter un créneau</button>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-poll')">Annuler</button>
+        <button class="btn btn-primary" onclick="savePoll()">Envoyer la proposition</button>
       </div>
     </div>
   </div>
@@ -2055,7 +2217,7 @@
       bindDeepLinks();
 
       // Le récap de connexion s'affiche quand les données sont arrivées (ou après 3 s au plus tard).
-      setTimeout(() => { briefingFlags.chantiers = true; briefingFlags.activities = true; maybeShowBriefing(); }, 3000);
+      setTimeout(() => { briefingFlags.chantiers = true; briefingFlags.activities = true; briefingFlags.polls = true; maybeShowBriefing(); }, 3000);
     }
 
     // Sème une collection avec des données de démo UNE SEULE FOIS pour tout le projet
@@ -2118,7 +2280,10 @@
         eventsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         renderEventsList();
         renderSetlist();
+        refreshRetroIfActive();
       });
+
+      pollsCol.onSnapshot(handlePollsSnapshot);
 
       chatCol.onSnapshot(snap => {
         chatData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
@@ -2138,6 +2303,7 @@
         updateFormationTag();
         if (!window.__usersFirstRender) { window.__usersFirstRender = true; renderChat(); }
         renderPresenceUI();
+        if (usersData.length !== lastUsersLenForPolls) { lastUsersLenForPolls = usersData.length; renderPolls(); }
         const myProfile = usersData.find(u => u.email === currentUser.email);
         if (myProfile && myProfile.role !== currentUser.role) {
           currentUser.role = myProfile.role;
@@ -2241,11 +2407,15 @@
         'agenda': { title: 'Agenda & Setlist Live', sub: 'Planning des répétitions et ordonnancement de la setlist de scène.' },
         'chat': { title: 'Espace Chat', sub: 'Messagerie instantanée du groupe.' },
         'docs': { title: 'Documents & Médias', sub: 'Téléchargement de fiches PDF, fichiers WAV et vidéos MP4.' },
+        'retro': { title: 'Rétroplanning', sub: 'Les chantiers planifiés à rebours à partir de votre prochain objectif.' },
+        'planning': { title: 'Planning & Séances', sub: 'Sondages de disponibilités pour caler les séances d’entraînement.' },
         'admin': { title: 'Espace Administration', sub: 'Gestion des autorisations et droits de suppression.' }
       };
 
       if (viewId === 'chat' && currentUser) markChatRead();
       if (viewId === 'chantiers' && currentUser && chantiersSeen) markChantiersSeen();
+      if (viewId === 'retro') renderRetro();
+      if (viewId === 'planning') renderPolls();
 
       if (titles[viewId]) {
         document.getElementById('view-title').textContent = titles[viewId].title;
@@ -2254,6 +2424,571 @@
     }
 
     /* ================= RENDERING ================= */
+
+    /* ================= RÉTROPLANNING ================= */
+    let retroMode = 'gantt';
+    let retroTargetId = 'auto';
+    let retroScrollLeft = null;
+    const RETRO_GROUPS = [
+      ['communication', 'Communication / Presse'],
+      ['technique', 'Technique / Son'],
+      ['logistique', 'Prépa Live / Logistique'],
+      ['general', 'Général']
+    ];
+
+    function isViewActive(id) {
+      const v = document.getElementById('view-' + id);
+      return !!(v && v.classList.contains('active'));
+    }
+    function refreshRetroIfActive() { if (isViewActive('retro')) renderRetro(); }
+    function addDays(d, n) { const x = new Date(d); x.setDate(x.getDate() + n); return x; }
+    function dayStart(d) { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; }
+    function daysBetween(a, b) { return Math.round((dayStart(b) - dayStart(a)) / 86400000); }
+    function parseDateOnly(str) {
+      const m = String(str || '').match(/^(\d{4})-(\d{2})-(\d{2})/);
+      return m ? new Date(+m[1], +m[2] - 1, +m[3]) : null;
+    }
+    function fmtShort(d) { return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }); }
+    function catOf(c) { return RETRO_GROUPS.some(g => g[0] === c.category) ? c.category : 'general'; }
+    function catLabel(c) { const g = RETRO_GROUPS.find(g => g[0] === catOf(c)); return g ? g[1] : 'Général'; }
+
+    function chantierStart(c, due) {
+      let st = parseDateOnly(c.startDate);
+      if (!st) st = c.id > 1e12 ? dayStart(new Date(c.id)) : dayStart(new Date());
+      if (due && st > due) st = due;
+      return st;
+    }
+
+    function getRetroTarget() {
+      const now = Date.now();
+      const upcoming = sortedEvents().filter(e => e.dateISO && new Date(e.dateISO).getTime() >= now - 86400000);
+      let ev = null;
+      if (retroTargetId === 'auto') ev = upcoming[0] || null;
+      else if (retroTargetId !== 'none') ev = eventsData.find(e => String(e.id) === String(retroTargetId) && e.dateISO) || null;
+      return { ev, date: ev ? dayStart(new Date(ev.dateISO)) : null, upcoming };
+    }
+
+    function fillRetroTargetSelect(t) {
+      const sel = document.getElementById('retro-target');
+      if (!sel) return;
+      const first = t.upcoming[0];
+      sel.innerHTML = [`<option value="auto">Prochain événement${first ? ' — ' + escapeHTML(first.title) : ''}</option>`]
+        .concat(t.upcoming.map(e => `<option value="${e.id}">${escapeHTML(e.title)} — ${fmtShort(new Date(e.dateISO))}</option>`))
+        .concat(['<option value="none">Sans objectif (depuis aujourd’hui)</option>']).join('');
+      sel.value = String(retroTargetId);
+    }
+    function onRetroTargetChange() {
+      retroTargetId = document.getElementById('retro-target').value;
+      retroScrollLeft = null;
+      renderRetro();
+    }
+    function setRetroMode(m) {
+      retroMode = m;
+      document.getElementById('retro-mode-gantt').className = 'btn btn-sm ' + (m === 'gantt' ? 'btn-primary' : 'btn-secondary');
+      document.getElementById('retro-mode-list').className = 'btn btn-sm ' + (m === 'list' ? 'btn-primary' : 'btn-secondary');
+      renderRetro();
+    }
+
+    function chantierStatus(c, due, today, target) {
+      if (c.done) return { color: '#10B981', label: 'Terminé' };
+      if (due && due < today) return { color: '#7F1D1D', label: 'En retard' };
+      if (target && due && due > target) return { color: '#F59E0B', label: 'Après l’objectif' };
+      if (c.urgent === 'urgent') return { color: '#EF4444', label: 'Urgent' };
+      return { color: '#3B82F6', label: 'En cours' };
+    }
+    function jLabel(due, target) {
+      if (!due) return '';
+      if (!target) return fmtShort(due);
+      const d = daysBetween(due, target);
+      return d >= 0 ? 'J-' + d : 'J+' + (-d);
+    }
+    function countdownLabel(n) { return n > 0 ? 'J-' + n : (n === 0 ? 'Jour J' : 'Passé'); }
+
+    function renderRetro() {
+      const box = document.getElementById('retro-container');
+      const sum = document.getElementById('retro-summary');
+      if (!box || !sum) return;
+      const t = getRetroTarget();
+      fillRetroTargetSelect(t);
+      const today = dayStart(new Date());
+      const target = t.date;
+
+      const items = chantiersData.map(c => {
+        const due = parseDateOnly(c.dueDate);
+        return { c, due, start: due ? chantierStart(c, due) : null };
+      });
+      const dated = items.filter(i => i.due);
+      const undated = items.filter(i => !i.due && !i.c.done);
+      const total = chantiersData.length;
+      const done = chantiersData.filter(c => c.done).length;
+      const late = dated.filter(i => !i.c.done && i.due < today).length;
+      const pct = total ? Math.round(done / total * 100) : 0;
+
+      sum.innerHTML = `
+        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+          <span class="retro-chip">${target ? '🎯 ' + escapeHTML(t.ev.title) + ' — <strong>' + countdownLabel(daysBetween(today, target)) + '</strong>' : '🎯 Aucun objectif sélectionné'}</span>
+          <span class="retro-chip">✅ ${done}/${total} terminés (${pct}%)</span>
+          ${late ? `<span class="retro-chip" style="background:#FEE2E2; color:#991B1B;">⚠️ ${late} en retard</span>` : ''}
+          ${undated.length ? `<span class="retro-chip" style="background:#FEF3C7; color:#92400E;">🗓️ ${undated.length} sans échéance</span>` : ''}
+        </div>
+        <div style="height:8px; background:#E2E8F0; border-radius:6px; overflow:hidden; margin-bottom:14px;"><div style="height:100%; width:${pct}%; background:#10B981;"></div></div>`;
+
+      const undatedHTML = undated.length
+        ? `<div class="brief-title" style="margin-top:16px;">Sans échéance (${undated.length}) — à placer dans le rétroplanning</div>` +
+          undated.map(i => `
+            <div class="feed-item" style="justify-content:space-between;">
+              <div style="min-width:0;"><strong>${escapeHTML(i.c.title)}</strong><div class="feed-time">${escapeHTML(i.c.assign || '')} • ${escapeHTML(catLabel(i.c))}</div></div>
+              <button class="btn btn-secondary btn-sm" onclick="openEditChantierModal(${i.c.id})"><i class="fa-solid fa-calendar-plus"></i> Définir une date</button>
+            </div>`).join('')
+        : '';
+
+      if (!total) {
+        box.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Aucun chantier pour le moment. Créez-en depuis « Chantiers & Rappels » ou avec le bouton « Chantier ».</p>';
+        return;
+      }
+      if (!dated.length) {
+        box.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Aucun chantier n’a encore d’échéance : donnez-leur une date pour construire le rétroplanning.</p>' + undatedHTML;
+        return;
+      }
+
+      if (retroMode === 'list') {
+        const groups = {};
+        dated.forEach(i => {
+          let label, order;
+          if (!i.c.done && i.due < today) { label = '⚠️ En retard'; order = -1e9; }
+          else if (target) {
+            const d = daysBetween(i.due, target);
+            if (d < 0) { label = 'Après l’objectif'; order = 1e9; }
+            else {
+              const w = Math.floor(d / 7);
+              label = w === 0 ? 'Dernière semaine avant l’objectif (J-0 à J-6)' : `S-${w} avant l’objectif (J-${w * 7} à J-${w * 7 + 6})`;
+              order = -w;
+            }
+          } else {
+            const w = Math.floor(daysBetween(today, i.due) / 7);
+            label = w <= 0 ? 'Cette semaine' : (w === 1 ? 'Semaine prochaine' : `Dans ${w} semaines`);
+            order = w;
+          }
+          (groups[label] = groups[label] || { order, items: [] }).items.push(i);
+        });
+        box.innerHTML = Object.keys(groups).sort((a, b) => groups[a].order - groups[b].order).map(label => {
+          const g = groups[label];
+          g.items.sort((x, y) => x.due - y.due);
+          return `<div class="brief-title" style="margin-top:14px;">${escapeHTML(label)}</div>` + g.items.map(i => {
+            const st = chantierStatus(i.c, i.due, today, target);
+            return `
+              <div class="feed-item" style="justify-content:space-between;">
+                <div style="display:flex; gap:10px; align-items:center; min-width:0;">
+                  <input type="checkbox" ${i.c.done ? 'checked' : ''} onclick="toggleChantierDone(${i.c.id})" style="width:18px; height:18px; accent-color: var(--brand-red); flex:none;">
+                  <div style="min-width:0;">
+                    <div style="font-weight:700; ${i.c.done ? 'text-decoration:line-through; opacity:.6;' : ''}">${escapeHTML(i.c.title)}</div>
+                    <div class="feed-time">${i.due.toLocaleDateString('fr-FR')} • <span style="color:${st.color}; font-weight:700;">${escapeHTML(jLabel(i.due, target))} · ${st.label}</span> • ${escapeHTML(i.c.assign || '')} • ${escapeHTML(catLabel(i.c))}</div>
+                  </div>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="openEditChantierModal(${i.c.id})"><i class="fa-solid fa-pen"></i></button>
+              </div>`;
+          }).join('');
+        }).join('') + undatedHTML;
+        return;
+      }
+
+      // ---- Frise (Gantt) ----
+      let min = today, max = today;
+      dated.forEach(i => { if (i.start < min) min = i.start; if (i.due > max) max = i.due; });
+      if (target && target > max) max = target;
+      min = addDays(min, -2); max = addDays(max, 3);
+      if (daysBetween(min, max) > 150) {
+        min = addDays(today, -14);
+        if (daysBetween(min, max) > 150) max = addDays(min, 150);
+      }
+      const days = daysBetween(min, max) + 1;
+      const W = window.innerWidth <= 640 ? 24 : 30;
+      const idx = d => daysBetween(min, d);
+      const trackW = days * W;
+      const gridBg = `background-size:${W}px 100%;`;
+
+      let weekLabels = '';
+      for (let i = 0; i < days; i++) {
+        const d = addDays(min, i);
+        if (i === 0 || d.getDay() === 1) weekLabels += `<span style="position:absolute; left:${i * W + 2}px; top:9px; font-size:10px; color:var(--text-muted); font-weight:700;">${fmtShort(d)}</span>`;
+      }
+
+      const flagList = [];
+      const pushFlag = (d, text, color) => { const k = idx(d); if (k >= 0 && k < days) flagList.push({ k, text, color }); };
+      pushFlag(today, 'Aujourd’hui', '#2563EB');
+      sortedEvents().forEach(e => {
+        if (!e.dateISO) return;
+        const d = dayStart(new Date(e.dateISO));
+        if (target && daysBetween(d, target) === 0) return;
+        if (d >= min && d <= max) pushFlag(d, '🎤 ' + String(e.title).slice(0, 16), '#F59E0B');
+      });
+      if (target) pushFlag(target, '🎯 ' + String(t.ev.title).slice(0, 18), '#8B1E2D');
+      flagList.sort((a, b) => a.k - b.k);
+      const flagsHTML = flagList.map((f, n) => `<span class="retro-flag" style="left:${f.k * W}px; top:${n % 2 ? 28 : 3}px; background:${f.color};">${escapeHTML(f.text)}</span>`).join('');
+
+      let rowsHTML = '';
+      RETRO_GROUPS.forEach(([key, label]) => {
+        const list = dated.filter(i => catOf(i.c) === key).sort((a, b) => a.due - b.due);
+        if (!list.length) return;
+        rowsHTML += `<div class="retro-row"><div class="retro-label group">${label}</div><div class="retro-track" style="width:${trackW}px; background:#F8FAFC;"></div></div>`;
+        list.forEach(i => {
+          const st = chantierStatus(i.c, i.due, today, target);
+          let a = idx(i.start), b = idx(i.due);
+          if (b < 0 || a > days - 1) return;
+          a = Math.max(0, a); b = Math.min(days - 1, b);
+          const left = a * W + 2, width = Math.max(W - 4, (b - a + 1) * W - 4);
+          const tip = `${i.c.title} — ${st.label} — échéance ${i.due.toLocaleDateString('fr-FR')}${i.c.assign ? ' — ' + i.c.assign : ''}`;
+          rowsHTML += `
+            <div class="retro-row">
+              <div class="retro-label" title="${escapeHTML(tip)}">
+                <input type="checkbox" ${i.c.done ? 'checked' : ''} onclick="toggleChantierDone(${i.c.id})" style="margin-right:6px; flex:none; accent-color: var(--brand-red);">
+                <span style="overflow:hidden; text-overflow:ellipsis; ${i.c.done ? 'text-decoration:line-through; opacity:.6;' : ''}" onclick="openEditChantierModal(${i.c.id})">${escapeHTML(i.c.title)}</span>
+              </div>
+              <div class="retro-track" style="width:${trackW}px; ${gridBg}">
+                <div class="retro-bar" style="left:${left}px; width:${width}px; background:${st.color};" title="${escapeHTML(tip)}" onclick="openEditChantierModal(${i.c.id})">${escapeHTML(jLabel(i.due, target))}</div>
+              </div>
+            </div>`;
+        });
+      });
+
+      let lines = '';
+      const ti = idx(today);
+      if (ti >= 0 && ti < days) lines += `<div class="retro-today" style="left:${ti * W + W / 2 - 1}px;"></div>`;
+      if (target) { const gi = idx(target); if (gi >= 0 && gi < days) lines += `<div class="retro-target" style="left:${gi * W + W / 2 - 1}px;"></div>`; }
+
+      box.innerHTML = `
+        <div class="retro-legend">
+          <span><i style="background:#10B981;"></i>Terminé</span>
+          <span><i style="background:#3B82F6;"></i>En cours</span>
+          <span><i style="background:#EF4444;"></i>Urgent</span>
+          <span><i style="background:#7F1D1D;"></i>En retard</span>
+          <span><i style="background:#F59E0B;"></i>Après l’objectif</span>
+          <span><i style="background:#2563EB;"></i>Aujourd’hui</span>
+          <span><i style="background:#8B1E2D;"></i>Objectif</span>
+        </div>
+        <div class="retro-scroll" id="retro-scroll">
+          <div class="retro-grid" style="min-width: calc(var(--rl) + ${trackW}px);">
+            <div class="retro-row"><div class="retro-label group">Chantier</div><div class="retro-track" style="width:${trackW}px; height:30px; ${gridBg}">${weekLabels}</div></div>
+            <div class="retro-row"><div class="retro-label group">Jalons</div><div class="retro-track" style="width:${trackW}px; height:54px; ${gridBg}">${flagsHTML}</div></div>
+            ${rowsHTML}
+            <div class="retro-overlay">${lines}</div>
+          </div>
+        </div>
+        ${undatedHTML}`;
+
+      const sc = document.getElementById('retro-scroll');
+      if (sc) {
+        sc.scrollLeft = retroScrollLeft !== null ? retroScrollLeft : Math.max(0, ti * W - 60);
+        sc.onscroll = () => { retroScrollLeft = sc.scrollLeft; };
+      }
+    }
+
+    /* ----- Modifier un chantier ----- */
+    function openEditChantierModal(id) {
+      const c = chantiersData.find(x => x.id === id);
+      if (!c) return;
+      document.getElementById('edit-chantier-id').value = c.id;
+      document.getElementById('edit-chantier-title').value = c.title || '';
+      document.getElementById('edit-chantier-type').value = c.type || 'hebdo';
+      document.getElementById('edit-chantier-urgent').value = c.urgent || 'normal';
+      document.getElementById('edit-chantier-category').value = catOf(c);
+      document.getElementById('edit-chantier-startdate').value = c.startDate || '';
+      document.getElementById('edit-chantier-duedate').value = c.dueDate || '';
+      document.getElementById('edit-chantier-assign').value = c.assign && c.assign !== 'Non assigné' ? c.assign : '';
+      document.getElementById('edit-chantier-done').checked = !!c.done;
+      openModal('modal-edit-chantier');
+    }
+
+    function saveEditedChantier() {
+      const id = parseInt(document.getElementById('edit-chantier-id').value);
+      const title = document.getElementById('edit-chantier-title').value.trim();
+      if (!title) return alert('Veuillez remplir le titre.');
+      const startDate = document.getElementById('edit-chantier-startdate').value || '';
+      const dueDate = document.getElementById('edit-chantier-duedate').value || '';
+      if (startDate && dueDate && startDate > dueDate) return alert('Le début doit être avant l’échéance.');
+      chantiersCol.doc(String(id)).update({
+        title,
+        type: document.getElementById('edit-chantier-type').value,
+        urgent: document.getElementById('edit-chantier-urgent').value,
+        category: document.getElementById('edit-chantier-category').value,
+        startDate, dueDate,
+        assign: document.getElementById('edit-chantier-assign').value.trim() || 'Non assigné',
+        done: document.getElementById('edit-chantier-done').checked
+      }).catch(err => { console.error(err); alert('Modification impossible (droits ou réseau).'); });
+      logActivity(`a modifié le chantier "${title}"`, 'fa-pen');
+      closeModal('modal-edit-chantier');
+    }
+
+    /* ================= SÉANCES & SONDAGES ================= */
+    const pollsCol = db.collection('polls');
+    let pollsData = [];
+    let pollsBaselineReady = false;
+    let lastUsersLenForPolls = -1;
+    const pollDetailsOpen = new Set();
+    const VOTE_ICON = { yes: '✅', maybe: '🟡', no: '❌' };
+
+    function memberName(u) { return (u.name && u.name !== 'undefined') ? u.name : String(u.email || '?').split('@')[0]; }
+    function shortSlot(iso) {
+      const d = new Date(iso);
+      return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' }) + ' ' + d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }).replace(':', 'h');
+    }
+    function pollSlotsSorted(p) { return [...(p.slots || [])].sort((a, b) => new Date(a.iso) - new Date(b.iso)); }
+    function answersOf(p, uid) { return (p.votes && p.votes[uid] && p.votes[uid].a) || {}; }
+    function myAnswers(p) { return currentUser ? answersOf(p, currentUser.docId) : {}; }
+    function hasAnswered(p) { return Object.keys(myAnswers(p)).length > 0; }
+    function canEditPoll(p) { return !!currentUser && (p.createdById === currentUser.docId || canManageContent()); }
+    function pollsPendingForMe() { return pollsData.filter(p => p.status !== 'closed' && !hasAnswered(p)); }
+
+    function slotStats(p, slot) {
+      let yes = 0, maybe = 0, no = 0;
+      const pending = [];
+      usersData.forEach(u => {
+        const v = answersOf(p, u.docId)[slot.id];
+        if (v === 'yes') yes++; else if (v === 'maybe') maybe++; else if (v === 'no') no++; else pending.push(u);
+      });
+      return { yes, maybe, no, pending, total: usersData.length };
+    }
+    // Meilleur créneau : le plus de « dispo », puis le plus de « peut-être », puis le plus proche.
+    function bestSlot(p) {
+      const slots = pollSlotsSorted(p);
+      if (!slots.length) return null;
+      const ranked = slots.map(s => ({ s, st: slotStats(p, s) }))
+        .sort((a, b) => b.st.yes - a.st.yes || b.st.maybe - a.st.maybe || new Date(a.s.iso) - new Date(b.s.iso));
+      return ranked[0];
+    }
+
+    function updatePollsBadge() {
+      const badge = document.getElementById('polls-pending-badge');
+      if (!badge || !currentUser) return;
+      const n = pollsPendingForMe().length;
+      badge.textContent = n;
+      badge.style.display = n ? 'inline-block' : 'none';
+    }
+
+    function pollCardHTML(p) {
+      const slots = pollSlotsSorted(p);
+      const open = p.status !== 'closed';
+      const best = open ? bestSlot(p) : null;
+      const mine = myAnswers(p);
+      const canEdit = canEditPoll(p);
+      const total = usersData.length;
+      const waiting = usersData.filter(u => !Object.keys(answersOf(p, u.docId)).length);
+
+      let banner = '';
+      if (open && best && (best.st.yes > 0 || best.st.maybe > 0)) {
+        const all = total > 0 && best.st.yes === total;
+        banner = `<div class="poll-banner ${all ? 'all' : ''}">${all ? '🎉 Tout le monde est disponible : ' : '🏆 Meilleur créneau pour l’instant : '}<strong>${escapeHTML(formatEventDate(best.s.iso))}</strong> — ${best.st.yes}/${total} disponibles${best.st.maybe ? ' (+' + best.st.maybe + ' peut-être)' : ''}</div>`;
+      }
+
+      const rows = slots.map(s => {
+        const st = slotStats(p, s);
+        const isBest = !!best && best.s.id === s.id && (st.yes > 0 || st.maybe > 0);
+        const isChosen = p.chosenSlotId === s.id;
+        const mv = mine[s.id];
+        const vb = (v, label) => `<button class="vote-btn ${mv === v ? 'on-' + v : ''}" title="${label}" onclick="votePoll('${p.id}', '${s.id}', '${v}')" ${open ? '' : 'disabled'}>${VOTE_ICON[v]}</button>`;
+        return `
+          <div class="poll-slot ${isChosen ? 'chosen' : (isBest ? 'best' : '')}">
+            <div style="min-width:170px;">
+              <strong>${escapeHTML(formatEventDate(s.iso))}</strong>${isChosen ? ' <span class="brief-tag urgent">Retenu</span>' : (isBest ? ' <span class="brief-tag mine">Meilleur</span>' : '')}
+              <div class="poll-stats"><span style="color:#047857;">✅ ${st.yes}</span><span style="color:#B45309;">🟡 ${st.maybe}</span><span style="color:#B91C1C;">❌ ${st.no}</span><span title="Pas encore répondu">… ${st.pending.length}</span></div>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+              ${open ? vb('yes', 'Disponible') + vb('maybe', 'Peut-être') + vb('no', 'Indisponible') : ''}
+              ${open && canEdit ? `<button class="btn btn-primary btn-sm" onclick="closePollWithSlot('${p.id}', '${s.id}')">Retenir</button>` : ''}
+              ${open && canEdit && slots.length > 1 ? `<button class="btn btn-secondary btn-sm" title="Supprimer ce créneau" onclick="removePollSlot('${p.id}', '${s.id}')"><i class="fa-solid fa-xmark"></i></button>` : ''}
+            </div>
+          </div>`;
+      }).join('');
+
+      const matrix = `
+        <details style="margin-top:10px;" ${pollDetailsOpen.has(String(p.id)) ? 'open' : ''} ontoggle="togglePollDetails('${p.id}', this.open)">
+          <summary style="cursor:pointer; font-size:12px; font-weight:700; color:var(--text-muted);">Voir qui a répondu (${total - waiting.length}/${total})</summary>
+          <div style="overflow-x:auto;">
+            <table class="poll-matrix">
+              <thead><tr><th>Membre</th>${slots.map(s => `<th>${escapeHTML(shortSlot(s.iso))}</th>`).join('')}</tr></thead>
+              <tbody>${usersData.map(u => {
+                const a = answersOf(p, u.docId);
+                return `<tr><td>${escapeHTML(memberName(u))}</td>${slots.map(s => `<td style="text-align:center;">${a[s.id] ? VOTE_ICON[a[s.id]] : '<span style="opacity:.35;">—</span>'}</td>`).join('')}</tr>`;
+              }).join('')}</tbody>
+            </table>
+          </div>
+        </details>`;
+
+      const waitingLine = open && waiting.length
+        ? `<div style="font-size:12px; color:var(--text-muted); margin-top:10px;">⏳ En attente de : ${waiting.map(u => escapeHTML(memberName(u))).join(', ')}</div>` : '';
+
+      const addSlot = open && canEdit ? `
+        <div style="display:flex; gap:6px; margin-top:10px; flex-wrap:wrap;">
+          <input type="datetime-local" class="poll-addslot-input" id="poll-addslot-${p.id}" style="padding:6px 8px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px;">
+          <button class="btn btn-secondary btn-sm" onclick="addSlotToPoll('${p.id}')"><i class="fa-solid fa-plus"></i> Créneau</button>
+        </div>` : '';
+
+      const chosen = !open ? slots.find(s => s.id === p.chosenSlotId) : null;
+      return `
+        <div class="poll-card">
+          <div class="poll-head">
+            <div>
+              <h4 style="font-weight:800; font-size:16px;">${escapeHTML(p.title)}</h4>
+              <div class="feed-time">📍 ${escapeHTML(p.location || 'Lieu à définir')} • Proposé par ${escapeHTML(p.createdBy || '?')} • ${slots.length} créneau${slots.length > 1 ? 'x' : ''}</div>
+              ${p.notes ? `<div style="font-size:12px; color:var(--text-muted); margin-top:4px;">${escapeHTML(p.notes)}</div>` : ''}
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <span class="status-pill ${open ? 'status-progress' : 'status-todo'}">${open ? 'OUVERT' : 'VALIDÉ'}</span>
+              ${canEdit && !open ? `<button class="btn btn-secondary btn-sm" onclick="reopenPoll('${p.id}')">Rouvrir</button>` : ''}
+              ${canEdit ? `<button class="btn btn-danger btn-sm" title="Supprimer le sondage" onclick="deletePoll('${p.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+            </div>
+          </div>
+          ${chosen ? `<div class="poll-banner all">✅ Séance validée : <strong>${escapeHTML(formatEventDate(chosen.iso))}</strong> — ajoutée à l’agenda.</div>` : banner}
+          ${rows}
+          ${matrix}
+          ${waitingLine}
+          ${addSlot}
+        </div>`;
+    }
+    function togglePollDetails(id, isOpen) { if (isOpen) pollDetailsOpen.add(String(id)); else pollDetailsOpen.delete(String(id)); }
+
+    function renderPolls() {
+      const box = document.getElementById('polls-container');
+      if (!box) return;
+      updatePollsBadge();
+      if (!pollsData.length) {
+        box.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Aucune séance proposée pour le moment. Cliquez sur « Proposer une séance » pour lancer un sondage.</p>';
+        return;
+      }
+      const open = pollsData.filter(p => p.status !== 'closed').sort((a, b) => b.id - a.id);
+      const closed = pollsData.filter(p => p.status === 'closed').sort((a, b) => b.id - a.id);
+      box.innerHTML = open.map(pollCardHTML).join('')
+        + (closed.length ? '<div class="brief-title" style="margin-top:18px;">Séances validées</div>' + closed.map(pollCardHTML).join('') : '');
+    }
+
+    /* ----- Créer un sondage ----- */
+    function addPollSlotInput(value) {
+      const list = document.getElementById('poll-slots-list');
+      const row = document.createElement('div');
+      row.className = 'poll-slot-row';
+      row.innerHTML = '<input type="datetime-local" class="poll-slot-input"><button type="button" class="btn btn-secondary btn-sm" title="Retirer" onclick="this.parentNode.remove()"><i class="fa-solid fa-xmark"></i></button>';
+      if (value) row.querySelector('input').value = value;
+      list.appendChild(row);
+    }
+    function openPollModal() {
+      document.getElementById('poll-title').value = '';
+      document.getElementById('poll-location').value = '';
+      document.getElementById('poll-notes').value = '';
+      document.getElementById('poll-slots-list').innerHTML = '';
+      addPollSlotInput(); addPollSlotInput(); addPollSlotInput();
+      openModal('modal-poll');
+    }
+    function newSlotId(n) { return 's' + Date.now().toString(36) + (n || 0) + Math.floor(Math.random() * 36).toString(36); }
+
+    function savePoll() {
+      const title = document.getElementById('poll-title').value.trim();
+      if (!title) return alert('Donnez un intitulé à la séance.');
+      const values = [...document.querySelectorAll('.poll-slot-input')].map(i => i.value).filter(Boolean);
+      const uniq = [...new Set(values)];
+      if (!uniq.length) return alert('Ajoutez au moins un créneau (date et heure).');
+      const id = Date.now();
+      const poll = {
+        id, title,
+        location: document.getElementById('poll-location').value.trim(),
+        notes: document.getElementById('poll-notes').value.trim(),
+        createdBy: currentUser.name, createdById: currentUser.docId,
+        status: 'open', chosenSlotId: '', eventId: 0,
+        slots: uniq.map((iso, n) => ({ id: newSlotId(n), iso })),
+        votes: {}
+      };
+      pollsCol.doc(String(id)).set(poll).catch(err => { console.error(err); alert('Création impossible (droits ou réseau).'); });
+      logActivity(`a proposé la séance "${title}" (${uniq.length} créneau${uniq.length > 1 ? 'x' : ''})`, 'fa-calendar-check');
+      closeModal('modal-poll');
+    }
+
+    /* ----- Voter ----- */
+    function votePoll(pid, sid, val) {
+      const p = pollsData.find(x => String(x.id) === String(pid));
+      if (!p || p.status === 'closed' || !currentUser) return;
+      const cur = myAnswers(p)[sid];
+      const upd = {};
+      upd['votes.' + currentUser.docId + '.name'] = currentUser.name;
+      upd['votes.' + currentUser.docId + '.a.' + sid] = (cur === val) ? firebase.firestore.FieldValue.delete() : val;
+      pollsCol.doc(String(pid)).update(upd).catch(err => { console.error(err); alert('Vote impossible (droits ou réseau).'); });
+    }
+
+    function addSlotToPoll(pid) {
+      const input = document.getElementById('poll-addslot-' + pid);
+      if (!input || !input.value) return alert('Choisissez une date et une heure.');
+      const p = pollsData.find(x => String(x.id) === String(pid));
+      if (!p) return;
+      if ((p.slots || []).some(s => s.iso === input.value)) return alert('Ce créneau existe déjà.');
+      pollsCol.doc(String(pid)).update({ slots: firebase.firestore.FieldValue.arrayUnion({ id: newSlotId(1), iso: input.value }) });
+      input.value = '';
+    }
+
+    function removePollSlot(pid, sid) {
+      const p = pollsData.find(x => String(x.id) === String(pid));
+      if (!p || !confirm('Supprimer ce créneau et les réponses associées ?')) return;
+      const slot = (p.slots || []).find(s => s.id === sid);
+      if (!slot) return;
+      const upd = { slots: firebase.firestore.FieldValue.arrayRemove(slot) };
+      Object.keys(p.votes || {}).forEach(uid => { upd['votes.' + uid + '.a.' + sid] = firebase.firestore.FieldValue.delete(); });
+      pollsCol.doc(String(pid)).update(upd);
+    }
+
+    /* ----- Retenir un créneau => événement dans l'agenda ----- */
+    function closePollWithSlot(pid, sid) {
+      const p = pollsData.find(x => String(x.id) === String(pid));
+      if (!p) return;
+      const slot = (p.slots || []).find(s => s.id === sid);
+      if (!slot) return;
+      const st = slotStats(p, slot);
+      const warn = st.yes < st.total ? `\n\nAttention : seulement ${st.yes}/${st.total} membres ont répondu « disponible ».` : '';
+      if (!confirm(`Retenir « ${formatEventDate(slot.iso)} » pour « ${p.title} » ?\nUn événement sera créé dans l’agenda et les membres seront prévenus.${warn}`)) return;
+      const evId = Date.now();
+      eventsCol.doc(String(evId)).set({
+        id: evId, title: 'Séance : ' + p.title, date: formatEventDate(slot.iso), dateISO: slot.iso,
+        location: p.location || 'À définir', createdBy: currentUser.name, pollId: p.id
+      });
+      pollsCol.doc(String(pid)).update({ status: 'closed', chosenSlotId: sid, eventId: evId });
+      logActivity(`a validé la séance "${p.title}" le ${formatEventDate(slot.iso)}`, 'fa-calendar-check');
+    }
+
+    function reopenPoll(pid) {
+      const p = pollsData.find(x => String(x.id) === String(pid));
+      if (!p || !confirm('Rouvrir le sondage ? L’événement créé dans l’agenda sera supprimé.')) return;
+      if (p.eventId) eventsCol.doc(String(p.eventId)).delete().catch(() => {});
+      pollsCol.doc(String(pid)).update({ status: 'open', chosenSlotId: '', eventId: 0 });
+    }
+
+    function deletePoll(pid) {
+      if (!confirm('Supprimer ce sondage ? (l’événement déjà créé dans l’agenda est conservé)')) return;
+      pollsCol.doc(String(pid)).delete();
+    }
+
+    function handlePollsSnapshot(snap) {
+      const prev = new Set(pollsData.map(p => p.id));
+      pollsData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+      const typing = document.activeElement && document.activeElement.classList && document.activeElement.classList.contains('poll-addslot-input');
+      if (typing) updatePollsBadge(); else renderPolls();
+      if (pollsBaselineReady) {
+        pollsData.filter(p => !prev.has(p.id) && p.createdBy !== currentUser.name && p.status !== 'closed').forEach(p => {
+          showToast('Nouvelle proposition de séance : ' + p.title, { actionLabel: 'Voter', onAction: () => switchTab('planning', null) });
+        });
+      }
+      pollsBaselineReady = true;
+      briefingFlags.polls = true;
+      maybeShowBriefing();
+    }
+
+    function renderBriefingPolls() {
+      const box = document.getElementById('conn-polls-list');
+      if (!box) return;
+      const pending = pollsPendingForMe();
+      if (!pending.length) { box.innerHTML = ''; return; }
+      box.innerHTML = `<div class="brief-title">Séances à voter (${pending.length})</div>` + pending.slice(0, 4).map(p => `
+        <div class="feed-item" style="justify-content:space-between;">
+          <div style="min-width:0;"><strong>${escapeHTML(p.title)}</strong><div class="feed-time">${(p.slots || []).length} créneau(x) proposé(s) par ${escapeHTML(p.createdBy || '?')}</div></div>
+          <button class="btn btn-primary btn-sm" onclick="closeBriefing(); switchTab('planning', null);">Répondre</button>
+        </div>`).join('');
+    }
+
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
@@ -2265,6 +3000,7 @@
       renderChat();
       renderDocsGrid();
       renderAdminUsers();
+      refreshRetroIfActive();
       updateKPIMetrics();
     }
 
@@ -2380,6 +3116,7 @@
               ${isChantierNew(c) ? '<span class="brief-tag new">Nouveau</span>' : ''}
               ${c.category && c.category !== 'general' ? `<span class="status-pill status-todo">${categoryLabels[c.category] || c.category}</span>` : ''}
               <span class="status-pill ${c.type === 'hebdo' ? 'status-progress' : 'status-todo'}">${c.type.toUpperCase()}</span>
+              <button class="btn btn-secondary btn-sm" title="Modifier" onclick="openEditChantierModal(${c.id})"><i class="fa-solid fa-pen"></i></button>
               ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteChantier(${c.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
           </div>
@@ -2972,7 +3709,7 @@
     /* ===== Chantiers : nouveautés, alertes et récap de connexion ===== */
     let chantiersSeen = null;   // Set des ids déjà vus (null = jamais initialisé)
     const chantiersToasted = new Set();
-    const briefingFlags = { chantiers: false, activities: false, shown: false };
+    const briefingFlags = { chantiers: false, activities: false, polls: false, shown: false };
     function chSeenKey() { return 'eliyah_ch_seen_' + (currentUser ? currentUser.docId : ''); }
     function loadChantiersSeen() {
       try {
@@ -3045,10 +3782,11 @@
     }
 
     function maybeShowBriefing() {
-      if (briefingFlags.shown || !briefingFlags.chantiers || !briefingFlags.activities || !currentUser) return;
+      if (briefingFlags.shown || !briefingFlags.chantiers || !briefingFlags.activities || !briefingFlags.polls || !currentUser) return;
       briefingFlags.shown = true;
       renderBriefing();
-      const hasContent = chantiersData.some(c => !c.done) || activitiesData.length;
+      renderBriefingPolls();
+      const hasContent = chantiersData.some(c => !c.done) || activitiesData.length || pollsPendingForMe().length;
       if (hasContent) openModal('modal-conn-notif');
     }
 
