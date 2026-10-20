@@ -1062,6 +1062,9 @@
       .retro-grid { --rl: 120px; }
       .poll-slot { flex-direction: column; align-items: stretch; }
     }
+    .rsvp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+    .rsvp-row .vote-btn { font-size: 12px; padding: 4px 8px; }
+    .rsvp-stats { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -1125,6 +1128,7 @@
         <li class="nav-item" onclick="switchTab('agenda', this)">
           <i class="fa-solid fa-calendar-days"></i>
           <span>Agenda & Setlist</span>
+          <span class="nav-badge" id="agenda-pending-badge" style="display:none;" title="Présences à confirmer">0</span>
         </li>
         <li class="nav-item" onclick="switchTab('planning', this)">
           <i class="fa-solid fa-calendar-check"></i>
@@ -1376,7 +1380,10 @@
           <h3>Agenda & Setlist du Concert Live</h3>
           <p>Planning des répétitions et ordonnancement de la setlist pour la scène</p>
         </div>
-        <button class="btn btn-primary" onclick="openAddEventModal()"><i class="fa-solid fa-calendar-plus"></i> Ajouter Événement</button>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button class="btn btn-secondary" onclick="exportAgendaICS()" title="Fichier à ouvrir dans Google Agenda, Apple Calendrier ou Outlook"><i class="fa-regular fa-calendar-plus"></i> Exporter (.ics)</button>
+          <button class="btn btn-primary" onclick="openAddEventModal()"><i class="fa-solid fa-calendar-plus"></i> Ajouter Événement</button>
+        </div>
       </div>
       <div class="two-cols">
         <div class="chart-box">
@@ -1492,6 +1499,21 @@
           </table>
         </div>
       </div>
+
+      <div class="chart-box" style="margin-top: 20px;">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-shield-halved" style="color:#059669;"></i> Sauvegarde des données</h3>
+            <p>Copie complète de la base : membres, morceaux, chantiers, agenda, sondages, chat… Les fichiers importés (PDF, audio, vidéo) ne sont pas inclus.</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="exportBackup()"><i class="fa-solid fa-download"></i> Télécharger une sauvegarde</button>
+          <button class="btn btn-secondary" onclick="document.getElementById('backup-file-input').click()"><i class="fa-solid fa-upload"></i> Restaurer depuis un fichier</button>
+          <input type="file" id="backup-file-input" accept="application/json,.json" style="display:none;" onchange="restoreBackupFromFile(this)">
+        </div>
+        <p id="backup-status" style="font-size:12px; color:var(--text-muted); margin-top:10px;"></p>
+      </div>
     </section>
   </main>
 
@@ -1532,6 +1554,7 @@
       </div>
       <div id="conn-chantiers-list" style="margin-bottom: 12px;"></div>
       <div id="conn-polls-list" style="margin-bottom: 12px;"></div>
+      <div id="conn-events-list" style="margin-bottom: 12px;"></div>
       <div class="brief-title">Derniers avancements</div>
       <div class="feed-list" id="conn-notif-list" style="margin-bottom: 20px; max-height: 220px; overflow-y: auto;"></div>
       <button class="btn btn-primary" style="width: 100%; justify-content: center;" onclick="closeBriefing()">Compris, Accéder au Projet</button>
@@ -2110,7 +2133,7 @@
         }
         if (legacyDoc.id !== user.uid) {
           await usersCol.doc(user.uid).set(legacyData);
-          await usersCol.doc(legacyDoc.id).delete();
+          try { await usersCol.doc(legacyDoc.id).delete(); } catch (e) { console.warn('Ancien profil non supprimé (droits) :', e.code); }
         } else {
           await usersCol.doc(user.uid).update({ name: legacyData.name });
         }
@@ -2942,9 +2965,15 @@
       const warn = st.yes < st.total ? `\n\nAttention : seulement ${st.yes}/${st.total} membres ont répondu « disponible ».` : '';
       if (!confirm(`Retenir « ${formatEventDate(slot.iso)} » pour « ${p.title} » ?\nUn événement sera créé dans l’agenda et les membres seront prévenus.${warn}`)) return;
       const evId = Date.now();
+      // Les réponses du sondage pour ce créneau deviennent les présences de l'événement.
+      const rsvp = {};
+      Object.keys(p.votes || {}).forEach(uid => {
+        const v = answersOf(p, uid)[sid];
+        if (v) rsvp[uid] = { name: (p.votes[uid] && p.votes[uid].name) || '', v };
+      });
       eventsCol.doc(String(evId)).set({
         id: evId, title: 'Séance : ' + p.title, date: formatEventDate(slot.iso), dateISO: slot.iso,
-        location: p.location || 'À définir', createdBy: currentUser.name, pollId: p.id
+        location: p.location || 'À définir', createdBy: currentUser.name, pollId: p.id, rsvp
       });
       pollsCol.doc(String(pid)).update({ status: 'closed', chosenSlotId: sid, eventId: evId });
       logActivity(`a validé la séance "${p.title}" le ${formatEventDate(slot.iso)}`, 'fa-calendar-check');
@@ -2987,6 +3016,165 @@
           <div style="min-width:0;"><strong>${escapeHTML(p.title)}</strong><div class="feed-time">${(p.slots || []).length} créneau(x) proposé(s) par ${escapeHTML(p.createdBy || '?')}</div></div>
           <button class="btn btn-primary btn-sm" onclick="closeBriefing(); switchTab('planning', null);">Répondre</button>
         </div>`).join('');
+    }
+
+
+    /* ================= PRÉSENCES AUX ÉVÉNEMENTS ================= */
+    function rsvpValue(e, uid) { return (e.rsvp && e.rsvp[uid] && e.rsvp[uid].v) || null; }
+    function rsvpStats(e) {
+      const names = { yes: [], maybe: [], no: [] };
+      const pending = [];
+      usersData.forEach(u => {
+        const v = rsvpValue(e, u.docId);
+        if (v && names[v]) names[v].push(memberName(u)); else pending.push(memberName(u));
+      });
+      return { names, pending };
+    }
+    function rsvpBlockHTML(e, past) {
+      const st = rsvpStats(e);
+      const mine = currentUser ? rsvpValue(e, currentUser.docId) : null;
+      const btn = (v, label) => `<button class="vote-btn ${mine === v ? 'on-' + v : ''}" ${past ? 'disabled' : ''} onclick="rsvpEvent('${e.id}', '${v}')">${VOTE_ICON[v]} ${label}</button>`;
+      const tip = `Présents : ${st.names.yes.join(', ') || '—'}\nPeut-être : ${st.names.maybe.join(', ') || '—'}\nAbsents : ${st.names.no.join(', ') || '—'}\nSans réponse : ${st.pending.join(', ') || '—'}`;
+      return `
+        ${past ? '' : `<div class="rsvp-row">${btn('yes', 'Je viens')}${btn('maybe', 'Peut-être')}${btn('no', 'Absent')}</div>`}
+        <div class="rsvp-stats" title="${escapeHTML(tip)}">✅ ${st.names.yes.length} · 🟡 ${st.names.maybe.length} · ❌ ${st.names.no.length} · ⏳ ${st.pending.length}${st.pending.length && !past ? ' (' + escapeHTML(st.pending.slice(0, 3).join(', ')) + (st.pending.length > 3 ? '…' : '') + ')' : ''}</div>`;
+    }
+    function rsvpEvent(eid, val) {
+      const e = eventsData.find(x => String(x.id) === String(eid));
+      if (!e || !currentUser) return;
+      const cur = rsvpValue(e, currentUser.docId);
+      const upd = {};
+      upd['rsvp.' + currentUser.docId] = (cur === val) ? firebase.firestore.FieldValue.delete() : { name: currentUser.name, v: val };
+      eventsCol.doc(String(eid)).update(upd).catch(err => { console.error(err); alert('Réponse impossible (droits ou réseau).'); });
+    }
+    // Événements à venir (45 jours) sur lesquels je n'ai pas encore répondu
+    function pendingRsvps() {
+      if (!currentUser) return [];
+      const now = Date.now(), lim = now + 45 * 86400000;
+      return sortedEvents().filter(e => e.dateISO && new Date(e.dateISO).getTime() >= now && new Date(e.dateISO).getTime() <= lim && !rsvpValue(e, currentUser.docId));
+    }
+    function updateAgendaBadge() {
+      const badge = document.getElementById('agenda-pending-badge');
+      if (!badge || !currentUser) return;
+      const n = pendingRsvps().length;
+      badge.textContent = n;
+      badge.style.display = n ? 'inline-block' : 'none';
+    }
+    function renderBriefingEvents() {
+      const box = document.getElementById('conn-events-list');
+      if (!box) return;
+      const pending = pendingRsvps();
+      if (!pending.length) { box.innerHTML = ''; return; }
+      box.innerHTML = `<div class="brief-title">Présence à confirmer (${pending.length})</div>` + pending.slice(0, 4).map(e => `
+        <div class="feed-item" style="justify-content:space-between;">
+          <div style="min-width:0;"><strong>${escapeHTML(e.title)}</strong><div class="feed-time">${escapeHTML(formatEventDate(e.dateISO))} • ${escapeHTML(e.location || '')}</div></div>
+          <button class="btn btn-primary btn-sm" onclick="closeBriefing(); switchTab('agenda', null);">Répondre</button>
+        </div>`).join('');
+    }
+
+    /* ================= EXPORT AGENDA (.ics) ================= */
+    function downloadTextFile(filename, text, mime) {
+      const blob = new Blob([text], { type: mime || 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = filename;
+      document.body.appendChild(a); a.click();
+      setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+    }
+    function icsEscape(t) {
+      return String(t == null ? '' : t).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+    }
+    function icsLocal(d) {
+      const p = n => String(n).padStart(2, '0');
+      return d.getFullYear() + p(d.getMonth() + 1) + p(d.getDate()) + 'T' + p(d.getHours()) + p(d.getMinutes()) + '00';
+    }
+    function buildICS(list) {
+      const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+      const lines = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//ELIYAH Hub//FR', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH', 'X-WR-CALNAME:ELIYAH Hub'];
+      list.forEach(e => {
+        const start = new Date(e.dateISO);
+        if (isNaN(start)) return;
+        const end = new Date(start.getTime() + 2 * 3600 * 1000);
+        const st = rsvpStats(e);
+        const desc = 'ELIYAH Hub' + (st.names.yes.length ? '\nConfirmés : ' + st.names.yes.join(', ') : '');
+        lines.push('BEGIN:VEVENT', 'UID:eliyah-' + e.id + '@live-hub-2026', 'DTSTAMP:' + stamp,
+          'DTSTART:' + icsLocal(start), 'DTEND:' + icsLocal(end),
+          'SUMMARY:' + icsEscape(e.title), 'LOCATION:' + icsEscape(e.location || ''),
+          'DESCRIPTION:' + icsEscape(desc), 'END:VEVENT');
+      });
+      lines.push('END:VCALENDAR');
+      return lines.join('\r\n') + '\r\n';
+    }
+    function exportAgendaICS() {
+      const lim = Date.now() - 86400000;
+      const list = sortedEvents().filter(e => e.dateISO && new Date(e.dateISO).getTime() >= lim);
+      if (!list.length) return alert('Aucun événement à venir avec une date : rien à exporter.');
+      downloadTextFile('eliyah-agenda.ics', buildICS(list), 'text/calendar');
+    }
+    function exportEventICS(id) {
+      const e = eventsData.find(x => String(x.id) === String(id));
+      if (!e || !e.dateISO) return;
+      downloadTextFile('eliyah-evenement.ics', buildICS([e]), 'text/calendar');
+    }
+
+    /* ================= SAUVEGARDE / RESTAURATION (admin) ================= */
+    const BACKUP_COLLECTIONS = ['users', 'songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'appState'];
+    function backupStatus(msg) { const el = document.getElementById('backup-status'); if (el) el.textContent = msg; }
+
+    async function exportBackup() {
+      if (!currentUser || currentUser.role !== 'admin') return alert('Réservé aux administrateurs.');
+      try {
+        const out = { app: 'ELIYAH Hub', version: 1, exportedAt: new Date().toISOString(), exportedBy: currentUser.email, collections: {} };
+        let total = 0;
+        for (const name of BACKUP_COLLECTIONS) {
+          backupStatus('Lecture de « ' + name + ' »…');
+          const snap = await db.collection(name).get();
+          out.collections[name] = snap.docs.map(d => {
+            const data = d.data();
+            if (name === 'users') { delete data.fcmTokens; delete data.online; }
+            return { id: d.id, data };
+          });
+          total += snap.size;
+        }
+        const day = new Date().toISOString().slice(0, 10);
+        downloadTextFile('eliyah-sauvegarde-' + day + '.json', JSON.stringify(out, null, 1), 'application/json');
+        backupStatus('Sauvegarde téléchargée : ' + total + ' documents (' + day + ').');
+        logActivity('a téléchargé une sauvegarde des données', 'fa-shield-halved');
+      } catch (err) {
+        console.error(err);
+        backupStatus('Échec de la sauvegarde : ' + (err.code || err.message));
+        alert('Sauvegarde impossible (droits ou réseau).');
+      }
+    }
+
+    async function restoreBackupFromFile(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file || !currentUser || currentUser.role !== 'admin') return;
+      let data;
+      try { data = JSON.parse(await file.text()); } catch (e) { return alert('Fichier illisible.'); }
+      if (!data || data.app !== 'ELIYAH Hub' || !data.collections) return alert('Ce fichier n’est pas une sauvegarde ELIYAH Hub.');
+      const names = BACKUP_COLLECTIONS.filter(n => Array.isArray(data.collections[n]));
+      const total = names.reduce((acc, n) => acc + data.collections[n].length, 0);
+      if (!confirm('Restaurer la sauvegarde du ' + String(data.exportedAt || '').slice(0, 10) + ' ?\n\n' + total + ' documents seront réécrits (remis tels qu’ils étaient dans le fichier). Les documents créés depuis cette sauvegarde ne sont pas supprimés.\n\nContinuer ?')) return;
+      try {
+        let done = 0, batch = db.batch(), ops = 0;
+        for (const n of names) {
+          for (const item of data.collections[n]) {
+            batch.set(db.collection(n).doc(String(item.id)), item.data, { merge: true });
+            ops++; done++;
+            if (ops >= 400) { await batch.commit(); batch = db.batch(); ops = 0; backupStatus('Restauration… ' + done + '/' + total); }
+          }
+        }
+        if (ops) await batch.commit();
+        backupStatus('Restauration terminée : ' + done + ' documents.');
+        logActivity('a restauré une sauvegarde des données', 'fa-shield-halved');
+        alert('Restauration terminée (' + done + ' documents).');
+      } catch (err) {
+        console.error(err);
+        backupStatus('Échec de la restauration : ' + (err.code || err.message));
+        alert('Restauration impossible (droits ou réseau). Une partie des données a pu être restaurée.');
+      }
     }
 
     function renderAll() {
@@ -3372,11 +3560,13 @@
         return `
         <div class="feed-item ${past ? 'event-past' : ''}">
           <div class="feed-item-icon" style="background:#FEF3C7; color:#D97706;"><i class="fa-solid fa-calendar-day"></i></div>
-          <div style="flex:1;">
+          <div style="flex:1; min-width:0;">
             <div style="font-weight:700;">${escapeHTML(e.title)}${past ? ' <span class="status-pill status-todo">Passé</span>' : ''}</div>
             <div class="feed-time"><i class="fa-regular fa-clock"></i> ${escapeHTML(when)} • <strong>${escapeHTML(e.location)}</strong></div>
+            ${e.dateISO ? rsvpBlockHTML(e, past) : ''}
           </div>
-          <div style="display:flex; gap:4px;">
+          <div style="display:flex; gap:4px; align-items:flex-start;">
+            ${e.dateISO ? `<button class="btn btn-secondary btn-sm" title="Ajouter à mon agenda" onclick="exportEventICS(${e.id})"><i class="fa-regular fa-calendar-plus"></i></button>` : ''}
             <button class="btn btn-secondary btn-sm" onclick="openEditEventModal(${e.id})"><i class="fa-solid fa-pen"></i></button>
             ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteEvent(${e.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </div>
@@ -3384,6 +3574,7 @@
       `;
       }).join('');
       updateNextLiveKPI();
+      updateAgendaBadge();
     }
 
     function openAddEventModal() {
@@ -3786,7 +3977,8 @@
       briefingFlags.shown = true;
       renderBriefing();
       renderBriefingPolls();
-      const hasContent = chantiersData.some(c => !c.done) || activitiesData.length || pollsPendingForMe().length;
+      renderBriefingEvents();
+      const hasContent = chantiersData.some(c => !c.done) || activitiesData.length || pollsPendingForMe().length || pendingRsvps().length;
       if (hasContent) openModal('modal-conn-notif');
     }
 
