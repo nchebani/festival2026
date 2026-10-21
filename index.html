@@ -1065,6 +1065,20 @@
     .rsvp-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
     .rsvp-row .vote-btn { font-size: 12px; padding: 4px 8px; }
     .rsvp-stats { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+    .modal-box.wide { max-width: 640px; }
+    .cm-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
+    .cm-item.done { opacity: .5; }
+    .cm-item.done .cm-text { text-decoration: line-through; }
+    .cm-time { flex: none; border: none; background: #FEE2E2; color: #8B1E2D; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 10px; cursor: pointer; }
+    .cm-gen { flex: none; background: #F1F5F9; color: var(--text-muted); font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 10px; }
+    .cm-text { font-size: 13px; line-height: 1.4; word-break: break-word; }
+    .drag-handle { cursor: grab; color: #94A3B8; padding: 6px 4px; touch-action: none; user-select: none; }
+    .setlist-row.dragging { background: #FEF2F2; box-shadow: 0 6px 18px rgba(0,0,0,.15); border-radius: 12px; position: relative; z-index: 5; }
+    .chk-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
+    .chk-item.done span { text-decoration: line-through; opacity: .55; }
+    .att-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #F1F5F9; }
+    .mini-bar { height: 6px; background: #E2E8F0; border-radius: 6px; overflow: hidden; flex: 1; }
+    .mini-bar > div { height: 100%; background: #10B981; }
 </style>
 </head>
 <body>
@@ -1770,6 +1784,81 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-song-comments">
+    <div class="modal-box wide">
+      <h3 style="font-weight: 800;" id="cm-title">Commentaires</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin:4px 0 8px;">Écoutez le mix, puis commentez au moment précis : un clic sur l’horodatage y ramène la lecture.</p>
+      <div id="cm-version-row" style="display:none; margin:6px 0;">
+        <label style="font-size:12px; font-weight:700;">Version du mix :</label>
+        <select id="cm-version" onchange="onCommentVersionChange()" style="padding:6px 8px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px;"></select>
+      </div>
+      <audio id="cm-audio" controls preload="metadata" style="width:100%; margin:8px 0;"></audio>
+      <p id="cm-nofile" style="display:none; font-size:12px; color:var(--text-muted);">Aucun fichier audio pour ce morceau : seuls les commentaires généraux sont possibles.</p>
+      <div class="form-group" style="margin-bottom:8px;">
+        <textarea id="cm-text" rows="2" placeholder="Ex : la voix est trop forte sur le refrain"></textarea>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <button class="btn btn-primary btn-sm" id="cm-add-time" onclick="addSongComment(true)"><i class="fa-regular fa-comment-dots"></i> Commenter à 0:00</button>
+        <button class="btn btn-secondary btn-sm" onclick="addSongComment(false)">Commentaire général</button>
+        <label style="font-size:12px; margin-left:auto; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="cm-hide-done" onchange="renderSongComments()"> Masquer les résolus</label>
+      </div>
+      <div id="cm-list" style="margin-top:14px;"></div>
+      <div style="display:flex; justify-content:flex-end; margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeSongComments()">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-song-tech">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;" id="tech-title">Fiche technique</h3>
+      <input type="hidden" id="tech-song-id">
+      <div class="form-group" style="margin-top:14px;">
+        <label>Accordage</label>
+        <input type="text" id="tech-tuning" placeholder="Ex : guitare en Drop D, clavier -1 ton">
+      </div>
+      <div class="form-group">
+        <label>Instruments et matériel</label>
+        <textarea id="tech-gear" rows="3" placeholder="Ex : Strat + delay, clavier nord, 2 micros voix"></textarea>
+      </div>
+      <div class="form-group">
+        <label>Notes de scène</label>
+        <textarea id="tech-stage" rows="3" placeholder="Ex : intro sans batterie, changement de guitare après le pont"></textarea>
+      </div>
+      <div id="tech-linked"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-song-tech')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveSongTech()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-chantier-detail">
+    <div class="modal-box wide">
+      <h3 style="font-weight: 800;" id="cd-title">Chantier</h3>
+      <div class="form-group" style="margin-top:14px;">
+        <label>Morceau lié</label>
+        <select id="cd-song" onchange="setChantierSong(this.value)"></select>
+      </div>
+      <div class="brief-title">Checklist</div>
+      <div id="cd-checklist"></div>
+      <div style="display:flex; gap:8px; margin-top:8px;">
+        <input type="text" id="cd-new-item" placeholder="Ajouter une étape…" style="flex:1; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px;" onkeydown="if(event.key==='Enter'){addChecklistItem();}">
+        <button class="btn btn-secondary btn-sm" onclick="addChecklistItem()"><i class="fa-solid fa-plus"></i></button>
+      </div>
+      <div class="brief-title" style="margin-top:18px;">Pièces jointes</div>
+      <div id="cd-attachments"></div>
+      <div style="margin-top:8px;">
+        <input type="file" id="cd-file" style="display:none;" onchange="uploadChantierAttachment(this)">
+        <button class="btn btn-secondary btn-sm" onclick="document.getElementById('cd-file').click()"><i class="fa-solid fa-paperclip"></i> Joindre un fichier</button>
+        <div class="upload-progress-wrap" id="cd-progress"><div class="upload-progress-bar" id="cd-progress-bar"></div></div>
+      </div>
+      <div style="display:flex; justify-content:flex-end; margin-top:18px;">
+        <button class="btn btn-primary" onclick="closeModal('modal-chantier-detail')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-add-doc">
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Importer un Document / Média</h3>
@@ -2234,6 +2323,7 @@
       initCharts();
       initFirebaseSync();
       startPresence();
+      initSetlistDnD();
       updateNotifButton();
       loadChantiersSeen();
       if (notifEnabled()) registerPushToken(); else scheduleNotifPrompt();
@@ -3177,6 +3267,320 @@
       }
     }
 
+
+    /* ================= COMMENTAIRES HORODATÉS SUR LES MIXES ================= */
+    let cmSongId = null;
+    let cmAudioBound = false;
+
+    function fmtTime(sec) {
+      sec = Math.max(0, Math.floor(sec || 0));
+      return Math.floor(sec / 60) + ':' + String(sec % 60).padStart(2, '0');
+    }
+    function songComments(s) { return Object.values((s && s.comments) || {}); }
+    function songOpenCommentCount(s) { return songComments(s).filter(c => !c.done).length; }
+    function hasTech(s) { return !!(s && (s.tuning || s.gear || s.stageNotes)); }
+
+    function songActionButtons(s) {
+      const n = songOpenCommentCount(s);
+      return `<button class="btn btn-secondary btn-sm" title="Commentaires sur le mix" onclick="openSongComments(${s.id})"><i class="fa-regular fa-comment-dots"></i>${n ? ' ' + n : ''}</button>
+            <button class="btn btn-secondary btn-sm" title="Fiche technique" onclick="openSongTech(${s.id})"><i class="fa-solid fa-clipboard-list" ${hasTech(s) ? 'style="color:#B45309;"' : ''}></i></button>`;
+    }
+
+    function cmSelectedUrl() {
+      const s = songsData.find(x => x.id === cmSongId);
+      if (!s) return '';
+      const sel = document.getElementById('cm-version');
+      return (sel && sel.value === 'prev') ? (s.previousFileUrl || '') : (s.fileUrl || '');
+    }
+
+    function openSongComments(id) {
+      const s = songsData.find(x => x.id === id);
+      if (!s) return;
+      cmSongId = id;
+      if (typeof isPlaying !== 'undefined' && isPlaying) { audioObj.pause(); isPlaying = false; updatePlayerUI(); }
+      document.getElementById('cm-title').textContent = 'Commentaires — ' + s.title;
+      const sel = document.getElementById('cm-version');
+      const hasPrev = !!s.previousFileUrl;
+      sel.innerHTML = '<option value="cur">Version actuelle</option>' + (hasPrev ? `<option value="prev">Version précédente${s.previousFileDate ? ' (' + escapeHTML(s.previousFileDate) + ')' : ''}</option>` : '');
+      sel.value = 'cur';
+      document.getElementById('cm-version-row').style.display = hasPrev ? 'block' : 'none';
+      document.getElementById('cm-text').value = '';
+      if (!cmAudioBound) {
+        const au = document.getElementById('cm-audio');
+        au.addEventListener('timeupdate', updateCommentTimeLabel);
+        au.addEventListener('seeked', updateCommentTimeLabel);
+        cmAudioBound = true;
+      }
+      loadCommentAudio();
+      renderSongComments();
+      openModal('modal-song-comments');
+    }
+
+    function loadCommentAudio() {
+      const au = document.getElementById('cm-audio');
+      const url = cmSelectedUrl();
+      au.pause();
+      if (url) { au.src = url; au.style.display = 'block'; } else { au.removeAttribute('src'); au.load(); au.style.display = 'none'; }
+      document.getElementById('cm-nofile').style.display = url ? 'none' : 'block';
+      document.getElementById('cm-add-time').style.display = url ? '' : 'none';
+      updateCommentTimeLabel();
+    }
+    function onCommentVersionChange() { loadCommentAudio(); renderSongComments(); }
+    function updateCommentTimeLabel() {
+      const au = document.getElementById('cm-audio');
+      const btn = document.getElementById('cm-add-time');
+      if (btn) btn.innerHTML = '<i class="fa-regular fa-comment-dots"></i> Commenter à ' + fmtTime(au ? au.currentTime : 0);
+    }
+    function closeSongComments() {
+      const au = document.getElementById('cm-audio');
+      if (au) au.pause();
+      cmSongId = null;
+      closeModal('modal-song-comments');
+    }
+    function refreshSongCommentsIfOpen() { if (cmSongId && isViewModalActive('modal-song-comments')) renderSongComments(); }
+    function isViewModalActive(id) { const m = document.getElementById(id); return !!(m && m.classList.contains('active')); }
+
+    function renderSongComments() {
+      const box = document.getElementById('cm-list');
+      const s = songsData.find(x => x.id === cmSongId);
+      if (!box || !s) return;
+      const url = cmSelectedUrl();
+      const hide = document.getElementById('cm-hide-done').checked;
+      const all = songComments(s);
+      const list = all
+        .filter(c => (c.t === null || c.t === undefined) || c.file === url)
+        .filter(c => !(hide && c.done))
+        .sort((a, b) => {
+          const ta = (a.t === null || a.t === undefined) ? 1e9 : a.t;
+          const tb = (b.t === null || b.t === undefined) ? 1e9 : b.t;
+          return ta - tb || (a.ts || 0) - (b.ts || 0);
+        });
+      const other = all.filter(c => c.t !== null && c.t !== undefined && c.file !== url).length;
+      box.innerHTML = (list.length ? list.map(c => {
+        const timed = c.t !== null && c.t !== undefined;
+        const canDelete = currentUser && (c.authorId === currentUser.docId || canManageContent());
+        return `
+          <div class="cm-item ${c.done ? 'done' : ''}">
+            ${timed ? `<button class="cm-time" onclick="seekComment(${Number(c.t)})" title="Aller à ce moment">▶ ${fmtTime(c.t)}</button>` : '<span class="cm-gen">Général</span>'}
+            <div style="flex:1; min-width:0;">
+              <div class="cm-text">${escapeHTML(c.text)}</div>
+              <div class="feed-time">${escapeHTML(c.author || '?')} • ${c.ts ? new Date(c.ts).toLocaleDateString('fr-FR') : ''}</div>
+            </div>
+            <button class="btn btn-secondary btn-sm" title="${c.done ? 'Rouvrir' : 'Marquer comme résolu'}" onclick="toggleCommentDone('${c.id}')"><i class="fa-solid ${c.done ? 'fa-rotate-left' : 'fa-check'}"></i></button>
+            ${canDelete ? `<button class="btn btn-danger btn-sm" title="Supprimer" onclick="deleteSongComment('${c.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>`;
+      }).join('') : '<p style="font-size:13px; color:var(--text-muted);">Aucun commentaire pour cette version.</p>')
+        + (other ? `<p style="font-size:11px; color:var(--text-muted); margin-top:8px;">${other} commentaire(s) horodaté(s) concernent une autre version du mix.</p>` : '');
+    }
+
+    function seekComment(t) {
+      const au = document.getElementById('cm-audio');
+      if (!au || !au.src) return;
+      au.currentTime = t;
+      au.play().catch(() => {});
+    }
+
+    function addSongComment(withTime) {
+      const s = songsData.find(x => x.id === cmSongId);
+      if (!s || !currentUser) return;
+      const text = document.getElementById('cm-text').value.trim();
+      if (!text) return alert('Écrivez un commentaire.');
+      const au = document.getElementById('cm-audio');
+      const url = cmSelectedUrl();
+      const timed = withTime && url;
+      const cid = 'c' + Date.now().toString(36) + Math.floor(Math.random() * 36).toString(36);
+      const c = {
+        id: cid, text, t: timed ? Math.round(au.currentTime * 10) / 10 : null, file: url || '',
+        author: currentUser.name, authorId: currentUser.docId, ts: Date.now(), done: false
+      };
+      songsCol.doc(String(s.id)).update({ ['comments.' + cid]: c })
+        .catch(err => { console.error(err); alert('Commentaire impossible (droits ou réseau).'); });
+      logActivity(`a commenté « ${s.title} »${timed ? ' à ' + fmtTime(c.t) : ''}`, 'fa-comment-dots');
+      document.getElementById('cm-text').value = '';
+    }
+    function toggleCommentDone(cid) {
+      const s = songsData.find(x => x.id === cmSongId);
+      const c = s && s.comments && s.comments[cid];
+      if (!c) return;
+      songsCol.doc(String(s.id)).update({ ['comments.' + cid + '.done']: !c.done });
+    }
+    function deleteSongComment(cid) {
+      const s = songsData.find(x => x.id === cmSongId);
+      if (!s || !confirm('Supprimer ce commentaire ?')) return;
+      songsCol.doc(String(s.id)).update({ ['comments.' + cid]: firebase.firestore.FieldValue.delete() });
+    }
+
+    /* ================= FICHE TECHNIQUE D'UN MORCEAU ================= */
+    function openSongTech(id) {
+      const s = songsData.find(x => x.id === id);
+      if (!s) return;
+      document.getElementById('tech-song-id').value = id;
+      document.getElementById('tech-title').textContent = 'Fiche technique — ' + s.title;
+      document.getElementById('tech-tuning').value = s.tuning || '';
+      document.getElementById('tech-gear').value = s.gear || '';
+      document.getElementById('tech-stage').value = s.stageNotes || '';
+      const linked = chantiersData.filter(c => c.songId === id);
+      document.getElementById('tech-linked').innerHTML = linked.length
+        ? '<div class="brief-title">Chantiers liés</div>' + linked.map(c => `<div class="chk-item ${c.done ? 'done' : ''}"><span>${c.done ? '✅' : '🔧'} ${escapeHTML(c.title)}</span></div>`).join('')
+        : '';
+      openModal('modal-song-tech');
+    }
+    function saveSongTech() {
+      const id = parseInt(document.getElementById('tech-song-id').value);
+      const s = songsData.find(x => x.id === id);
+      if (!s) return;
+      songsCol.doc(String(id)).update({
+        tuning: document.getElementById('tech-tuning').value.trim(),
+        gear: document.getElementById('tech-gear').value.trim(),
+        stageNotes: document.getElementById('tech-stage').value.trim()
+      }).catch(err => { console.error(err); alert('Enregistrement impossible (droits ou réseau).'); });
+      logActivity(`a mis à jour la fiche technique de « ${s.title} »`, 'fa-clipboard-list');
+      closeModal('modal-song-tech');
+    }
+
+    /* ================= SETLIST : GLISSER-DÉPOSER ================= */
+    let dndState = null;
+    function initSetlistDnD() {
+      const c = document.getElementById('setlist-items-container');
+      if (!c || c.dataset.dnd) return;
+      c.dataset.dnd = '1';
+      c.addEventListener('pointerdown', e => {
+        const h = e.target.closest('.drag-handle');
+        if (!h) return;
+        const row = h.closest('.setlist-row');
+        if (!row) return;
+        e.preventDefault();
+        dndState = { row };
+        row.classList.add('dragging');
+        try { h.setPointerCapture(e.pointerId); } catch (err) {}
+      });
+      c.addEventListener('pointermove', e => {
+        if (!dndState) return;
+        const others = [...c.querySelectorAll('.setlist-row')].filter(r => r !== dndState.row);
+        let before = null;
+        for (const r of others) {
+          const b = r.getBoundingClientRect();
+          if (e.clientY < b.top + b.height / 2) { before = r; break; }
+        }
+        if (before) c.insertBefore(dndState.row, before); else c.appendChild(dndState.row);
+      });
+      const end = () => {
+        if (!dndState) return;
+        const ids = [...c.querySelectorAll('.setlist-row')].map(r => parseInt(r.dataset.id));
+        dndState.row.classList.remove('dragging');
+        dndState = null;
+        setlistDocRef.set({ order: ids }).catch(err => { console.error(err); alert('Réorganisation impossible (droits ou réseau).'); });
+      };
+      c.addEventListener('pointerup', end);
+      c.addEventListener('pointercancel', end);
+    }
+
+    /* ================= CHANTIERS : CHECKLIST, PIÈCES JOINTES, MORCEAU LIÉ ================= */
+    let cdId = null;
+    function checklistItems(c) {
+      return Object.keys((c && c.items) || {}).map(k => Object.assign({ id: k }, c.items[k])).sort((a, b) => (a.o || 0) - (b.o || 0));
+    }
+    function attachmentsOf(c) {
+      return Object.keys((c && c.att) || {}).map(k => Object.assign({ id: k }, c.att[k])).sort((a, b) => (a.ts || 0) - (b.ts || 0));
+    }
+    function chantierExtrasHTML(c) {
+      const items = checklistItems(c);
+      const att = attachmentsOf(c);
+      const song = c.songId ? songsData.find(x => x.id === c.songId) : null;
+      if (!items.length && !att.length && !song) return '';
+      const done = items.filter(i => i.done).length;
+      const pct = items.length ? Math.round(done / items.length * 100) : 0;
+      return `<div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:8px; font-size:12px; color:var(--text-muted);">
+        ${items.length ? `<span style="display:flex; align-items:center; gap:6px; min-width:140px;"><span class="mini-bar"><div style="width:${pct}%;"></div></span><strong>${done}/${items.length}</strong></span>` : ''}
+        ${song ? `<span>🎵 ${escapeHTML(song.title)}</span>` : ''}
+        ${att.length ? `<span>📎 ${att.length}</span>` : ''}
+      </div>`;
+    }
+
+    function openChantierDetail(id) {
+      cdId = id;
+      document.getElementById('cd-new-item').value = '';
+      renderChantierDetail();
+      openModal('modal-chantier-detail');
+    }
+    function refreshChantierDetailIfOpen() { if (cdId && isViewModalActive('modal-chantier-detail')) renderChantierDetail(); }
+
+    function renderChantierDetail() {
+      const c = chantiersData.find(x => x.id === cdId);
+      if (!c) { closeModal('modal-chantier-detail'); return; }
+      document.getElementById('cd-title').textContent = c.title;
+      const sel = document.getElementById('cd-song');
+      if (document.activeElement !== sel) {
+        sel.innerHTML = '<option value="">— Aucun —</option>' + songsData.map(sg => `<option value="${sg.id}">${escapeHTML(sg.title)}</option>`).join('');
+        sel.value = c.songId ? String(c.songId) : '';
+      }
+      const items = checklistItems(c);
+      document.getElementById('cd-checklist').innerHTML = items.length ? items.map(i => `
+        <div class="chk-item ${i.done ? 'done' : ''}">
+          <input type="checkbox" ${i.done ? 'checked' : ''} style="width:17px; height:17px; accent-color: var(--brand-red); flex:none;" onclick="toggleChecklistItem('${i.id}')">
+          <span style="flex:1; min-width:0; word-break:break-word;">${escapeHTML(i.text)}</span>
+          <button class="btn btn-secondary btn-sm" title="Retirer" onclick="deleteChecklistItem('${i.id}')"><i class="fa-solid fa-xmark"></i></button>
+        </div>`).join('') : '<p style="font-size:12px; color:var(--text-muted);">Aucune étape. Découpez le chantier en petites tâches à cocher.</p>';
+      const att = attachmentsOf(c);
+      document.getElementById('cd-attachments').innerHTML = att.length ? att.map(a => {
+        const canDel = currentUser && (a.by === currentUser.name || canManageContent());
+        return `<div class="att-item">
+          <a href="${escapeHTML(a.url)}" target="_blank" rel="noopener" style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><i class="fa-solid fa-paperclip"></i> ${escapeHTML(a.name)}</a>
+          <span style="display:flex; gap:6px; align-items:center; flex:none;"><span class="feed-time">${a.size ? Math.max(1, Math.round(a.size / 1024)) + ' Ko' : ''}</span>
+          ${canDel ? `<button class="btn btn-danger btn-sm" title="Supprimer" onclick="deleteChantierAttachment('${a.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}</span>
+        </div>`;
+      }).join('') : '<p style="font-size:12px; color:var(--text-muted);">Aucun fichier joint.</p>';
+    }
+
+    function setChantierSong(val) {
+      if (!cdId) return;
+      chantiersCol.doc(String(cdId)).update({ songId: val ? parseInt(val) : 0 });
+    }
+    function addChecklistItem() {
+      const input = document.getElementById('cd-new-item');
+      const text = input.value.trim();
+      if (!text || !cdId) return;
+      const iid = 'i' + Date.now().toString(36) + Math.floor(Math.random() * 36).toString(36);
+      chantiersCol.doc(String(cdId)).update({ ['items.' + iid]: { text, done: false, o: Date.now() } });
+      input.value = '';
+      input.focus();
+    }
+    function toggleChecklistItem(iid) {
+      const c = chantiersData.find(x => x.id === cdId);
+      const it = c && c.items && c.items[iid];
+      if (!it) return;
+      chantiersCol.doc(String(cdId)).update({ ['items.' + iid + '.done']: !it.done });
+    }
+    function deleteChecklistItem(iid) {
+      if (!cdId) return;
+      chantiersCol.doc(String(cdId)).update({ ['items.' + iid]: firebase.firestore.FieldValue.delete() });
+    }
+
+    async function uploadChantierAttachment(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file || !cdId) return;
+      if (file.size > 100 * 1024 * 1024) return alert('Fichier trop volumineux (100 Mo maximum).');
+      const aid = 'a' + Date.now().toString(36);
+      const path = 'docs/chantiers/' + cdId + '_' + aid + '_' + file.name.replace(/[^\w.\-]+/g, '_');
+      try {
+        const url = await uploadFileWithProgress(storage.ref(path), file, document.getElementById('cd-progress'), document.getElementById('cd-progress-bar'));
+        await chantiersCol.doc(String(cdId)).update({ ['att.' + aid]: { name: file.name, url, path, size: file.size, by: currentUser.name, ts: Date.now() } });
+        const c = chantiersData.find(x => x.id === cdId);
+        logActivity(`a joint « ${file.name} » au chantier « ${c ? c.title : ''} »`, 'fa-paperclip');
+      } catch (err) {
+        console.error(err);
+        alert('Envoi impossible. Vérifiez votre connexion et réessayez.');
+      }
+    }
+    async function deleteChantierAttachment(aid) {
+      const c = chantiersData.find(x => x.id === cdId);
+      const a = c && c.att && c.att[aid];
+      if (!a || !confirm('Supprimer cette pièce jointe ?')) return;
+      try { if (a.path) await storage.ref(a.path).delete(); } catch (e) { console.warn('Fichier déjà absent ou non supprimé', e.code); }
+      chantiersCol.doc(String(cdId)).update({ ['att.' + aid]: firebase.firestore.FieldValue.delete() });
+    }
+
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
@@ -3304,6 +3708,7 @@
               ${isChantierNew(c) ? '<span class="brief-tag new">Nouveau</span>' : ''}
               ${c.category && c.category !== 'general' ? `<span class="status-pill status-todo">${categoryLabels[c.category] || c.category}</span>` : ''}
               <span class="status-pill ${c.type === 'hebdo' ? 'status-progress' : 'status-todo'}">${c.type.toUpperCase()}</span>
+              <button class="btn btn-secondary btn-sm" title="Checklist, pièces jointes, morceau lié" onclick="openChantierDetail(${c.id})"><i class="fa-solid fa-square-check"></i></button>
               <button class="btn btn-secondary btn-sm" title="Modifier" onclick="openEditChantierModal(${c.id})"><i class="fa-solid fa-pen"></i></button>
               ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteChantier(${c.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
             </div>
@@ -3315,9 +3720,11 @@
               ${c.done ? '<strong style="color:#047857;">Terminé</strong>' : 'En cours'}
             </span>
           </div>
+          ${chantierExtrasHTML(c)}
         </div>
       `;
       }).join('');
+      refreshChantierDetailIfOpen();
     }
 
     function toggleChantierDone(id) {
@@ -3371,6 +3778,7 @@
           </td>
           <td><span class="status-pill ${s.status === 'Masterisé' ? 'status-done' : (s.status === 'En Mixage' ? 'status-progress' : 'status-todo')}">${escapeHTML(s.status)}</span></td>
           <td>
+            ${songActionButtons(s)}
             <button class="btn btn-secondary btn-sm" onclick="openEditMixModal(${s.id})"><i class="fa-solid fa-pen"></i> Éditer</button>
             ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </td>
@@ -3431,11 +3839,13 @@
             ${s.previousFileUrl ? `<a href="${escapeHTML(s.previousFileUrl)}" target="_blank" rel="noopener" title="Version précédente du ${s.previousFileDate || ''}" style="font-size:11px; color:var(--text-muted); margin-left:6px; text-decoration:underline;"><i class="fa-solid fa-clock-rotate-left"></i> Version préc.</a>` : ''}
           </td>
           <td>
+            ${songActionButtons(s)}
             <button class="btn btn-secondary btn-sm" onclick="openEditSongModal(${s.id})"><i class="fa-solid fa-pen"></i></button>
             ${canManageContent() ? `<button class="btn btn-danger btn-sm" onclick="deleteSong(${s.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
           </td>
         </tr>
       `).join('');
+      refreshSongCommentsIfOpen();
     }
 
     function openAddSongModal() {
@@ -3657,15 +4067,18 @@
       if (totalEl) totalEl.textContent = formatTotalDuration(totalSec);
 
       container.innerHTML = summary + items.map((s, idx) => `
-        <div class="feed-item" style="justify-content:space-between;">
-          <div style="display:flex; align-items:center; gap:12px;">
-            <span style="font-weight:800; color:var(--brand-red); width:20px;">#${idx + 1}</span>
-            <div>
+        <div class="feed-item setlist-row" data-id="${s.id}" style="justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+            <span class="drag-handle" title="Glisser pour réordonner"><i class="fa-solid fa-grip-vertical"></i></span>
+            <span style="font-weight:800; color:var(--brand-red); min-width:22px;">#${idx + 1}</span>
+            <div style="min-width:0;">
               <strong>${escapeHTML(s.title)}</strong>
               <div class="feed-time">${escapeHTML(s.duration)} • Key: ${escapeHTML(s.key)} • Tempo: ${escapeHTML(s.bpm)} BPM</div>
+              ${hasTech(s) ? `<div class="feed-time" style="color:#92400E;">📝 ${escapeHTML([s.tuning, s.stageNotes].filter(Boolean).join(' • ').slice(0, 90))}</div>` : ''}
             </div>
           </div>
           <div style="display:flex; gap:4px;">
+            <button class="btn btn-secondary btn-sm" title="Fiche technique" onclick="openSongTech(${s.id})"><i class="fa-solid fa-clipboard-list"></i></button>
             <button class="btn btn-secondary btn-sm" onclick="moveSetlistItem(${s.id}, -1)"><i class="fa-solid fa-arrow-up"></i></button>
             <button class="btn btn-secondary btn-sm" onclick="moveSetlistItem(${s.id}, 1)"><i class="fa-solid fa-arrow-down"></i></button>
           </div>
@@ -4555,6 +4968,21 @@
         doc.setTextColor(...muted);
         doc.text(formatTotalDuration(cumul).replace(' min ', 'm ').replace(' s', 's'), 182, y);
         y += 8;
+        const extra = [];
+        if (sg.tuning) extra.push('Accordage : ' + sg.tuning);
+        if (sg.gear) extra.push('Matériel : ' + sg.gear);
+        if (sg.stageNotes) extra.push('Scène : ' + sg.stageNotes);
+        if (extra.length) {
+          y -= 3;
+          doc.setFont('helvetica', 'normal'); doc.setFontSize(8); doc.setTextColor(...muted);
+          extra.forEach(line => {
+            doc.splitTextToSize(line, 168).forEach(part => {
+              if (y > 280) { doc.addPage(); y = 20; }
+              doc.text(part, 24, y); y += 4.5;
+            });
+          });
+          y += 3;
+        }
       });
 
       doc.save('setlist-eliyah.pdf');
