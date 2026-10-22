@@ -1079,6 +1079,26 @@
     .att-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #F1F5F9; }
     .mini-bar { height: 6px; background: #E2E8F0; border-radius: 6px; overflow: hidden; flex: 1; }
     .mini-bar > div { height: 100%; background: #10B981; }
+    .mention { background: #DBEAFE; color: #1D4ED8; border-radius: 6px; padding: 0 4px; font-weight: 700; }
+    .mention.me { background: #FDE68A; color: #92400E; }
+    .chat-bubble.pinned { outline: 2px solid #F59E0B; }
+    .chat-bubble.mentioned { box-shadow: 0 0 0 2px #2563EB; }
+    .mention-box { border-top: 1px solid var(--border-color); background: #fff; max-height: 170px; overflow-y: auto; }
+    .mention-opt { padding: 9px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #F1F5F9; }
+    .mention-opt:hover { background: #F1F5F9; }
+    #chat-pinned { display: none; padding: 8px 14px; background: #FFFBEB; border-bottom: 1px solid #FDE68A; font-size: 12px; }
+    .pin-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; }
+    .pin-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fin-cards { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
+    .fin-card { flex: 1; min-width: 130px; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 14px; background: #fff; }
+    .fin-card small { display: block; color: var(--text-muted); font-weight: 700; font-size: 11px; text-transform: uppercase; }
+    .fin-card strong { font-size: 20px; }
+    .amt-pos { color: #047857; } .amt-neg { color: #B91C1C; }
+    .fin-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
+    .fin-row .fin-main { flex: 1; min-width: 0; }
+    .gear-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 14px; margin-bottom: 8px; background: #fff; }
+    .gear-card.late { border-color: #EF4444; background: #FEF2F2; }
+    .gear-card.out { border-color: #F59E0B; background: #FFFBEB; }
 </style>
 </head>
 <body>
@@ -1148,6 +1168,14 @@
           <i class="fa-solid fa-calendar-check"></i>
           <span>Planning & Séances</span>
           <span class="nav-badge" id="polls-pending-badge" style="display:none;" title="Sondages en attente de votre réponse">0</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('budget', this)">
+          <i class="fa-solid fa-wallet"></i>
+          <span>Budget & Cachets</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('gear', this)">
+          <i class="fa-solid fa-guitar"></i>
+          <span>Matériel</span>
         </li>
         <li class="nav-item" onclick="switchTab('chat', this)">
           <i class="fa-solid fa-comments"></i>
@@ -1454,6 +1482,56 @@
       </div>
     </section>
 
+    <section id="view-budget" class="view-content">
+      <div class="chart-box" style="margin-bottom: 16px;">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-wallet" style="color:#059669;"></i> Budget & Cachets</h3>
+            <p>Dépenses, recettes par concert et qui doit quoi.</p>
+          </div>
+          <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+            <select id="fin-filter-event" onchange="renderBudget()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:#fff; max-width:240px;"></select>
+            <button class="btn btn-secondary btn-sm" onclick="exportBudgetCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
+            <button class="btn btn-primary btn-sm" onclick="openFinanceModal()"><i class="fa-solid fa-plus"></i> Ajouter</button>
+          </div>
+        </div>
+        <div id="fin-summary"></div>
+      </div>
+      <div class="two-cols">
+        <div class="chart-box">
+          <div class="box-header"><div class="box-title"><h3>Qui doit quoi</h3><p>Calculé sur tous les mouvements.</p></div></div>
+          <div id="fin-balances"></div>
+        </div>
+        <div class="chart-box">
+          <div class="box-header"><div class="box-title"><h3>Mouvements</h3><p>Dépenses, recettes et remboursements.</p></div></div>
+          <div id="fin-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-gear" class="view-content">
+      <div class="chart-box">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-guitar" style="color: var(--brand-red);"></i> Matériel du groupe</h3>
+            <p>Inventaire et prêts d’instruments, câbles, micros…</p>
+          </div>
+          <button class="btn btn-primary" onclick="openGearModal()"><i class="fa-solid fa-plus"></i> Ajouter du matériel</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+          <input type="text" id="gear-search" placeholder="Rechercher…" oninput="renderGear()" style="flex:1; min-width:160px; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px;">
+          <select id="gear-filter" onchange="renderGear()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:#fff;">
+            <option value="all">Tout</option>
+            <option value="available">Disponible</option>
+            <option value="out">Prêté</option>
+            <option value="late">En retard</option>
+            <option value="mine">Mes objets</option>
+          </select>
+        </div>
+        <div id="gear-list"></div>
+      </div>
+    </section>
+
     <section id="view-chat" class="view-content">
       <div class="box-title">
         <h3>Espace de Discussion du Groupe ELIYAH</h3>
@@ -1461,13 +1539,18 @@
       </div>
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin:-6px 0 10px 0; flex-wrap:wrap;">
         <div id="chat-online-strip" style="font-size:12px; color:var(--text-muted);"></div>
-        <button id="notif-toggle-btn" class="btn btn-secondary btn-sm" onclick="toggleNotifications()" style="display:none;"></button>
+        <span style="display:flex; gap:6px;">
+          <button id="notif-toggle-btn" class="btn btn-secondary btn-sm" onclick="toggleNotifications()" style="display:none;"></button>
+          <button class="btn btn-secondary btn-sm" onclick="openNotifPrefs()" title="Préférences de notifications"><i class="fa-solid fa-sliders"></i></button>
+        </span>
       </div>
       <div class="chat-container">
+        <div id="chat-pinned"></div>
         <div class="chat-messages" id="chat-messages-box"></div>
         <div id="chat-reply-bar"></div>
+        <div id="mention-box" class="mention-box" style="display:none;"></div>
         <div class="chat-input-area">
-          <input type="text" id="chat-text-input" class="chat-input" placeholder="Écrivez votre message..." onkeypress="if(event.key === 'Enter') sendChatMessage()">
+          <input type="text" id="chat-text-input" class="chat-input" placeholder="Écrivez votre message… (@ pour mentionner)" autocomplete="off" oninput="onChatInput()" onkeypress="if(event.key === 'Enter') { if (mentionBoxOpen()) { pickMention(0); event.preventDefault(); } else { sendChatMessage(); } }">
           <button class="btn btn-primary" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
         </div>
       </div>
@@ -1855,6 +1938,95 @@
       </div>
       <div style="display:flex; justify-content:flex-end; margin-top:18px;">
         <button class="btn btn-primary" onclick="closeModal('modal-chantier-detail')">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-notif-prefs">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;">Préférences de notifications</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin:6px 0 14px;">Elles s’appliquent aux notifications push reçues sur vos appareils. Les pastilles dans l’app restent toujours actives.</p>
+      <label class="chk-item"><input type="checkbox" id="np-chat" style="width:17px; height:17px;"> <span>Messages du chat</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-mentions" style="width:17px; height:17px;"> <span>Quand on me mentionne (@)</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-chantiers" style="width:17px; height:17px;"> <span>Nouveaux chantiers</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-events" style="width:17px; height:17px;"> <span>Nouveaux événements</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-polls" style="width:17px; height:17px;"> <span>Sondages de séances</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-reminders" style="width:17px; height:17px;"> <span>Rappels (chantiers, séances, veille d’événement, prêts en retard)</span></label>
+      <div class="brief-title" style="margin-top:16px;">Mode silencieux</div>
+      <label class="chk-item"><input type="checkbox" id="np-quiet-on" style="width:17px; height:17px;"> <span>Ne pas me notifier la nuit</span></label>
+      <div style="display:flex; gap:8px; align-items:center; font-size:13px; margin-top:4px;">
+        de <input type="time" id="np-quiet-from" value="22:00" style="padding:6px 8px; border:1px solid var(--border-color); border-radius:10px;">
+        à <input type="time" id="np-quiet-to" value="08:00" style="padding:6px 8px; border:1px solid var(--border-color); border-radius:10px;">
+      </div>
+      <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Pendant ces heures (heure de Paris), aucune notification push n’est envoyée : elles ne sont pas rattrapées ensuite.</p>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-notif-prefs')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveNotifPrefs()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-finance">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;" id="fin-modal-title">Nouveau mouvement</h3>
+      <input type="hidden" id="fin-id">
+      <div class="form-group" style="margin-top:14px;">
+        <label>Type</label>
+        <select id="fin-kind" onchange="onFinanceKindChange()">
+          <option value="expense">💸 Dépense</option>
+          <option value="income">💰 Recette (cachet, vente…)</option>
+          <option value="transfer">🔁 Remboursement entre membres</option>
+        </select>
+      </div>
+      <div class="form-group" id="fin-title-row"><label>Intitulé</label><input type="text" id="fin-title" placeholder="Ex : location de la salle, cachet du festival"></div>
+      <div class="form-group"><label>Montant (€)</label><input type="text" id="fin-amount" inputmode="decimal" placeholder="Ex : 120,50"></div>
+      <div class="form-group"><label>Date</label><input type="date" id="fin-date"></div>
+      <div class="form-group" id="fin-event-row"><label>Événement lié (optionnel)</label><select id="fin-event"></select></div>
+      <div class="form-group" id="fin-cat-row"><label>Catégorie</label><select id="fin-category"></select></div>
+      <div class="form-group"><label id="fin-by-label">Payé par</label><select id="fin-by"></select></div>
+      <div class="form-group" id="fin-to-row" style="display:none;"><label>Remboursé à</label><select id="fin-to"></select></div>
+      <div id="fin-split-row">
+        <div class="brief-title" id="fin-split-label">Réparti entre</div>
+        <div id="fin-split"></div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="toggleAllSplit()" style="margin-top:6px;">Tout cocher / décocher</button>
+      </div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-finance')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveFinance()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-gear">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;" id="gear-modal-title">Matériel</h3>
+      <input type="hidden" id="g-id">
+      <div class="form-group" style="margin-top:14px;"><label>Nom</label><input type="text" id="g-name" placeholder="Ex : Strat noire, câble jack 6 m, micro SM58"></div>
+      <div class="form-group"><label>Catégorie</label>
+        <select id="g-cat"><option>Instrument</option><option>Ampli / Son</option><option>Micro</option><option>Câble</option><option>Pédale / Effet</option><option>Accessoire</option><option>Autre</option></select>
+      </div>
+      <div class="form-group"><label>Quantité</label><input type="number" id="g-qty" min="1" value="1"></div>
+      <div class="form-group"><label>Appartient à</label><select id="g-owner"></select></div>
+      <div class="form-group"><label>Notes (optionnel)</label><input type="text" id="g-notes" placeholder="Ex : état, numéro de série, accessoires fournis"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-gear')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveGear()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-loan">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;" id="loan-title">Prêter</h3>
+      <input type="hidden" id="l-gear-id">
+      <div class="form-group" style="margin-top:14px;"><label>Prêté à</label><select id="l-who" onchange="onLoanWhoChange()"></select></div>
+      <div class="form-group" id="l-ext-row" style="display:none;"><label>Nom de la personne</label><input type="text" id="l-ext" placeholder="Ex : un ami, le studio…"></div>
+      <div class="form-group"><label>Date du prêt</label><input type="date" id="l-since"></div>
+      <div class="form-group"><label>Retour prévu (optionnel)</label><input type="date" id="l-due"></div>
+      <div class="form-group"><label>Note (optionnel)</label><input type="text" id="l-note"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-loan')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveLoan()">Enregistrer le prêt</button>
       </div>
     </div>
   </div>
@@ -2398,10 +2570,20 @@
 
       pollsCol.onSnapshot(handlePollsSnapshot);
 
+      financesCol.onSnapshot(snap => {
+        financesData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderBudget();
+      }, err => console.error('finances', err));
+
+      gearCol.onSnapshot(snap => {
+        gearData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderGear();
+      }, err => console.error('gear', err));
+
       chatCol.onSnapshot(snap => {
         chatData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         renderChat();
-        if (chatBaselineReady) notifyNewChat(snap.docChanges());
+        if (chatBaselineReady) { notifyNewChat(snap.docChanges()); toastMentions(snap.docChanges()); }
         handleChatSnapshot();
       });
 
@@ -2416,7 +2598,7 @@
         updateFormationTag();
         if (!window.__usersFirstRender) { window.__usersFirstRender = true; renderChat(); }
         renderPresenceUI();
-        if (usersData.length !== lastUsersLenForPolls) { lastUsersLenForPolls = usersData.length; renderPolls(); }
+        if (usersData.length !== lastUsersLenForPolls) { lastUsersLenForPolls = usersData.length; renderPolls(); renderBudget(); renderGear(); }
         const myProfile = usersData.find(u => u.email === currentUser.email);
         if (myProfile && myProfile.role !== currentUser.role) {
           currentUser.role = myProfile.role;
@@ -2522,6 +2704,8 @@
         'docs': { title: 'Documents & Médias', sub: 'Téléchargement de fiches PDF, fichiers WAV et vidéos MP4.' },
         'retro': { title: 'Rétroplanning', sub: 'Les chantiers planifiés à rebours à partir de votre prochain objectif.' },
         'planning': { title: 'Planning & Séances', sub: 'Sondages de disponibilités pour caler les séances d’entraînement.' },
+        'budget': { title: 'Budget & Cachets', sub: 'Dépenses, recettes par concert et remboursements entre membres.' },
+        'gear': { title: 'Matériel du groupe', sub: 'Inventaire et prêts d’instruments, câbles et micros.' },
         'admin': { title: 'Espace Administration', sub: 'Gestion des autorisations et droits de suppression.' }
       };
 
@@ -2529,6 +2713,8 @@
       if (viewId === 'chantiers' && currentUser && chantiersSeen) markChantiersSeen();
       if (viewId === 'retro') renderRetro();
       if (viewId === 'planning') renderPolls();
+      if (viewId === 'budget') renderBudget();
+      if (viewId === 'gear') renderGear();
 
       if (titles[viewId]) {
         document.getElementById('view-title').textContent = titles[viewId].title;
@@ -3208,7 +3394,7 @@
     }
 
     /* ================= SAUVEGARDE / RESTAURATION (admin) ================= */
-    const BACKUP_COLLECTIONS = ['users', 'songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'appState'];
+    const BACKUP_COLLECTIONS = ['users', 'songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'finances', 'gear', 'appState'];
     function backupStatus(msg) { const el = document.getElementById('backup-status'); if (el) el.textContent = msg; }
 
     async function exportBackup() {
@@ -3579,6 +3765,498 @@
       if (!a || !confirm('Supprimer cette pièce jointe ?')) return;
       try { if (a.path) await storage.ref(a.path).delete(); } catch (e) { console.warn('Fichier déjà absent ou non supprimé', e.code); }
       chantiersCol.doc(String(cdId)).update({ ['att.' + aid]: firebase.firestore.FieldValue.delete() });
+    }
+
+
+    /* ================= CHAT : MENTIONS ET MESSAGES ÉPINGLÉS ================= */
+    let mentionCandidates = [];
+    function escapeRegExp(str) { return String(str).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+    function extractMentions(text) {
+      const out = [];
+      let rest = String(text);
+      // Noms les plus longs d'abord : « @Luca Rossi » ne doit pas aussi mentionner « Luca »
+      const members = usersData
+        .filter(u => !currentUser || u.docId !== currentUser.docId)
+        .map(u => ({ id: u.docId, name: memberName(u) }))
+        .filter(m => m.name)
+        .sort((a, b) => b.name.length - a.name.length);
+      members.forEach(m => {
+        const re = new RegExp('@' + escapeRegExp(m.name) + '(?![\\p{L}\\p{N}_])', 'iu');
+        if (re.test(rest)) { out.push(m.id); rest = rest.replace(re, ' '); }
+      });
+      return out;
+    }
+
+    function highlightMentions(text) {
+      const safe = escapeHTML(text);
+      const names = usersData.map(memberName).filter(Boolean).sort((a, b) => b.length - a.length);
+      if (!names.length) return safe;
+      const re = new RegExp('@(' + names.map(n => escapeRegExp(escapeHTML(n))).join('|') + ')(?![\\p{L}\\p{N}_])', 'giu');
+      const me = currentUser ? String(currentUser.name).toLowerCase() : '';
+      return safe.replace(re, (all, n) => `<span class="mention ${n.toLowerCase() === me ? 'me' : ''}">${all}</span>`);
+    }
+
+    function mentionBoxOpen() { const b = document.getElementById('mention-box'); return !!(b && b.style.display !== 'none' && mentionCandidates.length); }
+    function onChatInput() {
+      const input = document.getElementById('chat-text-input');
+      const box = document.getElementById('mention-box');
+      if (!input || !box) return;
+      const pos = input.selectionStart == null ? input.value.length : input.selectionStart;
+      const m = input.value.slice(0, pos).match(/(?:^|\s)@([^\s@]*)$/);
+      if (!m) { box.style.display = 'none'; mentionCandidates = []; return; }
+      const q = m[1].toLowerCase();
+      mentionCandidates = usersData
+        .filter(u => !currentUser || u.docId !== currentUser.docId)
+        .map(memberName)
+        .filter(n => n.toLowerCase().replace(/\s+/g, '').startsWith(q))
+        .slice(0, 6);
+      if (!mentionCandidates.length) { box.style.display = 'none'; return; }
+      box.innerHTML = mentionCandidates.map((n, i) => `<div class="mention-opt" onmousedown="event.preventDefault(); pickMention(${i});">@${escapeHTML(n)}</div>`).join('');
+      box.style.display = 'block';
+    }
+    function pickMention(i) {
+      const name = mentionCandidates[i];
+      const input = document.getElementById('chat-text-input');
+      if (!name || !input) return;
+      const pos = input.selectionStart == null ? input.value.length : input.selectionStart;
+      const before = input.value.slice(0, pos).replace(/@([^\s@]*)$/, '@' + name + ' ');
+      input.value = before + input.value.slice(pos);
+      input.focus();
+      try { input.setSelectionRange(before.length, before.length); } catch (e) {}
+      document.getElementById('mention-box').style.display = 'none';
+      mentionCandidates = [];
+    }
+    function toastMentions(changes) {
+      if (!currentUser) return;
+      changes.filter(ch => ch.type === 'added').forEach(ch => {
+        const m = ch.doc.data();
+        if (m.sender === currentUser.name || !Array.isArray(m.mentions) || !m.mentions.includes(currentUser.docId)) return;
+        if (!document.hidden && isChatViewActive()) return;
+        showToast(m.sender + ' vous a mentionné : ' + String(m.text || '').slice(0, 80), { actionLabel: 'Voir', onAction: () => switchTab('chat', null) });
+      });
+    }
+
+    function togglePin(id) {
+      const c = chatData.find(x => x.id === id);
+      if (!c || !currentUser) return;
+      chatCol.doc(String(id)).update({ pinned: !c.pinned, pinnedBy: currentUser.name })
+        .catch(err => { console.error(err); alert('Épinglage impossible (droits ou réseau).'); });
+    }
+    function renderPinnedBar() {
+      const box = document.getElementById('chat-pinned');
+      if (!box) return;
+      const pins = chatData.filter(c => c.pinned).slice(-3).reverse();
+      if (!pins.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+      box.style.display = 'block';
+      box.innerHTML = pins.map(c => `
+        <div class="pin-row" onclick="scrollToMessage(${c.id})">
+          📌 <strong>${escapeHTML(c.sender)}</strong> <span>${escapeHTML(String(c.text || '').slice(0, 90))}</span>
+          <button class="chat-act" title="Désépingler" onclick="event.stopPropagation(); togglePin(${c.id})"><i class="fa-solid fa-xmark"></i></button>
+        </div>`).join('');
+    }
+    function scrollToMessage(id) {
+      const el = document.querySelector('.chat-bubble[data-mid="' + id + '"]');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    /* ================= PRÉFÉRENCES DE NOTIFICATIONS ================= */
+    const NOTIF_KEYS = ['chat', 'mentions', 'chantiers', 'events', 'polls', 'reminders'];
+    function myPrefs() {
+      const me = currentUser ? usersData.find(u => u.docId === currentUser.docId) : null;
+      return (me && me.notifPrefs) || {};
+    }
+    function clientPrefAllows(type) {
+      const p = myPrefs();
+      if (p[type] === false) return false;
+      const q = p.quiet;
+      if (q && q.on) {
+        const d = new Date();
+        const now = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        const from = q.from || '22:00', to = q.to || '08:00';
+        const quiet = from > to ? (now >= from || now < to) : (now >= from && now < to);
+        if (quiet) return false;
+      }
+      return true;
+    }
+    function openNotifPrefs() {
+      const p = myPrefs();
+      NOTIF_KEYS.forEach(k => { document.getElementById('np-' + k).checked = p[k] !== false; });
+      const q = p.quiet || {};
+      document.getElementById('np-quiet-on').checked = !!q.on;
+      document.getElementById('np-quiet-from').value = q.from || '22:00';
+      document.getElementById('np-quiet-to').value = q.to || '08:00';
+      openModal('modal-notif-prefs');
+    }
+    function saveNotifPrefs() {
+      if (!currentUser) return;
+      const prefs = {};
+      NOTIF_KEYS.forEach(k => { prefs[k] = document.getElementById('np-' + k).checked; });
+      prefs.quiet = {
+        on: document.getElementById('np-quiet-on').checked,
+        from: document.getElementById('np-quiet-from').value || '22:00',
+        to: document.getElementById('np-quiet-to').value || '08:00'
+      };
+      usersCol.doc(currentUser.docId).update({ notifPrefs: prefs })
+        .then(() => { closeModal('modal-notif-prefs'); showToast('Préférences enregistrées.'); })
+        .catch(err => { console.error(err); alert('Enregistrement impossible (droits ou réseau).'); });
+    }
+
+    /* ================= BUDGET & CACHETS ================= */
+    const financesCol = db.collection('finances');
+    let financesData = [];
+    const FIN_CATS = {
+      expense: ['Location salle / studio', 'Matériel', 'Transport', 'Repas', 'Promo / Communication', 'Autre'],
+      income: ['Cachet', 'Merchandising', 'Billetterie', 'Autre']
+    };
+    function todayStr() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    function fmtEur(cents) {
+      return ((cents || 0) / 100).toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €';
+    }
+    function parseAmountToCents(v) {
+      const n = parseFloat(String(v).replace(/\s/g, '').replace(',', '.'));
+      return (isFinite(n) && n > 0) ? Math.round(n * 100) : 0;
+    }
+    function finName(uid, fallback) {
+      const u = usersData.find(x => x.docId === uid);
+      return u ? memberName(u) : (fallback || 'Ancien membre');
+    }
+    function splitCents(total, uids) {
+      const n = uids.length, out = {};
+      if (!n) return out;
+      const base = Math.floor(total / n);
+      let rem = total - base * n;
+      [...uids].sort().forEach(u => { out[u] = base + (rem > 0 ? 1 : 0); if (rem > 0) rem--; });
+      return out;
+    }
+    // Solde par membre : positif = on lui doit de l'argent, négatif = il doit de l'argent
+    function computeBalances(list) {
+      const bal = {};
+      const add = (u, v) => { if (u) bal[u] = (bal[u] || 0) + v; };
+      list.forEach(f => {
+        if (f.kind === 'expense') {
+          add(f.byId, f.cents);
+          const sh = splitCents(f.cents, f.split || []);
+          Object.keys(sh).forEach(u => add(u, -sh[u]));
+        } else if (f.kind === 'income') {
+          add(f.byId, -f.cents);
+          const sh = splitCents(f.cents, f.split || []);
+          Object.keys(sh).forEach(u => add(u, sh[u]));
+        } else if (f.kind === 'transfer') {
+          add(f.byId, f.cents);
+          add(f.toId, -f.cents);
+        }
+      });
+      return bal;
+    }
+    function suggestTransfers(bal) {
+      const cr = [], de = [];
+      Object.keys(bal).forEach(u => { if (bal[u] > 0) cr.push({ u, v: bal[u] }); else if (bal[u] < 0) de.push({ u, v: -bal[u] }); });
+      cr.sort((a, b) => b.v - a.v); de.sort((a, b) => b.v - a.v);
+      const out = [];
+      let i = 0, j = 0;
+      while (i < de.length && j < cr.length) {
+        const m = Math.min(de[i].v, cr[j].v);
+        if (m > 0) out.push({ from: de[i].u, to: cr[j].u, cents: m });
+        de[i].v -= m; cr[j].v -= m;
+        if (de[i].v === 0) i++;
+        if (cr[j].v === 0) j++;
+      }
+      return out;
+    }
+
+    function canEditFinance(f) { return !!currentUser && (f.createdById === currentUser.docId || canManageContent()); }
+    function financeFilter() { const el = document.getElementById('fin-filter-event'); return el ? el.value : 'all'; }
+    function filteredFinances() {
+      const f = financeFilter();
+      if (!f || f === 'all') return financesData;
+      if (f === 'none') return financesData.filter(x => !x.eventId);
+      return financesData.filter(x => String(x.eventId) === f);
+    }
+
+    function renderBudget() {
+      const sum = document.getElementById('fin-summary');
+      if (!sum) return;
+      const sel = document.getElementById('fin-filter-event');
+      if (document.activeElement !== sel) {
+        const cur = sel.value || 'all';
+        sel.innerHTML = '<option value="all">Tous les mouvements</option><option value="none">Hors événement</option>'
+          + sortedEvents().map(e => `<option value="${e.id}">${escapeHTML(e.title)}${e.dateISO ? ' — ' + fmtShort(new Date(e.dateISO)) : ''}</option>`).join('');
+        sel.value = [...sel.options].some(o => o.value === cur) ? cur : 'all';
+      }
+      const shown = filteredFinances();
+      const exp = shown.filter(f => f.kind === 'expense').reduce((a, f) => a + f.cents, 0);
+      const inc = shown.filter(f => f.kind === 'income').reduce((a, f) => a + f.cents, 0);
+      const net = inc - exp;
+      sum.innerHTML = `<div class="fin-cards">
+        <div class="fin-card"><small>Dépenses</small><strong class="amt-neg">${fmtEur(exp)}</strong></div>
+        <div class="fin-card"><small>Recettes</small><strong class="amt-pos">${fmtEur(inc)}</strong></div>
+        <div class="fin-card"><small>Résultat</small><strong class="${net >= 0 ? 'amt-pos' : 'amt-neg'}">${net >= 0 ? '+' : '−'}${fmtEur(Math.abs(net))}</strong></div>
+      </div>`;
+
+      // Qui doit quoi (tous les mouvements)
+      const bal = computeBalances(financesData);
+      const ids = new Set(usersData.map(u => u.docId));
+      Object.keys(bal).forEach(u => ids.add(u));
+      const rows = [...ids].map(u => ({ u, v: bal[u] || 0 })).sort((a, b) => b.v - a.v);
+      const transfers = suggestTransfers(bal);
+      document.getElementById('fin-balances').innerHTML = (rows.length ? rows.map(r => `
+        <div class="fin-row">
+          <div class="fin-main"><strong>${escapeHTML(finName(r.u))}</strong></div>
+          <span class="${r.v > 0 ? 'amt-pos' : (r.v < 0 ? 'amt-neg' : '')}" style="font-weight:800;">${r.v > 0 ? 'à recevoir ' + fmtEur(r.v) : (r.v < 0 ? 'doit ' + fmtEur(-r.v) : 'à jour')}</span>
+        </div>`).join('') : '<p style="font-size:13px; color:var(--text-muted);">Aucun membre.</p>')
+        + (transfers.length ? '<div class="brief-title" style="margin-top:14px;">Pour tout solder</div>' + transfers.map(t => `
+        <div class="fin-row">
+          <div class="fin-main">${escapeHTML(finName(t.from))} → <strong>${escapeHTML(finName(t.to))}</strong> : <strong>${fmtEur(t.cents)}</strong></div>
+          <button class="btn btn-secondary btn-sm" onclick="settleTransfer('${t.from}', '${t.to}', ${t.cents})">Marquer comme réglé</button>
+        </div>`).join('') : '');
+
+      // Liste des mouvements
+      const list = [...shown].sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')) || b.id - a.id);
+      document.getElementById('fin-list').innerHTML = list.length ? list.map(f => {
+        const ev = f.eventId ? eventsData.find(e => e.id === f.eventId) : null;
+        const icon = f.kind === 'expense' ? '💸' : (f.kind === 'income' ? '💰' : '🔁');
+        const sign = f.kind === 'expense' ? '−' : (f.kind === 'income' ? '+' : '');
+        const cls = f.kind === 'expense' ? 'amt-neg' : (f.kind === 'income' ? 'amt-pos' : '');
+        const detail = f.kind === 'transfer'
+          ? `${escapeHTML(finName(f.byId, f.byName))} → ${escapeHTML(finName(f.toId, f.toName))}`
+          : `${f.kind === 'expense' ? 'Payé' : 'Encaissé'} par ${escapeHTML(finName(f.byId, f.byName))} • réparti sur ${(f.split || []).length}`;
+        return `<div class="fin-row">
+          <span style="font-size:18px;">${icon}</span>
+          <div class="fin-main">
+            <div style="font-weight:700;">${escapeHTML(f.title)}</div>
+            <div class="feed-time">${escapeHTML(f.date ? new Date(f.date + 'T12:00').toLocaleDateString('fr-FR') : '')} • ${detail}${f.category ? ' • ' + escapeHTML(f.category) : ''}${ev ? ' • 🎤 ' + escapeHTML(ev.title) : ''}</div>
+          </div>
+          <strong class="${cls}">${sign}${fmtEur(f.cents)}</strong>
+          ${canEditFinance(f) ? `<button class="btn btn-secondary btn-sm" onclick="openFinanceModal(${f.id})"><i class="fa-solid fa-pen"></i></button><button class="btn btn-danger btn-sm" onclick="deleteFinance(${f.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+        </div>`;
+      }).join('') : '<p style="font-size:13px; color:var(--text-muted);">Aucun mouvement. Ajoutez une dépense ou un cachet avec le bouton « Ajouter ».</p>';
+    }
+
+    function memberOptions(selected, withGroup) {
+      return (withGroup ? `<option value="">Le groupe</option>` : '')
+        + usersData.map(u => `<option value="${u.docId}" ${u.docId === selected ? 'selected' : ''}>${escapeHTML(memberName(u))}</option>`).join('');
+    }
+    function onFinanceKindChange() {
+      const kind = document.getElementById('fin-kind').value;
+      const tr = kind === 'transfer';
+      document.getElementById('fin-title-row').style.display = tr ? 'none' : '';
+      document.getElementById('fin-event-row').style.display = tr ? 'none' : '';
+      document.getElementById('fin-cat-row').style.display = tr ? 'none' : '';
+      document.getElementById('fin-split-row').style.display = tr ? 'none' : '';
+      document.getElementById('fin-to-row').style.display = tr ? '' : 'none';
+      document.getElementById('fin-by-label').textContent = tr ? 'Qui rembourse' : (kind === 'income' ? 'Encaissé par' : 'Payé par');
+      document.getElementById('fin-split-label').textContent = kind === 'income' ? 'Cachet partagé entre' : 'Dépense répartie entre';
+      if (!tr) document.getElementById('fin-category').innerHTML = FIN_CATS[kind].map(c => `<option>${c}</option>`).join('');
+    }
+    function toggleAllSplit() {
+      const cbs = [...document.querySelectorAll('.fin-split-cb')];
+      const all = cbs.every(c => c.checked);
+      cbs.forEach(c => { c.checked = !all; });
+    }
+    function openFinanceModal(id) {
+      const f = id ? financesData.find(x => x.id === id) : null;
+      if (id && !f) return;
+      document.getElementById('fin-modal-title').textContent = f ? 'Modifier le mouvement' : 'Nouveau mouvement';
+      document.getElementById('fin-id').value = f ? f.id : '';
+      document.getElementById('fin-kind').value = f ? f.kind : 'expense';
+      document.getElementById('fin-title').value = f ? (f.kind === 'transfer' ? '' : f.title) : '';
+      document.getElementById('fin-amount').value = f ? (f.cents / 100).toFixed(2).replace('.', ',') : '';
+      document.getElementById('fin-date').value = f ? f.date : todayStr();
+      const evSel = document.getElementById('fin-event');
+      const flt = financeFilter();
+      evSel.innerHTML = '<option value="">— Aucun —</option>' + sortedEvents().map(e => `<option value="${e.id}">${escapeHTML(e.title)}</option>`).join('');
+      evSel.value = f ? String(f.eventId || '') : (/^\d+$/.test(flt) ? flt : '');
+      const me = currentUser ? currentUser.docId : '';
+      document.getElementById('fin-by').innerHTML = memberOptions(f ? f.byId : me, false);
+      document.getElementById('fin-to').innerHTML = memberOptions(f && f.toId ? f.toId : '', false);
+      const split = f ? (f.split || []) : usersData.map(u => u.docId);
+      document.getElementById('fin-split').innerHTML = usersData.map(u => `<label class="chk-item"><input type="checkbox" class="fin-split-cb" value="${u.docId}" ${split.includes(u.docId) ? 'checked' : ''} style="width:17px; height:17px;"> <span>${escapeHTML(memberName(u))}</span></label>`).join('');
+      onFinanceKindChange();
+      if (f && f.category) document.getElementById('fin-category').value = f.category;
+      openModal('modal-finance');
+    }
+    function saveFinance() {
+      if (!currentUser) return;
+      const existingId = parseInt(document.getElementById('fin-id').value) || 0;
+      const old = existingId ? financesData.find(x => x.id === existingId) : null;
+      const kind = document.getElementById('fin-kind').value;
+      const cents = parseAmountToCents(document.getElementById('fin-amount').value);
+      if (!cents) return alert('Saisissez un montant supérieur à 0 (ex : 120,50).');
+      const byId = document.getElementById('fin-by').value;
+      if (!byId) return alert('Choisissez le membre concerné.');
+      const date = document.getElementById('fin-date').value || todayStr();
+      const id = existingId || Date.now();
+      const obj = {
+        id, kind, cents, date, byId, byName: finName(byId),
+        createdBy: old ? old.createdBy : currentUser.name,
+        createdById: old ? old.createdById : currentUser.docId
+      };
+      if (kind === 'transfer') {
+        const toId = document.getElementById('fin-to').value;
+        if (!toId || toId === byId) return alert('Choisissez deux membres différents.');
+        Object.assign(obj, { title: 'Remboursement', toId, toName: finName(toId), split: [], eventId: 0, category: '' });
+      } else {
+        const title = document.getElementById('fin-title').value.trim();
+        if (!title) return alert('Donnez un intitulé.');
+        const split = [...document.querySelectorAll('.fin-split-cb:checked')].map(c => c.value);
+        if (!split.length) return alert('Cochez au moins un membre pour la répartition.');
+        Object.assign(obj, { title, split, toId: '', toName: '', eventId: parseInt(document.getElementById('fin-event').value) || 0, category: document.getElementById('fin-category').value });
+      }
+      financesCol.doc(String(id)).set(obj).catch(err => { console.error(err); alert('Enregistrement impossible (droits ou réseau).'); });
+      logActivity(`a ${old ? 'modifié' : 'ajouté'} un mouvement : ${obj.title} (${fmtEur(cents)})`, 'fa-wallet');
+      closeModal('modal-finance');
+    }
+    function deleteFinance(id) {
+      if (!confirm('Supprimer ce mouvement ?')) return;
+      financesCol.doc(String(id)).delete().catch(err => { console.error(err); alert('Suppression impossible (droits ou réseau).'); });
+    }
+    function settleTransfer(fromId, toId, cents) {
+      if (!currentUser || !confirm(`Enregistrer que ${finName(fromId)} a remboursé ${fmtEur(cents)} à ${finName(toId)} ?`)) return;
+      const id = Date.now();
+      financesCol.doc(String(id)).set({
+        id, kind: 'transfer', title: 'Remboursement', cents, date: todayStr(), eventId: 0, category: '', split: [],
+        byId: fromId, byName: finName(fromId), toId, toName: finName(toId),
+        createdBy: currentUser.name, createdById: currentUser.docId
+      }).catch(err => { console.error(err); alert('Enregistrement impossible (droits ou réseau).'); });
+      logActivity(`a enregistré un remboursement de ${fmtEur(cents)}`, 'fa-wallet');
+    }
+    function csvCell(v) { return '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"'; }
+    function exportBudgetCSV() {
+      const list = [...filteredFinances()].sort((a, b) => String(a.date || '').localeCompare(String(b.date || '')));
+      if (!list.length) return alert('Aucun mouvement à exporter.');
+      const head = ['Date', 'Type', 'Intitulé', 'Catégorie', 'Montant (€)', 'Payé / encaissé par', 'Concerne', 'Événement'];
+      const rows = list.map(f => {
+        const ev = f.eventId ? eventsData.find(e => e.id === f.eventId) : null;
+        const kind = f.kind === 'expense' ? 'Dépense' : (f.kind === 'income' ? 'Recette' : 'Remboursement');
+        const concerns = f.kind === 'transfer' ? finName(f.toId, f.toName) : (f.split || []).map(u => finName(u)).join(' / ');
+        const amount = ((f.kind === 'expense' ? -1 : 1) * f.cents / 100).toFixed(2).replace('.', ',');
+        return [f.date, kind, f.title, f.category || '', amount, finName(f.byId, f.byName), concerns, ev ? ev.title : ''].map(csvCell).join(';');
+      });
+      downloadTextFile('eliyah-budget.csv', '\uFEFF' + [head.map(csvCell).join(';')].concat(rows).join('\r\n'), 'text/csv;charset=utf-8');
+    }
+
+    /* ================= MATÉRIEL : INVENTAIRE ET PRÊTS ================= */
+    const gearCol = db.collection('gear');
+    let gearData = [];
+    function gearOverdue(g) { return !!(g.loan && g.loan.due && g.loan.due < todayStr()); }
+    function canEditGear(g) { return !!currentUser && (g.createdById === currentUser.docId || g.ownerId === currentUser.docId || canManageContent()); }
+
+    function renderGear() {
+      const box = document.getElementById('gear-list');
+      if (!box) return;
+      const q = String((document.getElementById('gear-search') || {}).value || '').trim().toLowerCase();
+      const f = (document.getElementById('gear-filter') || {}).value || 'all';
+      const list = gearData.filter(g => {
+        if (f === 'available' && g.loan) return false;
+        if (f === 'out' && !g.loan) return false;
+        if (f === 'late' && !gearOverdue(g)) return false;
+        if (f === 'mine' && !(currentUser && g.ownerId === currentUser.docId)) return false;
+        if (!q) return true;
+        return [g.name, g.category, g.ownerName, g.notes, g.loan && g.loan.toName].join(' ').toLowerCase().includes(q);
+      }).sort((a, b) => String(a.name).localeCompare(String(b.name), 'fr'));
+      box.innerHTML = list.length ? list.map(g => {
+        const late = gearOverdue(g);
+        const loanLine = g.loan
+          ? `<div class="feed-time" style="${late ? 'color:#B91C1C; font-weight:700;' : 'color:#92400E;'}">${late ? '⚠️ En retard — ' : '📤 Prêté — '}${escapeHTML(g.loan.toName || '?')} depuis le ${new Date((g.loan.since || todayStr()) + 'T12:00').toLocaleDateString('fr-FR')}${g.loan.due ? ' • retour prévu le ' + new Date(g.loan.due + 'T12:00').toLocaleDateString('fr-FR') : ''}${g.loan.note ? ' • ' + escapeHTML(g.loan.note) : ''}</div>`
+          : '<div class="feed-time" style="color:#047857;">✅ Disponible</div>';
+        return `<div class="gear-card ${late ? 'late' : (g.loan ? 'out' : '')}">
+          <div style="min-width:0; flex:1;">
+            <div style="font-weight:800;">${escapeHTML(g.name)}${(g.qty || 1) > 1 ? ' <span class="status-pill status-todo">×' + (g.qty) + '</span>' : ''}</div>
+            <div class="feed-time">${escapeHTML(g.category || '')} • ${escapeHTML(g.ownerName || 'Le groupe')}${g.notes ? ' • ' + escapeHTML(g.notes) : ''}</div>
+            ${loanLine}
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            ${g.loan ? `<button class="btn btn-primary btn-sm" onclick="returnGear(${g.id})"><i class="fa-solid fa-rotate-left"></i> Rendu</button>` : `<button class="btn btn-secondary btn-sm" onclick="openLoanModal(${g.id})"><i class="fa-solid fa-hand-holding"></i> Prêter</button>`}
+            ${canEditGear(g) ? `<button class="btn btn-secondary btn-sm" onclick="openGearModal(${g.id})"><i class="fa-solid fa-pen"></i></button>` : ''}
+            ${(g.createdById === (currentUser && currentUser.docId) || canManageContent()) ? `<button class="btn btn-danger btn-sm" onclick="deleteGear(${g.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>
+        </div>`;
+      }).join('') : '<p style="font-size:13px; color:var(--text-muted);">Aucun matériel pour ce filtre. Ajoutez vos instruments, câbles et micros avec le bouton « Ajouter du matériel ».</p>';
+    }
+
+    function openGearModal(id) {
+      const g = id ? gearData.find(x => x.id === id) : null;
+      if (id && !g) return;
+      document.getElementById('gear-modal-title').textContent = g ? 'Modifier le matériel' : 'Ajouter du matériel';
+      document.getElementById('g-id').value = g ? g.id : '';
+      document.getElementById('g-name').value = g ? g.name : '';
+      document.getElementById('g-cat').value = g ? (g.category || 'Autre') : 'Instrument';
+      document.getElementById('g-qty').value = g ? (g.qty || 1) : 1;
+      document.getElementById('g-notes').value = g ? (g.notes || '') : '';
+      document.getElementById('g-owner').innerHTML = memberOptions(g ? g.ownerId : (currentUser ? currentUser.docId : ''), true);
+      openModal('modal-gear');
+    }
+    function saveGear() {
+      if (!currentUser) return;
+      const name = document.getElementById('g-name').value.trim();
+      if (!name) return alert('Donnez un nom au matériel.');
+      const existingId = parseInt(document.getElementById('g-id').value) || 0;
+      const old = existingId ? gearData.find(x => x.id === existingId) : null;
+      const ownerId = document.getElementById('g-owner').value;
+      const data = {
+        name, category: document.getElementById('g-cat').value,
+        qty: Math.max(1, parseInt(document.getElementById('g-qty').value) || 1),
+        ownerId: ownerId || '', ownerName: ownerId ? finName(ownerId) : 'Le groupe',
+        notes: document.getElementById('g-notes').value.trim()
+      };
+      if (old) {
+        gearCol.doc(String(old.id)).update(data).catch(err => { console.error(err); alert('Modification impossible (droits ou réseau).'); });
+      } else {
+        const id = Date.now();
+        gearCol.doc(String(id)).set(Object.assign({ id, loan: null, createdBy: currentUser.name, createdById: currentUser.docId }, data))
+          .catch(err => { console.error(err); alert('Ajout impossible (droits ou réseau).'); });
+        logActivity(`a ajouté « ${name} » au matériel`, 'fa-guitar');
+      }
+      closeModal('modal-gear');
+    }
+    function deleteGear(id) {
+      const g = gearData.find(x => x.id === id);
+      if (!g || !confirm('Supprimer « ' + g.name + ' » de l’inventaire ?')) return;
+      gearCol.doc(String(id)).delete().catch(err => { console.error(err); alert('Suppression impossible (droits ou réseau).'); });
+    }
+    function openLoanModal(id) {
+      const g = gearData.find(x => x.id === id);
+      if (!g) return;
+      document.getElementById('l-gear-id').value = id;
+      document.getElementById('loan-title').textContent = 'Prêter : ' + g.name;
+      document.getElementById('l-who').innerHTML = memberOptions(currentUser ? currentUser.docId : '', false) + '<option value="__ext">Une personne extérieure…</option>';
+      document.getElementById('l-ext').value = '';
+      document.getElementById('l-ext-row').style.display = 'none';
+      document.getElementById('l-since').value = todayStr();
+      document.getElementById('l-due').value = '';
+      document.getElementById('l-note').value = '';
+      openModal('modal-loan');
+    }
+    function onLoanWhoChange() {
+      document.getElementById('l-ext-row').style.display = document.getElementById('l-who').value === '__ext' ? '' : 'none';
+    }
+    function saveLoan() {
+      const id = parseInt(document.getElementById('l-gear-id').value);
+      const g = gearData.find(x => x.id === id);
+      if (!g) return;
+      const who = document.getElementById('l-who').value;
+      const ext = document.getElementById('l-ext').value.trim();
+      if (who === '__ext' && !ext) return alert('Indiquez le nom de la personne.');
+      const since = document.getElementById('l-since').value || todayStr();
+      const due = document.getElementById('l-due').value || '';
+      if (due && due < since) return alert('Le retour prévu doit être après le début du prêt.');
+      const loan = {
+        toId: who === '__ext' ? '' : who, toName: who === '__ext' ? ext : finName(who),
+        since, due, note: document.getElementById('l-note').value.trim()
+      };
+      gearCol.doc(String(id)).update({ loan }).catch(err => { console.error(err); alert('Prêt impossible (droits ou réseau).'); });
+      logActivity(`a prêté « ${g.name} » à ${loan.toName}`, 'fa-hand-holding');
+      closeModal('modal-loan');
+    }
+    function returnGear(id) {
+      const g = gearData.find(x => x.id === id);
+      if (!g || !g.loan || !confirm('Marquer « ' + g.name + ' » comme rendu ?')) return;
+      gearCol.doc(String(id)).update({ loan: null }).catch(err => { console.error(err); alert('Mise à jour impossible (droits ou réseau).'); });
+      logActivity(`a récupéré « ${g.name} » (rendu par ${g.loan.toName})`, 'fa-rotate-left');
     }
 
     function renderAll() {
@@ -4148,18 +4826,20 @@
           return `<button class="react-chip ${iMine ? 'mine' : ''}" title="${escapeHTML(names.join(', '))}" onclick="toggleReaction(${c.id}, '${k}')">${REACTIONS[k]} ${names.length}</button>`;
         }).join('');
         const actions = Object.keys(REACTIONS).map(k => `<button class="chat-act" onclick="toggleReaction(${c.id}, '${k}')" title="Réagir">${REACTIONS[k]}</button>`).join('')
-          + `<button class="chat-act" onclick="startReply(${c.id})" title="Répondre"><i class="fa-solid fa-reply"></i></button>`;
+          + `<button class="chat-act" onclick="startReply(${c.id})" title="Répondre"><i class="fa-solid fa-reply"></i></button>`
+          + `<button class="chat-act" onclick="togglePin(${c.id})" title="${c.pinned ? 'Désépingler' : 'Épingler'}"><i class="fa-solid fa-thumbtack"></i></button>`;
         return `
-        <div class="chat-bubble ${mine ? 'sent' : 'received'}">
-          <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${escapeHTML(c.sender)}${chatInstrumentIcon(c.sender)}</div>
+        <div class="chat-bubble ${mine ? 'sent' : 'received'} ${c.pinned ? 'pinned' : ''} ${(c.mentions || []).includes(currentUser.docId) ? 'mentioned' : ''}" data-mid="${c.id}">
+          <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${escapeHTML(c.sender)}${chatInstrumentIcon(c.sender)}${c.pinned ? ' 📌' : ''}</div>
           ${c.replyTo ? `<div class="chat-quote"><strong>${escapeHTML(c.replyTo.sender)}</strong><br>${escapeHTML(c.replyTo.text)}</div>` : ''}
-          <div>${escapeHTML(c.text)}</div>
+          <div>${highlightMentions(c.text)}</div>
           ${chips ? `<div class="chat-reactions">${chips}</div>` : ''}
           <div class="meta"><span>${escapeHTML(c.time)}</span><span class="chat-actions">${actions}</span></div>
         </div>`;
       }).join('');
       if (nearBottom || !chatRenderedOnce) box.scrollTop = box.scrollHeight;
       chatRenderedOnce = true;
+      renderPinnedBar();
     }
 
     let replyingTo = null;
@@ -4432,6 +5112,8 @@
       changes.filter(ch => ch.type === 'added').forEach(ch => {
         const m = ch.doc.data();
         if (m.sender === currentUser.name) return;
+        const mentionedMe = Array.isArray(m.mentions) && m.mentions.includes(currentUser.docId);
+        if (!clientPrefAllows(mentionedMe ? 'mentions' : 'chat')) return;
         try {
           new Notification('ELIYAH — ' + m.sender, { body: String(m.text || '').slice(0, 120), tag: 'eliyah-chat' });
         } catch (e) {}
@@ -4559,6 +5241,8 @@
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       };
       if (replyingTo) payload.replyTo = replyingTo;
+      const mentions = extractMentions(text);
+      if (mentions.length) payload.mentions = mentions;
       chatCol.doc(String(newId)).set(payload);
       input.value = '';
       cancelReply();
