@@ -8,6 +8,16 @@
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
+  <script>
+    // Applique le thème (clair / sombre) avant l'affichage pour éviter un flash blanc
+    (function () {
+      try {
+        var t = localStorage.getItem('eliyah_theme');
+        if (t !== 'dark' && t !== 'light') t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
   <title>ELIYAH — Gestion du Groupe & Suivi Production</title>
   
   <!-- Typography & FontAwesome Icons -->
@@ -27,7 +37,7 @@
       --bg-main: #F4F6F9;
       --bg-card: #FFFFFF;
       --sidebar-bg: #FFFFFF;
-      --border-color: #E2E8F0;
+      --border-color: var(--border-color);
       
       /* Colors inspired by ELIYAH logo & dynamic palette */
       --brand-red: #8B1E2D;
@@ -128,7 +138,7 @@
       position: relative;
     }
     .nav-item:hover {
-      background: #F1F5F9;
+      background: var(--surface-3);
       color: var(--text-dark);
     }
     .nav-item.active {
@@ -151,7 +161,7 @@
       border-radius: 12px;
     }
     .user-card {
-      background: #F8FAFC;
+      background: var(--surface-2);
       border: 1px solid var(--border-color);
       border-radius: var(--radius-md);
       padding: 12px;
@@ -258,7 +268,7 @@
       font-size: 14px;
     }
     .action-icon-btn:hover {
-      background: #E2E8F0;
+      background: var(--surface-4);
       color: var(--text-dark);
     }
     .action-icon-btn.logout:hover {
@@ -301,7 +311,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: white;
+      background: var(--bg-card);
       padding: 8px 16px;
       border-radius: 30px;
       box-shadow: var(--shadow-sm);
@@ -425,7 +435,7 @@
       align-items: flex-start;
       gap: 12px;
       padding: 12px;
-      background: #F8FAFC;
+      background: var(--surface-2);
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
       font-size: 13px;
@@ -448,7 +458,7 @@
       margin-top: 2px;
     }
     .chantier-card {
-      background: white;
+      background: var(--bg-card);
       border-radius: var(--radius-md);
       border: 1px solid var(--border-color);
       padding: 16px;
@@ -458,7 +468,7 @@
     }
     .chantier-card.urgent {
       border-left-color: #EF4444;
-      background: #FEF2F2;
+      background: var(--surface-danger);
     }
     .chantier-card.normal {
       border-left-color: #0284C7;
@@ -475,7 +485,7 @@
       color: var(--text-dark);
     }
     .data-card {
-      background: white;
+      background: var(--bg-card);
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-color);
       box-shadow: var(--shadow-sm);
@@ -490,7 +500,7 @@
       text-align: left;
     }
     th {
-      background: #F8FAFC;
+      background: var(--surface-2);
       color: var(--text-muted);
       font-size: 11px;
       font-weight: 700;
@@ -500,7 +510,7 @@
     }
     td {
       padding: 14px 18px;
-      border-bottom: 1px solid #F1F5F9;
+      border-bottom: 1px solid var(--surface-3);
       font-size: 13px;
       vertical-align: middle;
     }
@@ -508,7 +518,7 @@
       border-bottom: none;
     }
     tr:hover td {
-      background: #FAFAFA;
+      background: var(--surface-2);
     }
     .status-pill {
       display: inline-flex;
@@ -522,7 +532,7 @@
     }
     .status-done { background: #D1FAE5; color: #047857; }
     .status-progress { background: #FEF3C7; color: #B45309; }
-    .status-todo { background: #F1F5F9; color: #475569; }
+    .status-todo { background: var(--surface-3); color: var(--text-muted); }
     
     .btn {
       display: inline-flex;
@@ -545,11 +555,11 @@
       box-shadow: 0 4px 12px rgba(139, 30, 45, 0.3);
     }
     .btn-secondary {
-      background: #F1F5F9;
+      background: var(--surface-3);
       color: var(--text-dark);
     }
     .btn-secondary:hover {
-      background: #E2E8F0;
+      background: var(--surface-4);
     }
     .btn-danger {
       background: #FEE2E2;
@@ -572,7 +582,7 @@
       padding: 6px 14px;
       border-radius: 20px;
       border: 1px solid var(--border-color);
-      background: white;
+      background: var(--bg-card);
       font-size: 12px;
       font-weight: 600;
       color: var(--text-muted);
@@ -584,7 +594,7 @@
       border-color: var(--brand-red);
     }
     .chat-container {
-      background: white;
+      background: var(--bg-card);
       border-radius: var(--radius-lg);
       border: 1px solid var(--border-color);
       height: 500px;
@@ -608,7 +618,7 @@
       position: relative;
     }
     .chat-bubble.received {
-      background: #F1F5F9;
+      background: var(--surface-3);
       align-self: flex-start;
       border-bottom-left-radius: 4px;
     }
@@ -654,7 +664,7 @@
       display: flex;
     }
     .modal-box {
-      background: white;
+      background: var(--bg-card);
       padding: 26px;
       border-radius: var(--radius-lg);
       width: 100%;
@@ -733,7 +743,7 @@
       width: 36px;
       height: 36px;
       background: white;
-      color: var(--text-dark);
+      color: #0F172A;
       border-radius: 50%;
       display: flex;
       align-items: center;
@@ -797,7 +807,7 @@
     .chat-actions { display: flex; gap: 2px; opacity: .6; }
     .chat-actions:hover { opacity: 1; }
     .chat-act { background: none; border: none; cursor: pointer; font-size: 13px; padding: 0 3px; color: inherit; }
-    #chat-reply-bar { display: none; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 16px; background: #F1F5F9; border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); }
+    #chat-reply-bar { display: none; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 16px; background: var(--surface-3); border-top: 1px solid var(--border-color); font-size: 12px; color: var(--text-muted); }
 
     /* ================= MOBILE (TÉLÉPHONE) ================= */
     @media (max-width: 640px) {
@@ -961,7 +971,7 @@
     }
     .login-hint {
       display: none;
-      background: #ECFDF5;
+      background: var(--surface-ok);
       color: #047857;
       font-size: 12px;
       font-weight: 600;
@@ -985,7 +995,7 @@
     .upload-progress-wrap {
       display: none;
       height: 6px;
-      background: #E2E8F0;
+      background: var(--surface-4);
       border-radius: 10px;
       overflow: hidden;
       margin-top: 8px;
@@ -1023,13 +1033,13 @@
       #chantiers-new-badge { right: 22px; }
     }
     /* ===== Rétroplanning ===== */
-    .retro-chip { background: #F1F5F9; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-    .retro-scroll { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 14px; background: #fff; }
+    .retro-chip { background: var(--surface-3); padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+    .retro-scroll { overflow-x: auto; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-card); }
     .retro-grid { position: relative; --rl: 190px; }
-    .retro-row { display: flex; align-items: stretch; border-bottom: 1px solid #F1F5F9; }
-    .retro-label { position: sticky; left: 0; z-index: 3; width: var(--rl); min-width: var(--rl); flex: none; background: #fff; padding: 6px 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; border-right: 1px solid #E2E8F0; overflow: hidden; white-space: nowrap; cursor: pointer; }
-    .retro-label.group { background: #F8FAFC; font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: .05em; color: var(--text-muted); cursor: default; }
-    .retro-track { position: relative; flex: none; height: 34px; background-image: linear-gradient(to right, #F1F5F9 1px, transparent 1px); }
+    .retro-row { display: flex; align-items: stretch; border-bottom: 1px solid var(--surface-3); }
+    .retro-label { position: sticky; left: 0; z-index: 3; width: var(--rl); min-width: var(--rl); flex: none; background: var(--bg-card); padding: 6px 10px; font-size: 12px; font-weight: 600; display: flex; align-items: center; border-right: 1px solid var(--border-color); overflow: hidden; white-space: nowrap; cursor: pointer; }
+    .retro-label.group { background: var(--surface-2); font-weight: 800; text-transform: uppercase; font-size: 10px; letter-spacing: .05em; color: var(--text-muted); cursor: default; }
+    .retro-track { position: relative; flex: none; height: 34px; background-image: linear-gradient(to right, var(--surface-3) 1px, transparent 1px); }
     .retro-bar { position: absolute; top: 6px; height: 22px; border-radius: 7px; color: #fff; font-size: 10px; font-weight: 700; display: flex; align-items: center; justify-content: flex-end; padding: 0 6px; cursor: pointer; overflow: hidden; white-space: nowrap; box-shadow: 0 1px 3px rgba(0,0,0,.15); }
     .retro-overlay { position: absolute; top: 0; bottom: 0; left: var(--rl); right: 0; pointer-events: none; z-index: 2; }
     .retro-today, .retro-target { position: absolute; top: 0; bottom: 0; width: 2px; }
@@ -1040,22 +1050,22 @@
     .retro-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: middle; }
 
     /* ===== Séances & sondages ===== */
-    .poll-card { border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; margin-bottom: 14px; background: #fff; }
+    .poll-card { border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; margin-bottom: 14px; background: var(--bg-card); }
     .poll-head { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; align-items: flex-start; }
     .poll-banner { margin-top: 10px; padding: 8px 12px; border-radius: 10px; background: #FEF3C7; color: #92400E; font-size: 13px; }
     .poll-banner.all { background: #D1FAE5; color: #047857; }
-    .poll-slot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border: 1px solid #E2E8F0; border-radius: 12px; margin-top: 8px; }
-    .poll-slot.best { border-color: #10B981; background: #ECFDF5; }
-    .poll-slot.chosen { border-color: #8B1E2D; background: #FEF2F2; }
+    .poll-slot { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 12px; margin-top: 8px; }
+    .poll-slot.best { border-color: #10B981; background: var(--surface-ok); }
+    .poll-slot.chosen { border-color: #8B1E2D; background: var(--surface-danger); }
     .poll-stats { display: flex; gap: 6px; font-size: 12px; font-weight: 700; margin-top: 4px; }
-    .poll-stats span { padding: 2px 8px; border-radius: 10px; background: #F1F5F9; }
-    .vote-btn { border: 1px solid #E2E8F0; background: #fff; border-radius: 10px; padding: 6px 10px; font-size: 14px; cursor: pointer; }
+    .poll-stats span { padding: 2px 8px; border-radius: 10px; background: var(--surface-3); }
+    .vote-btn { border: 1px solid var(--border-color); background: var(--bg-card); border-radius: 10px; padding: 6px 10px; font-size: 14px; cursor: pointer; }
     .vote-btn.on-yes { background: #D1FAE5; border-color: #10B981; }
     .vote-btn.on-maybe { background: #FEF3C7; border-color: #F59E0B; }
     .vote-btn.on-no { background: #FEE2E2; border-color: #EF4444; }
     .vote-btn:disabled { opacity: .5; cursor: default; }
     .poll-matrix { font-size: 12px; border-collapse: collapse; width: 100%; margin-top: 8px; }
-    .poll-matrix th, .poll-matrix td { padding: 6px 8px; border-bottom: 1px solid #F1F5F9; white-space: nowrap; text-align: left; }
+    .poll-matrix th, .poll-matrix td { padding: 6px 8px; border-bottom: 1px solid var(--surface-3); white-space: nowrap; text-align: left; }
     .poll-slot-row { display: flex; gap: 6px; margin-bottom: 6px; }
     .poll-slot-row input { flex: 1; }
     @media (max-width: 640px) {
@@ -1066,45 +1076,87 @@
     .rsvp-row .vote-btn { font-size: 12px; padding: 4px 8px; }
     .rsvp-stats { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
     .modal-box.wide { max-width: 640px; }
-    .cm-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
+    .cm-item { display: flex; gap: 10px; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid var(--surface-3); }
     .cm-item.done { opacity: .5; }
     .cm-item.done .cm-text { text-decoration: line-through; }
     .cm-time { flex: none; border: none; background: #FEE2E2; color: #8B1E2D; font-weight: 800; font-size: 12px; padding: 4px 10px; border-radius: 10px; cursor: pointer; }
-    .cm-gen { flex: none; background: #F1F5F9; color: var(--text-muted); font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 10px; }
+    .cm-gen { flex: none; background: var(--surface-3); color: var(--text-muted); font-weight: 700; font-size: 11px; padding: 4px 10px; border-radius: 10px; }
     .cm-text { font-size: 13px; line-height: 1.4; word-break: break-word; }
     .drag-handle { cursor: grab; color: #94A3B8; padding: 6px 4px; touch-action: none; user-select: none; }
-    .setlist-row.dragging { background: #FEF2F2; box-shadow: 0 6px 18px rgba(0,0,0,.15); border-radius: 12px; position: relative; z-index: 5; }
+    .setlist-row.dragging { background: var(--surface-danger); box-shadow: 0 6px 18px rgba(0,0,0,.15); border-radius: 12px; position: relative; z-index: 5; }
     .chk-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; }
     .chk-item.done span { text-decoration: line-through; opacity: .55; }
-    .att-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #F1F5F9; }
-    .mini-bar { height: 6px; background: #E2E8F0; border-radius: 6px; overflow: hidden; flex: 1; }
+    .att-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 6px 0; font-size: 13px; border-bottom: 1px solid var(--surface-3); }
+    .mini-bar { height: 6px; background: var(--surface-4); border-radius: 6px; overflow: hidden; flex: 1; }
     .mini-bar > div { height: 100%; background: #10B981; }
     .mention { background: #DBEAFE; color: #1D4ED8; border-radius: 6px; padding: 0 4px; font-weight: 700; }
     .mention.me { background: #FDE68A; color: #92400E; }
     .chat-bubble.pinned { outline: 2px solid #F59E0B; }
     .chat-bubble.mentioned { box-shadow: 0 0 0 2px #2563EB; }
-    .mention-box { border-top: 1px solid var(--border-color); background: #fff; max-height: 170px; overflow-y: auto; }
-    .mention-opt { padding: 9px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid #F1F5F9; }
-    .mention-opt:hover { background: #F1F5F9; }
-    #chat-pinned { display: none; padding: 8px 14px; background: #FFFBEB; border-bottom: 1px solid #FDE68A; font-size: 12px; }
+    .mention-box { border-top: 1px solid var(--border-color); background: var(--bg-card); max-height: 170px; overflow-y: auto; }
+    .mention-opt { padding: 9px 14px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--surface-3); }
+    .mention-opt:hover { background: var(--surface-3); }
+    #chat-pinned { display: none; padding: 8px 14px; background: var(--surface-warn); border-bottom: 1px solid #FDE68A; font-size: 12px; }
     .pin-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; cursor: pointer; }
     .pin-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .fin-cards { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 6px; }
-    .fin-card { flex: 1; min-width: 130px; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 14px; background: #fff; }
+    .fin-card { flex: 1; min-width: 130px; border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 14px; background: var(--bg-card); }
     .fin-card small { display: block; color: var(--text-muted); font-weight: 700; font-size: 11px; text-transform: uppercase; }
     .fin-card strong { font-size: 20px; }
     .amt-pos { color: #047857; } .amt-neg { color: #B91C1C; }
-    .fin-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #F1F5F9; }
+    .fin-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--surface-3); }
     .fin-row .fin-main { flex: 1; min-width: 0; }
-    .gear-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 14px; margin-bottom: 8px; background: #fff; }
-    .gear-card.late { border-color: #EF4444; background: #FEF2F2; }
-    .gear-card.out { border-color: #F59E0B; background: #FFFBEB; }
+    .gear-card { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 14px; margin-bottom: 8px; background: var(--bg-card); }
+    .gear-card.late { border-color: #EF4444; background: var(--surface-danger); }
+    .gear-card.out { border-color: #F59E0B; background: var(--surface-warn); }
+    /* ===== Variables de surface + mode sombre ===== */
+    :root {
+      --surface-2: #F8FAFC; --surface-3: #F1F5F9; --surface-4: #E2E8F0;
+      --surface-warn: #FFFBEB; --surface-danger: #FEF2F2; --surface-ok: #ECFDF5;
+    }
+    :root[data-theme="dark"] {
+      color-scheme: dark;
+      --bg-main: #0B1220; --bg-card: #121C31; --sidebar-bg: #0E1627; --border-color: #25324D;
+      --brand-red: #D6354A; --brand-red-light: #3A141B; --brand-red-hover: #B82A3C;
+      --text-dark: #E6EAF2; --text-muted: #9AA7BD; --text-light: #6B7A93;
+      --surface-2: #17233C; --surface-3: #1C2A47; --surface-4: #2B3B5E;
+      --surface-warn: #2B2410; --surface-danger: #35151B; --surface-ok: #10261E;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,.4); --shadow-md: 0 4px 12px -2px rgba(0,0,0,.5); --shadow-lg: 0 12px 28px -5px rgba(0,0,0,.6);
+    }
+    [data-theme="dark"] input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),
+    [data-theme="dark"] select, [data-theme="dark"] textarea { background: var(--surface-2); color: var(--text-dark); border-color: var(--border-color); }
+    [data-theme="dark"] ::placeholder { color: var(--text-light); }
+    [data-theme="dark"] .modal-overlay { background: rgba(0, 0, 0, 0.65); }
+    [data-theme="dark"] .vote-btn { color: var(--text-dark); }
+    [data-theme="dark"] .vote-btn.on-yes { background: #0F3D2E; border-color: #10B981; }
+    [data-theme="dark"] .vote-btn.on-maybe { background: #3D2F0B; border-color: #F59E0B; }
+    [data-theme="dark"] .vote-btn.on-no { background: #4A1820; border-color: #EF4444; }
+    [data-theme="dark"] .mention { background: #1E3A8A; color: #DBEAFE; }
+    [data-theme="dark"] .mention.me { background: #78350F; color: #FDE68A; }
+    [data-theme="dark"] .toast { border: 1px solid var(--border-color); }
+    .theme-toggle { min-width: 36px; }
+    .login-theme { position: fixed; top: 14px; right: 14px; z-index: 600; }
+
+    /* ===== Recherche globale ===== */
+    .search-input { flex: 1; padding: 10px 12px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; font-family: inherit; background: var(--bg-card); color: var(--text-dark); }
+    .sr-group { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .05em; color: var(--text-muted); margin: 12px 0 4px; }
+    .sr-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 10px; cursor: pointer; }
+    .sr-item:hover, .sr-item.active { background: var(--surface-3); }
+    .sr-icon { width: 30px; height: 30px; flex: none; border-radius: 9px; background: var(--brand-red-light); color: var(--brand-red); display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .sr-main { min-width: 0; flex: 1; }
+    .sr-title { font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .sr-sub { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ===== Version de test ===== */
+    #env-banner { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 10000; background: #F59E0B; color: #111; font-weight: 800; font-size: 11px; padding: 3px 14px; border-radius: 20px; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
+    @media (max-width: 640px) { .hide-sm { display: none; } }
 </style>
 </head>
 <body>
 
   <!-- ================= LOGIN SCREEN ================= -->
   <div id="login-screen">
+    <button class="btn btn-secondary btn-sm theme-toggle login-theme" onclick="toggleTheme()" title="Mode sombre"><i class="fa-solid fa-moon"></i></button>
     <div class="login-card">
       <div class="brand-logo">
         <div class="logo-text">ΣLIY<span>Δ</span>H.</div>
@@ -1222,6 +1274,8 @@
         <p id="view-subtitle">Suivi global de l'avancement des productions & travaux du groupe.</p>
       </div>
       <div class="header-actions">
+        <button class="btn btn-secondary" onclick="openGlobalSearch()" title="Rechercher (Ctrl ou Cmd + K)"><i class="fa-solid fa-magnifying-glass"></i> <span class="hide-sm">Rechercher</span></button>
+        <button class="btn btn-secondary theme-toggle" onclick="toggleTheme()" title="Mode sombre"><i class="fa-solid fa-moon"></i></button>
         <button class="btn btn-secondary" onclick="exportSummaryPDF()"><i class="fa-solid fa-print"></i> Synthèse / Rapport</button>
         <div class="group-tag">
           <i class="fa-solid fa-users" style="color: var(--brand-red);"></i>
@@ -1458,7 +1512,7 @@
             <p>Tous les chantiers placés à rebours à partir de votre objectif.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-            <select id="retro-target" onchange="onRetroTargetChange()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:#fff; max-width:260px;"></select>
+            <select id="retro-target" onchange="onRetroTargetChange()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:var(--bg-card); max-width:260px;"></select>
             <button class="btn btn-primary btn-sm" id="retro-mode-gantt" onclick="setRetroMode('gantt')">Frise</button>
             <button class="btn btn-secondary btn-sm" id="retro-mode-list" onclick="setRetroMode('list')">Par semaine</button>
             <button class="btn btn-secondary btn-sm" onclick="openModal('modal-add-chantier')"><i class="fa-solid fa-plus"></i> Chantier</button>
@@ -1490,7 +1544,7 @@
             <p>Dépenses, recettes par concert et qui doit quoi.</p>
           </div>
           <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-            <select id="fin-filter-event" onchange="renderBudget()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:#fff; max-width:240px;"></select>
+            <select id="fin-filter-event" onchange="renderBudget()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:var(--bg-card); max-width:240px;"></select>
             <button class="btn btn-secondary btn-sm" onclick="exportBudgetCSV()"><i class="fa-solid fa-file-csv"></i> CSV</button>
             <button class="btn btn-primary btn-sm" onclick="openFinanceModal()"><i class="fa-solid fa-plus"></i> Ajouter</button>
           </div>
@@ -1520,7 +1574,7 @@
         </div>
         <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
           <input type="text" id="gear-search" placeholder="Rechercher…" oninput="renderGear()" style="flex:1; min-width:160px; padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px;">
-          <select id="gear-filter" onchange="renderGear()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:#fff;">
+          <select id="gear-filter" onchange="renderGear()" style="padding:8px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:var(--bg-card);">
             <option value="all">Tout</option>
             <option value="available">Disponible</option>
             <option value="out">Prêté</option>
@@ -1610,6 +1664,19 @@
           <input type="file" id="backup-file-input" accept="application/json,.json" style="display:none;" onchange="restoreBackupFromFile(this)">
         </div>
         <p id="backup-status" style="font-size:12px; color:var(--text-muted); margin-top:10px;"></p>
+      </div>
+
+      <div class="chart-box" id="test-tools-card" style="margin-top: 20px; display:none; border: 2px dashed #F59E0B;">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-flask" style="color:#F59E0B;"></i> Outils de la version de test</h3>
+            <p>Visibles uniquement dans la version de test : jamais sur les vraies données du groupe.</p>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="seedDemoData()"><i class="fa-solid fa-wand-magic-sparkles"></i> Générer des données de démo</button>
+          <button class="btn btn-danger" onclick="resetTestData()"><i class="fa-solid fa-broom"></i> Vider les données de test</button>
+        </div>
       </div>
     </section>
   </main>
@@ -2031,6 +2098,17 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-search" onclick="if (event.target === this) closeGlobalSearch()">
+    <div class="modal-box wide" style="padding:16px;">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <i class="fa-solid fa-magnifying-glass" style="color:var(--text-muted);"></i>
+        <input type="text" id="search-input" class="search-input" placeholder="Rechercher un morceau, un chantier, un message, un objet…" autocomplete="off" oninput="runGlobalSearch()" onkeydown="onSearchKey(event)">
+        <button class="btn btn-secondary btn-sm" onclick="closeGlobalSearch()">Esc</button>
+      </div>
+      <div id="search-results" style="margin-top:12px; max-height:60vh; overflow-y:auto;"></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-add-doc">
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Importer un Document / Média</h3>
@@ -2183,7 +2261,7 @@
 
   <script>
     /* ================= FIREBASE SETUP ================= */
-    const firebaseConfig = {
+    const FIREBASE_CONFIG_PROD = {
       apiKey: "AIzaSyAbcgDTWjOjog1pRDU9N5tnevD1MvfAG5Q",
       authDomain: "live-hub-2026.firebaseapp.com",
       projectId: "live-hub-2026",
@@ -2192,6 +2270,26 @@
       appId: "1:56918867184:web:7667d75288d14a565e9635",
       measurementId: "G-MNHRC2MSBH"
     };
+
+    // Projet Firebase de TEST (facultatif) : colle ici la configuration web de ton projet de test.
+    // La page placée dans le dossier /test/ du site (ou ouverte avec ?env=test) utilise ce projet
+    // et jamais les vraies données du groupe.
+    const FIREBASE_CONFIG_TEST = null;
+    const IS_TEST_PATH = /\/test(\/|$)/.test(location.pathname) || /[?&]env=test\b/.test(location.search);
+    const IS_TEST_ENV = IS_TEST_PATH && !!FIREBASE_CONFIG_TEST;
+    const firebaseConfig = IS_TEST_ENV ? FIREBASE_CONFIG_TEST : FIREBASE_CONFIG_PROD;
+    if (IS_TEST_PATH && !FIREBASE_CONFIG_TEST) {
+      // Sécurité : sans projet de test configuré, on refuse de tourner sur les vraies données.
+      document.body.innerHTML = '<div style="font-family:sans-serif; max-width:520px; margin:12vh auto; padding:24px; text-align:center;"><h2>Version de test non configurée</h2><p style="margin-top:12px; color:#64748B;">Cette page est la version de test, mais aucun projet Firebase de test n\'est renseigné (FIREBASE_CONFIG_TEST). Par sécurité, elle ne se connecte pas aux vraies données du groupe.</p></div>';
+      throw new Error('Version de test non configurée');
+    }
+    if (IS_TEST_ENV) {
+      document.title = '[TEST] ' + document.title;
+      const envBanner = document.createElement('div');
+      envBanner.id = 'env-banner';
+      envBanner.textContent = 'VERSION DE TEST — projet ' + firebaseConfig.projectId;
+      document.body.appendChild(envBanner);
+    }
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -2830,7 +2928,7 @@
           ${late ? `<span class="retro-chip" style="background:#FEE2E2; color:#991B1B;">⚠️ ${late} en retard</span>` : ''}
           ${undated.length ? `<span class="retro-chip" style="background:#FEF3C7; color:#92400E;">🗓️ ${undated.length} sans échéance</span>` : ''}
         </div>
-        <div style="height:8px; background:#E2E8F0; border-radius:6px; overflow:hidden; margin-bottom:14px;"><div style="height:100%; width:${pct}%; background:#10B981;"></div></div>`;
+        <div style="height:8px; background:var(--surface-4); border-radius:6px; overflow:hidden; margin-bottom:14px;"><div style="height:100%; width:${pct}%; background:#10B981;"></div></div>`;
 
       const undatedHTML = undated.length
         ? `<div class="brief-title" style="margin-top:16px;">Sans échéance (${undated.length}) — à placer dans le rétroplanning</div>` +
@@ -2929,7 +3027,7 @@
       RETRO_GROUPS.forEach(([key, label]) => {
         const list = dated.filter(i => catOf(i.c) === key).sort((a, b) => a.due - b.due);
         if (!list.length) return;
-        rowsHTML += `<div class="retro-row"><div class="retro-label group">${label}</div><div class="retro-track" style="width:${trackW}px; background:#F8FAFC;"></div></div>`;
+        rowsHTML += `<div class="retro-row"><div class="retro-label group">${label}</div><div class="retro-track" style="width:${trackW}px; background:var(--surface-2);"></div></div>`;
         list.forEach(i => {
           const st = chantierStatus(i.c, i.due, today, target);
           let a = idx(i.start), b = idx(i.due);
@@ -4259,6 +4357,223 @@
       logActivity(`a récupéré « ${g.name} » (rendu par ${g.loan.toName})`, 'fa-rotate-left');
     }
 
+
+    /* ================= MODE SOMBRE ================= */
+    const THEME_KEY = 'eliyah_theme';
+    function storedTheme() {
+      try { const t = localStorage.getItem(THEME_KEY); return (t === 'dark' || t === 'light') ? t : null; } catch (e) { return null; }
+    }
+    function systemTheme() { return (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light'; }
+    function currentTheme() { return document.documentElement.getAttribute('data-theme') || storedTheme() || systemTheme(); }
+    function applyChartTheme() {
+      if (typeof Chart === 'undefined') return;
+      const dark = currentTheme() === 'dark';
+      Chart.defaults.color = dark ? '#9AA7BD' : '#64748B';
+      Chart.defaults.borderColor = dark ? 'rgba(148,163,184,.18)' : 'rgba(0,0,0,.1)';
+      if (Chart.defaults.elements && Chart.defaults.elements.arc) Chart.defaults.elements.arc.borderColor = dark ? '#121C31' : '#ffffff';
+      [progressChartInstance, doughnutChartInstance].forEach(ch => { if (ch) { try { ch.update(); } catch (e) {} } });
+    }
+    function applyTheme(t) {
+      document.documentElement.setAttribute('data-theme', t);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', t === 'dark' ? '#0B1220' : '#8B1E2D');
+      document.querySelectorAll('.theme-toggle').forEach(b => {
+        b.innerHTML = t === 'dark' ? '<i class="fa-solid fa-sun"></i>' : '<i class="fa-solid fa-moon"></i>';
+        b.title = t === 'dark' ? 'Passer en mode clair' : 'Passer en mode sombre';
+      });
+      applyChartTheme();
+    }
+    function toggleTheme() {
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      try { localStorage.setItem(THEME_KEY, next); } catch (e) {}
+      applyTheme(next);
+    }
+    applyTheme(currentTheme());
+    if (window.matchMedia) {
+      const mq = matchMedia('(prefers-color-scheme: dark)');
+      const onSys = e => { if (!storedTheme()) applyTheme(e.matches ? 'dark' : 'light'); };
+      if (mq.addEventListener) mq.addEventListener('change', onSys); else if (mq.addListener) mq.addListener(onSys);
+    }
+
+    /* ================= RECHERCHE GLOBALE ================= */
+    let searchResults = [];
+    let searchActive = 0;
+    function normText(t) {
+      return String(t == null ? '' : t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+    }
+    function buildSearchIndex() {
+      const idx = [];
+      const add = (type, icon, title, sub, hay, go) => idx.push({ type, icon, title: String(title || ''), sub: String(sub || ''), hay: hay || title, go });
+      songsData.forEach(s => {
+        add('Morceaux', 'fa-music', s.title, [s.key, s.bpm ? s.bpm + ' BPM' : '', s.status].filter(Boolean).join(' • '),
+          [s.title, s.key, s.status, s.tuning, s.gear, s.stageNotes].join(' '), () => switchTab('morceaux', null));
+        Object.values(s.comments || {}).forEach(c => add('Commentaires de mix', 'fa-comment-dots', c.text,
+          s.title + (c.t !== null && c.t !== undefined ? ' • ' + fmtTime(c.t) : '') + ' • ' + (c.author || ''),
+          [c.text, s.title, c.author].join(' '), () => { switchTab('morceaux', null); openSongComments(s.id); }));
+      });
+      chantiersData.forEach(c => add('Chantiers', 'fa-list-check', c.title, [c.assign, c.dueDate ? 'échéance ' + c.dueDate : '', c.done ? 'terminé' : ''].filter(Boolean).join(' • '),
+        [c.title, c.assign, c.category, Object.values(c.items || {}).map(i => i.text).join(' ')].join(' '),
+        () => { switchTab('chantiers', null); setTimeout(() => openChantierDetail(c.id), 60); }));
+      eventsData.forEach(e => add('Événements', 'fa-calendar-day', e.title, [e.dateISO ? formatEventDate(e.dateISO) : e.date, e.location].filter(Boolean).join(' • '),
+        [e.title, e.location, e.date].join(' '), () => switchTab('agenda', null)));
+      pollsData.forEach(p => add('Séances (sondages)', 'fa-calendar-check', p.title, [p.location, p.status === 'closed' ? 'validée' : 'ouverte'].filter(Boolean).join(' • '),
+        [p.title, p.location, p.notes].join(' '), () => switchTab('planning', null)));
+      documentsData.forEach(d => add('Documents', 'fa-folder-open', d.title, d.desc || '', [d.title, d.desc].join(' '), () => switchTab('docs', null)));
+      chatData.slice(-400).forEach(c => add('Messages', 'fa-comments', c.text, (c.sender || '') + (c.time ? ' • ' + c.time : ''),
+        [c.text, c.sender].join(' '), () => { switchTab('chat', null); setTimeout(() => scrollToMessage(c.id), 200); }));
+      gearData.forEach(g => add('Matériel', 'fa-guitar', g.name, [g.category, g.ownerName, g.loan ? 'prêté à ' + g.loan.toName : 'disponible'].filter(Boolean).join(' • '),
+        [g.name, g.category, g.ownerName, g.notes, g.loan && g.loan.toName].join(' '), () => switchTab('gear', null)));
+      financesData.forEach(f => add('Budget', 'fa-wallet', f.title, fmtEur(f.cents) + (f.date ? ' • ' + f.date : ''),
+        [f.title, f.category, f.byName].join(' '), () => switchTab('budget', null)));
+      usersData.forEach(u => add('Membres', 'fa-user', memberName(u), [u.email, getInstrumentMeta(u.instrument).label].filter(Boolean).join(' • '),
+        [memberName(u), u.email, u.instrument].join(' '), () => switchTab(currentUser && currentUser.role === 'admin' ? 'admin' : 'dashboard', null)));
+      return idx;
+    }
+    const SEARCH_ORDER = ['Morceaux', 'Commentaires de mix', 'Chantiers', 'Événements', 'Séances (sondages)', 'Documents', 'Messages', 'Matériel', 'Budget', 'Membres'];
+
+    function openGlobalSearch() {
+      if (!currentUser) return;
+      openModal('modal-search');
+      const input = document.getElementById('search-input');
+      input.value = '';
+      runGlobalSearch();
+      setTimeout(() => input.focus(), 50);
+    }
+    function closeGlobalSearch() { closeModal('modal-search'); }
+
+    function runGlobalSearch() {
+      const box = document.getElementById('search-results');
+      const q = normText(document.getElementById('search-input').value).trim();
+      searchResults = []; searchActive = 0;
+      if (!q) {
+        box.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Tapez pour chercher dans les morceaux, chantiers, événements, messages, documents, matériel, budget et membres. Raccourci : Ctrl ou Cmd + K.</p>';
+        return;
+      }
+      const tokens = q.split(/\s+/);
+      const hits = buildSearchIndex().filter(it => {
+        const h = normText(it.hay);
+        return tokens.every(t => h.includes(t));
+      }).map(it => {
+        const t = normText(it.title);
+        return Object.assign({}, it, { score: t.startsWith(tokens[0]) ? 0 : (t.includes(tokens[0]) ? 1 : 2) });
+      });
+      let html = '';
+      SEARCH_ORDER.forEach(type => {
+        const group = hits.filter(h => h.type === type).sort((a, b) => a.score - b.score).slice(0, 5);
+        const total = hits.filter(h => h.type === type).length;
+        if (!group.length) return;
+        html += `<div class="sr-group">${escapeHTML(type)} (${total})</div>`;
+        group.forEach(h => {
+          const i = searchResults.push(h) - 1;
+          html += `<div class="sr-item ${i === 0 ? 'active' : ''}" data-i="${i}" onclick="runSearchResult(${i})">
+            <span class="sr-icon"><i class="fa-solid ${h.icon}"></i></span>
+            <span class="sr-main"><div class="sr-title">${escapeHTML(h.title)}</div><div class="sr-sub">${escapeHTML(h.sub)}</div></span>
+          </div>`;
+        });
+      });
+      box.innerHTML = html || '<p style="font-size:13px; color:var(--text-muted);">Aucun résultat.</p>';
+    }
+    function runSearchResult(i) {
+      const r = searchResults[i];
+      if (!r) return;
+      closeGlobalSearch();
+      r.go();
+    }
+    function onSearchKey(e) {
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (!searchResults.length) return;
+        searchActive = (searchActive + (e.key === 'ArrowDown' ? 1 : -1) + searchResults.length) % searchResults.length;
+        document.querySelectorAll('#search-results .sr-item').forEach(el => el.classList.toggle('active', Number(el.dataset.i) === searchActive));
+        const el = document.querySelector('#search-results .sr-item.active');
+        if (el) el.scrollIntoView({ block: 'nearest' });
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        runSearchResult(searchActive);
+      }
+    }
+    document.addEventListener('keydown', e => {
+      if ((e.metaKey || e.ctrlKey) && String(e.key).toLowerCase() === 'k') {
+        if (currentUser) { e.preventDefault(); openGlobalSearch(); }
+      } else if (e.key === 'Escape' && isViewModalActive('modal-search')) {
+        closeGlobalSearch();
+      }
+    });
+
+    /* ================= OUTILS DE LA VERSION DE TEST ================= */
+    if (IS_TEST_ENV) {
+      const card = document.getElementById('test-tools-card');
+      if (card) card.style.display = 'block';
+    }
+
+    async function seedDemoData() {
+      if (!IS_TEST_ENV || !currentUser || currentUser.role !== 'admin') return alert('Disponible uniquement dans la version de test, pour un administrateur.');
+      if (!confirm('Ajouter des données de démonstration (morceaux, chantiers, événements, sondage, budget, matériel, chat) ?')) return;
+      try {
+        const p = n => String(n).padStart(2, '0');
+        const day = n => { const d = new Date(); d.setDate(d.getDate() + n); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
+        const base = Date.now();
+        let k = 0;
+        const nid = () => base + (k++);
+        const batch = db.batch();
+        const put = (col, obj) => batch.set(db.collection(col).doc(String(obj.id)), obj);
+        const me = { id: currentUser.docId, name: currentUser.name };
+        const everyone = usersData.length ? usersData.map(u => u.docId) : [me.id];
+
+        DEFAULT_SONGS.forEach(sg => put('songs', Object.assign({}, sg)));
+        [
+          ['Valider le master des 4 premiers titres', 'hebdo', 'urgent', 'technique', 3, 'Démo'],
+          ['Shooting photo pour la pochette', 'mensuel', 'normal', 'communication', 12, 'Équipe visuel'],
+          ['Dossier de presse', 'mensuel', 'normal', 'communication', 20, me.name],
+          ['Raccord des claviers pour le live', 'hebdo', 'urgent', 'logistique', 6, me.name]
+        ].forEach(([title, type, urgent, category, due, assign]) => put('chantiers', {
+          id: nid(), title, type, urgent, category, startDate: '', dueDate: day(due), assign, done: false, createdBy: me.name
+        }));
+        [['Répétition générale', 8, '19:30', 'Studio test'], ['Concert de lancement', 24, '21:00', 'Salle de démonstration'], ['Festival d’été', 60, '17:00', 'Plein air']]
+          .forEach(([title, due, hour, location]) => {
+            const dateISO = day(due) + 'T' + hour;
+            put('events', { id: nid(), title, date: formatEventDate(dateISO), dateISO, location, createdBy: me.name });
+          });
+        put('polls', {
+          id: nid(), title: 'Répétition avant le concert', location: 'Studio test', notes: 'Prévoir 3 h', createdBy: me.name, createdById: me.id,
+          status: 'open', chosenSlotId: '', eventId: 0,
+          slots: [4, 5, 7].map((n, i) => ({ id: newSlotId(i), iso: day(n) + 'T19:00' })), votes: {}
+        });
+        put('finances', { id: nid(), kind: 'expense', title: 'Location du studio', cents: 12000, date: day(-3), eventId: 0, category: 'Location salle / studio', byId: me.id, byName: me.name, toId: '', toName: '', split: everyone, createdBy: me.name, createdById: me.id });
+        put('finances', { id: nid(), kind: 'income', title: 'Cachet de la soirée', cents: 40000, date: day(-1), eventId: 0, category: 'Cachet', byId: me.id, byName: me.name, toId: '', toName: '', split: everyone, createdBy: me.name, createdById: me.id });
+        put('gear', { id: nid(), name: 'Guitare Strat', category: 'Instrument', qty: 1, ownerId: me.id, ownerName: me.name, notes: '', loan: null, createdBy: me.name, createdById: me.id });
+        put('gear', { id: nid(), name: 'Câble jack 6 m', category: 'Câble', qty: 4, ownerId: '', ownerName: 'Le groupe', notes: '', loan: { toId: '', toName: 'Un ami', since: day(-10), due: day(-2), note: '' }, createdBy: me.name, createdById: me.id });
+        put('gear', { id: nid(), name: 'Micro SM58', category: 'Micro', qty: 2, ownerId: '', ownerName: 'Le groupe', notes: 'Avec pinces', loan: null, createdBy: me.name, createdById: me.id });
+        ['Salut tout le monde, voici la version de test !', 'On valide la date de la répétition ?', 'N’oubliez pas de répondre au sondage.']
+          .forEach((text, i) => put('chat', { id: nid(), sender: me.name, text, time: '10:0' + i }));
+        await batch.commit();
+        alert('Données de démonstration ajoutées.');
+      } catch (err) {
+        console.error(err);
+        alert('Impossible de générer les données (droits ou réseau).');
+      }
+    }
+
+    async function resetTestData() {
+      if (!IS_TEST_ENV || !currentUser || currentUser.role !== 'admin') return alert('Disponible uniquement dans la version de test, pour un administrateur.');
+      if (prompt('Cette action supprime toutes les données de TEST (sauf les membres). Tapez SUPPRIMER pour confirmer.') !== 'SUPPRIMER') return;
+      try {
+        for (const name of ['songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'finances', 'gear']) {
+          const snap = await db.collection(name).get();
+          let batch = db.batch(), n = 0;
+          for (const d of snap.docs) {
+            batch.delete(d.ref);
+            if (++n >= 400) { await batch.commit(); batch = db.batch(); n = 0; }
+          }
+          if (n) await batch.commit();
+        }
+        alert('Données de test supprimées.');
+      } catch (err) {
+        console.error(err);
+        alert('Suppression impossible (droits ou réseau).');
+      }
+    }
+
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
@@ -4448,7 +4763,7 @@
           <td><span class="status-pill ${s.voix === '3/3 Posées' ? 'status-done' : 'status-progress'}">${escapeHTML(s.voix)}</span></td>
           <td>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <div style="height:8px; background:#E2E8F0; width:90px; border-radius:10px; overflow:hidden;">
+              <div style="height:8px; background:var(--surface-4); width:90px; border-radius:10px; overflow:hidden;">
                 <div style="height:100%; width:${s.mixPct}%; background:${s.mixPct === 100 ? '#059669' : 'var(--brand-red)'}; transition: width 0.3s;"></div>
               </div>
               <span style="font-size: 12px; font-weight: 800;">${s.mixPct}%</span>
@@ -4735,7 +5050,7 @@
       const totalSec = items.reduce((acc, s) => acc + parseDurationSec(s.duration), 0);
 
       const summary = `
-        <div class="feed-item" style="background:#F8FAFC; border-radius:12px; padding:10px 14px; margin-bottom:8px;">
+        <div class="feed-item" style="background:var(--surface-2); border-radius:12px; padding:10px 14px; margin-bottom:8px;">
           <i class="fa-solid fa-hourglass-half" style="color:var(--brand-red);"></i>
           <div><strong>Durée totale : ${formatTotalDuration(totalSec)}</strong>
           <div class="feed-time">${items.length} titre${items.length > 1 ? 's' : ''} dans la setlist</div></div>
@@ -4922,6 +5237,7 @@
 
     async function registerPushToken() {
       try {
+        if (IS_TEST_ENV) return false; // pas de push serveur dans la version de test
         if (!currentUser || !('serviceWorker' in navigator) || !firebase.messaging || !firebase.messaging.isSupported()) return false;
         if (!VAPID_KEY || VAPID_KEY.startsWith('COLLE_')) { console.warn('Clé VAPID non renseignée : push serveur désactivé.'); return false; }
         const reg = await navigator.serviceWorker.register('firebase-messaging-sw.js');
@@ -4949,6 +5265,7 @@
     }
 
     function scheduleNotifPrompt() {
+      if (IS_TEST_ENV) return;
       if (!notifSupported() || Notification.permission !== 'default') return;
       let dismissed = null;
       try { dismissed = localStorage.getItem('eliyah_notif_prompt'); } catch (e) {}
@@ -5261,7 +5578,7 @@
               <p style="font-size:11px; color:var(--text-muted); margin-top:2px;">${escapeHTML(d.desc)}</p>
             </div>
           </div>
-          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:12px; border-top:1px solid #F1F5F9; padding-top:10px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-top:12px; border-top:1px solid var(--surface-3); padding-top:10px;">
             ${d.fileUrl
               ? `<a href="${escapeHTML(d.fileUrl)}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm"><i class="fa-solid fa-download"></i> Télécharger</a>`
               : `<span style="font-size:11px; color:var(--text-light);"><i class="fa-solid fa-triangle-exclamation"></i> Fichier indisponible</span>`}
