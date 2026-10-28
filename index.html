@@ -1150,6 +1150,15 @@
     /* ===== Version de test ===== */
     #env-banner { position: fixed; top: 6px; left: 50%; transform: translateX(-50%); z-index: 10000; background: #F59E0B; color: #111; font-weight: 800; font-size: 11px; padding: 3px 14px; border-radius: 20px; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,.25); }
     @media (max-width: 640px) { .hide-sm { display: none; } }
+    .studio-card { border: 1px solid var(--border-color); border-radius: 14px; padding: 12px 14px; margin: 8px 0; background: var(--bg-card); }
+    .studio-card.done { border-left: 4px solid #10B981; }
+    .studio-card.wip { border-left: 4px solid #F59E0B; }
+    .studio-chip { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; background: var(--surface-3); margin: 2px 4px 2px 0; }
+    .studio-folder { border: 1px solid var(--border-color); border-radius: 14px; padding: 10px 14px; margin-bottom: 10px; background: var(--bg-card); }
+    .studio-folder > summary { cursor: pointer; font-weight: 800; font-size: 14px; }
+    .tr-card { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 14px; margin-bottom: 8px; background: var(--bg-card); }
+    .tr-card.expired { opacity: .55; }
+    .tr-card.soon { border-color: #EF4444; }
 </style>
 </head>
 <body>
@@ -1228,6 +1237,15 @@
         <li class="nav-item" onclick="switchTab('gear', this)">
           <i class="fa-solid fa-guitar"></i>
           <span>Matériel</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('studio', this)">
+          <i class="fa-solid fa-compact-disc"></i>
+          <span>Studio</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('transfers', this)">
+          <i class="fa-solid fa-inbox"></i>
+          <span>Réceptions</span>
+          <span class="nav-badge" id="transfers-pending-badge" style="display:none;" title="Liens à télécharger">0</span>
         </li>
         <li class="nav-item" onclick="switchTab('chat', this)">
           <i class="fa-solid fa-comments"></i>
@@ -1583,6 +1601,62 @@
           </select>
         </div>
         <div id="gear-list"></div>
+      </div>
+    </section>
+
+    <section id="view-studio" class="view-content">
+      <div class="chart-box">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-compact-disc" style="color: var(--brand-red);"></i> Studio — projets et pistes</h3>
+            <p>Chaque membre dépose ses enregistrements dans son dossier ; tous peuvent les récupérer et continuer à travailler.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openStudioModal()"><i class="fa-solid fa-cloud-arrow-up"></i> Déposer</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:12px;">
+          <button id="studio-tab-song" class="btn btn-primary btn-sm" onclick="setStudioTab('song')">Par morceau</button>
+          <button id="studio-tab-member" class="btn btn-secondary btn-sm" onclick="setStudioTab('member')">Par membre</button>
+          <button id="studio-tab-mine" class="btn btn-secondary btn-sm" onclick="setStudioTab('mine')">Mes dépôts</button>
+          <select id="studio-filter-kind" onchange="renderStudio()" style="padding:7px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:var(--bg-card);">
+            <option value="all">Tous les types</option>
+            <option value="claviers">Claviers</option><option value="voix">Voix</option><option value="guitare">Guitare</option>
+            <option value="basse">Basse</option><option value="batterie">Batterie</option><option value="stems">Stems</option>
+            <option value="projet">Projet Ableton</option><option value="mix">Mix</option><option value="autre">Autre</option>
+          </select>
+          <label style="font-size:12px; display:flex; gap:6px; align-items:center;"><input type="checkbox" id="studio-filter-done" onchange="renderStudio()"> Terminés seulement</label>
+        </div>
+        <div id="studio-container"></div>
+      </div>
+      <div class="chart-box" style="margin-top:16px;">
+        <div class="brief-title" style="margin-top:0;">Bien déposer un projet Ableton Live</div>
+        <ol style="font-size:13px; color:var(--text-muted); padding-left:18px; line-height:1.6;">
+          <li>Dans Ableton : <strong>Fichier &gt; Collect All and Save</strong>, pour que tous les samples soient copiés dans le dossier du projet.</li>
+          <li>Compresse le dossier du projet (clic droit &gt; Compresser). Tu peux d’abord retirer le dossier <em>Backup</em> pour alléger.</li>
+          <li>Dépose le .zip avec le type « Projet Ableton Live », ou donne un lien si le fichier est très gros.</li>
+          <li>Ableton ne fusionne pas les modifications : un seul membre travaille sur un projet à la fois. Marque ton dépôt « Terminé » quand tu as fini, les autres repartent de ta dernière version.</li>
+          <li>Pour les stems, exporte-les tous depuis le <strong>début du morceau</strong>, au même format, pour qu’ils restent alignés.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="view-transfers" class="view-content">
+      <div class="chart-box">
+        <div class="box-header">
+          <div class="box-title">
+            <h3><i class="fa-solid fa-inbox" style="color:#2563EB;"></i> Réceptions — liens à télécharger</h3>
+            <p>SwissTransfer, WeTransfer, Drive… Déposez le lien, chacun coche quand il a téléchargé.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openTransferModal()"><i class="fa-solid fa-plus"></i> Ajouter un lien</button>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:12px;">
+          <select id="transfers-filter" onchange="renderTransfers()" style="padding:7px 10px; border:1px solid var(--border-color); border-radius:10px; font-family:inherit; font-size:13px; background:var(--bg-card);">
+            <option value="pending">À télécharger</option>
+            <option value="all">Tous</option>
+            <option value="expired">Expirés</option>
+          </select>
+        </div>
+        <div id="transfers-container"></div>
+        <p style="font-size:12px; color:var(--text-muted); margin-top:10px;">Ces liens expirent : la durée dépend du service et de l’offre. Pour garder un fichier longtemps, déposez-le plutôt dans le Studio.</p>
       </div>
     </section>
 
@@ -2018,7 +2092,9 @@
       <label class="chk-item"><input type="checkbox" id="np-chantiers" style="width:17px; height:17px;"> <span>Nouveaux chantiers</span></label>
       <label class="chk-item"><input type="checkbox" id="np-events" style="width:17px; height:17px;"> <span>Nouveaux événements</span></label>
       <label class="chk-item"><input type="checkbox" id="np-polls" style="width:17px; height:17px;"> <span>Sondages de séances</span></label>
-      <label class="chk-item"><input type="checkbox" id="np-reminders" style="width:17px; height:17px;"> <span>Rappels (chantiers, séances, veille d’événement, prêts en retard)</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-studio" style="width:17px; height:17px;"> <span>Dépôts du Studio (pistes terminées, projets)</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-transfers" style="width:17px; height:17px;"> <span>Nouveaux liens à télécharger</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-reminders" style="width:17px; height:17px;"> <span>Rappels (chantiers, séances, veille d’événement, prêts en retard, liens qui expirent)</span></label>
       <div class="brief-title" style="margin-top:16px;">Mode silencieux</div>
       <label class="chk-item"><input type="checkbox" id="np-quiet-on" style="width:17px; height:17px;"> <span>Ne pas me notifier la nuit</span></label>
       <div style="display:flex; gap:8px; align-items:center; font-size:13px; margin-top:4px;">
@@ -2106,6 +2182,53 @@
         <button class="btn btn-secondary btn-sm" onclick="closeGlobalSearch()">Esc</button>
       </div>
       <div id="search-results" style="margin-top:12px; max-height:60vh; overflow-y:auto;"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-studio">
+    <div class="modal-box wide">
+      <h3 style="font-weight: 800;">Déposer dans mon dossier</h3>
+      <div class="form-group" style="margin-top:14px;"><label>Morceau</label><select id="st-song" onchange="updateStudioVersionHint()"></select></div>
+      <div class="form-group"><label>Type</label>
+        <select id="st-kind" onchange="updateStudioVersionHint()">
+          <option value="claviers">🎹 Claviers</option><option value="voix">🎤 Voix</option><option value="guitare">🎸 Guitare</option>
+          <option value="basse">Basse</option><option value="batterie">Batterie</option><option value="stems">Stems (pistes séparées)</option>
+          <option value="projet">Projet Ableton Live (.zip)</option><option value="mix">Mix</option><option value="autre">Autre</option>
+        </select>
+        <div id="st-version-hint" style="font-size:12px; color:var(--text-muted); margin-top:4px;"></div>
+      </div>
+      <div class="form-group"><label>Note (optionnel)</label><input type="text" id="st-note" placeholder="Ex : prises claviers du refrain, nappes + piano"></div>
+      <div class="form-group"><label>Chantier concerné (optionnel)</label><select id="st-chantier" onchange="onStudioChantierChange()"></select></div>
+      <label id="st-chantier-done-row" class="chk-item" style="display:none;"><input type="checkbox" id="st-chantier-done" style="width:17px; height:17px;"> <span>Marquer ce chantier comme terminé</span></label>
+      <div class="form-group"><label>Fichiers (plusieurs possibles, 2 Go maximum chacun)</label><input type="file" id="st-files" multiple></div>
+      <div class="form-group"><label>OU un lien (Drive, Dropbox…) pour un très gros projet</label><input type="text" id="st-link" placeholder="https://…"></div>
+      <p id="st-test-hint" style="display:none; font-size:12px; color:#92400E;">Version de test : l’envoi de fichiers est désactivé (pas de stockage), seul le dépôt par lien fonctionne.</p>
+      <label class="chk-item"><input type="checkbox" id="st-done" style="width:17px; height:17px;"> <span><strong>Terminé</strong> : prêt à être repris par les autres membres (ils sont prévenus)</span></label>
+      <div id="st-progress-label" style="font-size:12px; color:var(--text-muted); margin-top:8px;"></div>
+      <div class="upload-progress-wrap" id="st-progress"><div class="upload-progress-bar" id="st-progress-bar"></div></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-studio')">Annuler</button>
+        <button class="btn btn-primary" id="st-save-btn" onclick="saveStudioDeposit()">Déposer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-transfer">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;" id="tr-modal-title">Ajouter un lien</h3>
+      <input type="hidden" id="tr-id">
+      <div class="form-group" style="margin-top:14px;"><label>Titre</label><input type="text" id="tr-title" placeholder="Ex : stems du concert, projet de Wilson"></div>
+      <div class="form-group"><label>Lien</label><input type="text" id="tr-url" placeholder="https://www.swisstransfer.com/d/…"></div>
+      <div class="form-group"><label>Date d’expiration du lien (recommandé)</label><input type="date" id="tr-expires"></div>
+      <div class="form-group"><label>Destinataires</label>
+        <select id="tr-to-mode" onchange="onTransferToModeChange()"><option value="all">Tout le groupe</option><option value="some">Certains membres</option></select>
+      </div>
+      <div id="tr-to-list" style="display:none;"></div>
+      <div class="form-group"><label>Note (optionnel)</label><input type="text" id="tr-note" placeholder="Ex : à récupérer avant la répétition de samedi"></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-transfer')">Annuler</button>
+        <button class="btn btn-primary" onclick="saveTransfer()">Enregistrer</button>
+      </div>
     </div>
   </div>
 
@@ -2274,7 +2397,14 @@
     // Projet Firebase de TEST (facultatif) : colle ici la configuration web de ton projet de test.
     // La page placée dans le dossier /test/ du site (ou ouverte avec ?env=test) utilise ce projet
     // et jamais les vraies données du groupe.
-    const FIREBASE_CONFIG_TEST = null;
+    const FIREBASE_CONFIG_TEST = {
+      apiKey: "AIzaSyD6irP93BrFBT6UknBMqQya5E86KFt1Mio",
+      authDomain: "live-hub-test.firebaseapp.com",
+      projectId: "live-hub-test",
+      storageBucket: "live-hub-test.firebasestorage.app",
+      messagingSenderId: "782153085314",
+      appId: "1:782153085314:web:6e8929941a3b69e83c9f9b"
+    };
     const IS_TEST_PATH = /\/test(\/|$)/.test(location.pathname) || /[?&]env=test\b/.test(location.search);
     const IS_TEST_ENV = IS_TEST_PATH && !!FIREBASE_CONFIG_TEST;
     const firebaseConfig = IS_TEST_ENV ? FIREBASE_CONFIG_TEST : FIREBASE_CONFIG_PROD;
@@ -2678,6 +2808,17 @@
         renderGear();
       }, err => console.error('gear', err));
 
+      studioCol.onSnapshot(snap => {
+        studioData = snap.docs.map(d => d.data()).sort((a, b) => (a.createdAt || a.id) - (b.createdAt || b.id));
+        renderStudio();
+        renderChantiersList();
+      }, err => console.error('studio', err));
+
+      transfersCol.onSnapshot(snap => {
+        transfersData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
+        renderTransfers();
+      }, err => console.error('transfers', err));
+
       chatCol.onSnapshot(snap => {
         chatData = snap.docs.map(d => d.data()).sort((a, b) => a.id - b.id);
         renderChat();
@@ -2696,7 +2837,7 @@
         updateFormationTag();
         if (!window.__usersFirstRender) { window.__usersFirstRender = true; renderChat(); }
         renderPresenceUI();
-        if (usersData.length !== lastUsersLenForPolls) { lastUsersLenForPolls = usersData.length; renderPolls(); renderBudget(); renderGear(); }
+        if (usersData.length !== lastUsersLenForPolls) { lastUsersLenForPolls = usersData.length; renderPolls(); renderBudget(); renderGear(); renderStudio(); renderTransfers(); }
         const myProfile = usersData.find(u => u.email === currentUser.email);
         if (myProfile && myProfile.role !== currentUser.role) {
           currentUser.role = myProfile.role;
@@ -2803,6 +2944,8 @@
         'retro': { title: 'Rétroplanning', sub: 'Les chantiers planifiés à rebours à partir de votre prochain objectif.' },
         'planning': { title: 'Planning & Séances', sub: 'Sondages de disponibilités pour caler les séances d’entraînement.' },
         'budget': { title: 'Budget & Cachets', sub: 'Dépenses, recettes par concert et remboursements entre membres.' },
+        'studio': { title: 'Studio', sub: 'Projets Ableton Live et pistes de chaque membre, à reprendre et continuer.' },
+        'transfers': { title: 'Réceptions', sub: 'Liens SwissTransfer, WeTransfer et autres à télécharger.' },
         'gear': { title: 'Matériel du groupe', sub: 'Inventaire et prêts d’instruments, câbles et micros.' },
         'admin': { title: 'Espace Administration', sub: 'Gestion des autorisations et droits de suppression.' }
       };
@@ -2813,6 +2956,8 @@
       if (viewId === 'planning') renderPolls();
       if (viewId === 'budget') renderBudget();
       if (viewId === 'gear') renderGear();
+      if (viewId === 'studio') renderStudio();
+      if (viewId === 'transfers') renderTransfers();
 
       if (titles[viewId]) {
         document.getElementById('view-title').textContent = titles[viewId].title;
@@ -3492,7 +3637,7 @@
     }
 
     /* ================= SAUVEGARDE / RESTAURATION (admin) ================= */
-    const BACKUP_COLLECTIONS = ['users', 'songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'finances', 'gear', 'appState'];
+    const BACKUP_COLLECTIONS = ['users', 'songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'finances', 'gear', 'studio', 'transfers', 'appState'];
     function backupStatus(msg) { const el = document.getElementById('backup-status'); if (el) el.textContent = msg; }
 
     async function exportBackup() {
@@ -3771,13 +3916,15 @@
       const items = checklistItems(c);
       const att = attachmentsOf(c);
       const song = c.songId ? songsData.find(x => x.id === c.songId) : null;
-      if (!items.length && !att.length && !song) return '';
+      const deps = studioData.filter(d => d.chantierId === c.id);
+      if (!items.length && !att.length && !song && !deps.length) return '';
       const done = items.filter(i => i.done).length;
       const pct = items.length ? Math.round(done / items.length * 100) : 0;
       return `<div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-top:8px; font-size:12px; color:var(--text-muted);">
         ${items.length ? `<span style="display:flex; align-items:center; gap:6px; min-width:140px;"><span class="mini-bar"><div style="width:${pct}%;"></div></span><strong>${done}/${items.length}</strong></span>` : ''}
         ${song ? `<span>🎵 ${escapeHTML(song.title)}</span>` : ''}
         ${att.length ? `<span>📎 ${att.length}</span>` : ''}
+        ${deps.length ? `<span>🎛️ ${deps.length} dépôt${deps.length > 1 ? 's' : ''} Studio</span>` : ''}
       </div>`;
     }
 
@@ -3959,7 +4106,7 @@
     }
 
     /* ================= PRÉFÉRENCES DE NOTIFICATIONS ================= */
-    const NOTIF_KEYS = ['chat', 'mentions', 'chantiers', 'events', 'polls', 'reminders'];
+    const NOTIF_KEYS = ['chat', 'mentions', 'chantiers', 'events', 'polls', 'studio', 'transfers', 'reminders'];
     function myPrefs() {
       const me = currentUser ? usersData.find(u => u.docId === currentUser.docId) : null;
       return (me && me.notifPrefs) || {};
@@ -4425,11 +4572,15 @@
         [g.name, g.category, g.ownerName, g.notes, g.loan && g.loan.toName].join(' '), () => switchTab('gear', null)));
       financesData.forEach(f => add('Budget', 'fa-wallet', f.title, fmtEur(f.cents) + (f.date ? ' • ' + f.date : ''),
         [f.title, f.category, f.byName].join(' '), () => switchTab('budget', null)));
+      studioData.forEach(d => add('Studio', 'fa-compact-disc', kindMeta(d.kind).label + (d.songTitle ? ' — ' + d.songTitle : ''), (d.ownerName || '') + ' • v' + (d.version || 1) + (d.status === 'done' ? ' • terminé' : ' • en cours'),
+        [d.kind, d.songTitle, d.ownerName, d.note, (d.files || []).map(f => f.name).join(' ')].join(' '), () => switchTab('studio', null)));
+      transfersData.forEach(t => add('Réceptions', 'fa-inbox', t.title, transferService(t.url) + (t.expires ? ' • expire le ' + t.expires : ''),
+        [t.title, t.note, t.createdBy, transferService(t.url)].join(' '), () => switchTab('transfers', null)));
       usersData.forEach(u => add('Membres', 'fa-user', memberName(u), [u.email, getInstrumentMeta(u.instrument).label].filter(Boolean).join(' • '),
         [memberName(u), u.email, u.instrument].join(' '), () => switchTab(currentUser && currentUser.role === 'admin' ? 'admin' : 'dashboard', null)));
       return idx;
     }
-    const SEARCH_ORDER = ['Morceaux', 'Commentaires de mix', 'Chantiers', 'Événements', 'Séances (sondages)', 'Documents', 'Messages', 'Matériel', 'Budget', 'Membres'];
+    const SEARCH_ORDER = ['Morceaux', 'Commentaires de mix', 'Chantiers', 'Événements', 'Séances (sondages)', 'Documents', 'Messages', 'Matériel', 'Budget', 'Studio', 'Réceptions', 'Membres'];
 
     function openGlobalSearch() {
       if (!currentUser) return;
@@ -4544,6 +4695,10 @@
         put('gear', { id: nid(), name: 'Guitare Strat', category: 'Instrument', qty: 1, ownerId: me.id, ownerName: me.name, notes: '', loan: null, createdBy: me.name, createdById: me.id });
         put('gear', { id: nid(), name: 'Câble jack 6 m', category: 'Câble', qty: 4, ownerId: '', ownerName: 'Le groupe', notes: '', loan: { toId: '', toName: 'Un ami', since: day(-10), due: day(-2), note: '' }, createdBy: me.name, createdById: me.id });
         put('gear', { id: nid(), name: 'Micro SM58', category: 'Micro', qty: 2, ownerId: '', ownerName: 'Le groupe', notes: 'Avec pinces', loan: null, createdBy: me.name, createdById: me.id });
+        put('studio', { id: nid(), ownerId: me.id, ownerName: me.name, songId: 1, songTitle: 'Prelude / Eil', kind: 'claviers', version: 1, note: 'Nappes + piano (démo par lien)', status: 'done', files: [], link: 'https://example.com/claviers-demo', chantierId: 0, createdAt: base });
+        put('studio', { id: nid(), ownerId: me.id, ownerName: me.name, songId: 2, songTitle: 'Lumière dans l’Ombre', kind: 'projet', version: 2, note: 'Projet Ableton complet (démo)', status: 'wip', files: [], link: 'https://example.com/projet-demo', chantierId: 0, createdAt: base + 1 });
+        put('transfers', { id: nid(), title: 'Stems du dernier concert', url: 'https://www.swisstransfer.com/d/demo', service: 'SwissTransfer', expires: day(5), to: 'all', note: 'À récupérer avant samedi', createdBy: me.name, createdById: me.id, done: {} });
+        put('transfers', { id: nid(), title: 'Ancienne maquette', url: 'https://wetransfer.com/downloads/demo', service: 'WeTransfer', expires: day(-2), to: 'all', note: '', createdBy: me.name, createdById: me.id, done: {} });
         ['Salut tout le monde, voici la version de test !', 'On valide la date de la répétition ?', 'N’oubliez pas de répondre au sondage.']
           .forEach((text, i) => put('chat', { id: nid(), sender: me.name, text, time: '10:0' + i }));
         await batch.commit();
@@ -4558,7 +4713,7 @@
       if (!IS_TEST_ENV || !currentUser || currentUser.role !== 'admin') return alert('Disponible uniquement dans la version de test, pour un administrateur.');
       if (prompt('Cette action supprime toutes les données de TEST (sauf les membres). Tapez SUPPRIMER pour confirmer.') !== 'SUPPRIMER') return;
       try {
-        for (const name of ['songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'finances', 'gear']) {
+        for (const name of ['songs', 'chantiers', 'events', 'documents', 'chat', 'activities', 'polls', 'finances', 'gear', 'studio', 'transfers']) {
           const snap = await db.collection(name).get();
           let batch = db.batch(), n = 0;
           for (const d of snap.docs) {
@@ -4574,6 +4729,359 @@
       }
     }
 
+
+    /* ================= STUDIO : DOSSIERS DES MEMBRES, PROJETS ET PISTES ================= */
+    const studioCol = db.collection('studio');
+    const transfersCol = db.collection('transfers');
+    let studioData = [];
+    let transfersData = [];
+    let studioTab = 'song';
+    const studioOpen = new Set();
+    const STUDIO_KINDS = {
+      claviers: ['fa-keyboard', 'Claviers'], voix: ['fa-microphone', 'Voix'], guitare: ['fa-guitar', 'Guitare'],
+      basse: ['fa-wave-square', 'Basse'], batterie: ['fa-drum', 'Batterie'], stems: ['fa-layer-group', 'Stems'],
+      projet: ['fa-diagram-project', 'Projet Ableton Live'], mix: ['fa-sliders', 'Mix'], autre: ['fa-file-audio', 'Autre']
+    };
+    function kindMeta(k) { const m = STUDIO_KINDS[k] || STUDIO_KINDS.autre; return { icon: m[0], label: m[1] }; }
+    function fmtSize(b) {
+      if (!b) return '';
+      if (b < 1048576) return Math.max(1, Math.round(b / 1024)) + ' Ko';
+      if (b < 1073741824) return (b / 1048576).toFixed(1) + ' Mo';
+      return (b / 1073741824).toFixed(2) + ' Go';
+    }
+    function isAudioName(n) { return /\.(wav|mp3|aif|aiff|flac|m4a|ogg)$/i.test(String(n || '')); }
+    function nextStudioVersion(ownerId, songId, kind) {
+      const same = studioData.filter(d => d.ownerId === ownerId && (d.songId || 0) === (songId || 0) && d.kind === kind);
+      return same.reduce((m, d) => Math.max(m, d.version || 1), 0) + 1;
+    }
+    function isLatestDeposit(d) {
+      return !studioData.some(x => x.ownerId === d.ownerId && (x.songId || 0) === (d.songId || 0) && x.kind === d.kind && (x.version || 1) > (d.version || 1));
+    }
+    function setStudioTab(t) {
+      studioTab = t;
+      ['song', 'member', 'mine'].forEach(k => {
+        const b = document.getElementById('studio-tab-' + k);
+        if (b) b.className = 'btn btn-sm ' + (k === t ? 'btn-primary' : 'btn-secondary');
+      });
+      renderStudio();
+    }
+    function studioFiltered() {
+      const kEl = document.getElementById('studio-filter-kind');
+      const dEl = document.getElementById('studio-filter-done');
+      const k = kEl ? kEl.value : 'all';
+      const doneOnly = dEl ? dEl.checked : false;
+      return studioData.filter(d => (k === 'all' || d.kind === k) && (!doneOnly || d.status === 'done'))
+        .sort((a, b) => (b.createdAt || b.id) - (a.createdAt || a.id));
+    }
+
+    function depositCardHTML(d) {
+      const meta = kindMeta(d.kind);
+      const mine = !!currentUser && d.ownerId === currentUser.docId;
+      const done = d.status === 'done';
+      const files = (d.files || []).map((f, i) => `
+        <div class="att-item">
+          <span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><i class="fa-solid fa-file-audio"></i> ${escapeHTML(f.name)}</span>
+          <span style="display:flex; gap:8px; align-items:center; flex:none;"><span class="feed-time">${fmtSize(f.size)}</span>
+            <a class="btn btn-secondary btn-sm" href="${escapeHTML(f.url)}" target="_blank" rel="noopener" title="Télécharger"><i class="fa-solid fa-download"></i></a></span>
+        </div>${isAudioName(f.name) && i < 8 ? `<audio controls preload="none" src="${escapeHTML(f.url)}" style="width:100%; height:34px; margin:2px 0 6px;"></audio>` : ''}`).join('');
+      const link = d.link ? `<div class="att-item"><a href="${escapeHTML(d.link)}" target="_blank" rel="noopener" style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"><i class="fa-solid fa-link"></i> ${escapeHTML(d.link)}</a></div>` : '';
+      return `
+        <div class="studio-card ${done ? 'done' : 'wip'}">
+          <div style="display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; align-items:flex-start;">
+            <div style="min-width:0;">
+              <div style="font-weight:800;"><i class="fa-solid ${meta.icon}"></i> ${escapeHTML(meta.label)}${d.songTitle ? ' — ' + escapeHTML(d.songTitle) : ''}
+                <span class="brief-tag ${done ? 'mine' : 'due'}">${done ? 'Terminé' : 'En cours'}</span>
+                <span class="brief-tag new">v${d.version || 1}</span>${isLatestDeposit(d) ? ' <span class="brief-tag urgent" style="background:#E0F2FE; color:#075985;">Dernière version</span>' : ''}</div>
+              <div class="feed-time">${escapeHTML(d.ownerName || '?')} • ${d.createdAt ? new Date(d.createdAt).toLocaleDateString('fr-FR') : ''}${d.chantierTitle ? ' • 🔧 ' + escapeHTML(d.chantierTitle) : ''}</div>
+              ${d.note ? `<div style="font-size:13px; margin-top:4px;">${escapeHTML(d.note)}</div>` : ''}
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+              ${mine ? `<button class="btn btn-secondary btn-sm" onclick="toggleStudioDone(${d.id})">${done ? 'Rouvrir' : '<i class="fa-solid fa-check"></i> Marquer terminé'}</button>` : ''}
+              ${(mine || canManageContent()) ? `<button class="btn btn-danger btn-sm" title="Supprimer" onclick="deleteStudioDeposit(${d.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+            </div>
+          </div>
+          <div style="margin-top:6px;">${files}${link}</div>
+        </div>`;
+    }
+
+    function studioFolderHTML(key, summaryHTML, cardsHTML) {
+      return `<details class="studio-folder" ${studioOpen.has(key) ? 'open' : ''} ontoggle="toggleStudioOpen('${key}', this.open)">
+        <summary>${summaryHTML}</summary>${cardsHTML}</details>`;
+    }
+    function toggleStudioOpen(key, isOpen) { if (isOpen) studioOpen.add(key); else studioOpen.delete(key); }
+
+    function renderStudio() {
+      const box = document.getElementById('studio-container');
+      if (!box) return;
+      const list = studioFiltered();
+      if (!studioData.length) {
+        box.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Aucun dépôt pour le moment. Enregistre tes pistes, puis clique sur « Déposer » : elles arriveront dans ton dossier et seront visibles par tout le groupe.</p>';
+        return;
+      }
+      if (!list.length) { box.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">Aucun dépôt pour ce filtre.</p>'; return; }
+
+      if (studioTab === 'mine') {
+        const mine = list.filter(d => currentUser && d.ownerId === currentUser.docId);
+        box.innerHTML = mine.length ? mine.map(depositCardHTML).join('') : '<p style="font-size:13px; color:var(--text-muted);">Tu n’as encore rien déposé.</p>';
+        return;
+      }
+
+      if (studioTab === 'member') {
+        const ids = [...new Set(studioData.map(d => d.ownerId))];
+        const members = ids.map(id => ({ id, name: finName(id, (studioData.find(d => d.ownerId === id) || {}).ownerName) }))
+          .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+        box.innerHTML = members.map(m => {
+          const all = studioData.filter(d => d.ownerId === m.id);
+          const shown = list.filter(d => d.ownerId === m.id);
+          if (!shown.length) return '';
+          const doneN = all.filter(d => d.status === 'done').length;
+          return studioFolderHTML('m' + m.id, `📁 Dossier de ${escapeHTML(m.name)} — ${all.length} dépôt${all.length > 1 ? 's' : ''} (${doneN} terminé${doneN > 1 ? 's' : ''})`, shown.map(depositCardHTML).join(''));
+        }).join('') || '<p style="font-size:13px; color:var(--text-muted);">Aucun dépôt pour ce filtre.</p>';
+        return;
+      }
+
+      // Par morceau
+      const groups = {};
+      list.forEach(d => { const k = d.songId ? String(d.songId) : 'none'; (groups[k] = groups[k] || []).push(d); });
+      const order = Object.keys(groups).sort((a, b) => {
+        if (a === 'none') return 1; if (b === 'none') return -1;
+        const ta = (songsData.find(s => String(s.id) === a) || {}).title || '';
+        const tb = (songsData.find(s => String(s.id) === b) || {}).title || '';
+        return ta.localeCompare(tb, 'fr');
+      });
+      box.innerHTML = order.map(k => {
+        const items = groups[k];
+        const song = songsData.find(s => String(s.id) === k);
+        const title = k === 'none' ? 'Sans morceau' : (song ? song.title : (items[0].songTitle || 'Morceau'));
+        const chips = items.filter(d => d.status === 'done' && isLatestDeposit(d)).map(d => {
+          const m = kindMeta(d.kind);
+          return `<span class="studio-chip"><i class="fa-solid ${m.icon}"></i> ${escapeHTML(m.label)} · ${escapeHTML(d.ownerName || '?')} v${d.version || 1}</span>`;
+        }).join('');
+        return studioFolderHTML('s' + k, `🎵 ${escapeHTML(title)} <span class="feed-time" style="font-weight:400;">(${items.length} dépôt${items.length > 1 ? 's' : ''})</span><div style="margin-top:6px; font-weight:400;">${chips || '<span class="feed-time">Rien de terminé pour l’instant</span>'}</div>`, items.map(depositCardHTML).join(''));
+      }).join('');
+    }
+
+    /* ----- Déposer ----- */
+    function openStudioModal() {
+      if (!currentUser) return;
+      document.getElementById('st-song').innerHTML = '<option value="">— Aucun morceau —</option>' + songsData.map(sg => `<option value="${sg.id}">${escapeHTML(sg.title)}</option>`).join('');
+      document.getElementById('st-kind').value = 'claviers';
+      document.getElementById('st-note').value = '';
+      document.getElementById('st-link').value = '';
+      document.getElementById('st-files').value = '';
+      document.getElementById('st-done').checked = false;
+      const open = chantiersData.filter(c => !c.done).sort((a, b) => (isChantierMine(b) ? 1 : 0) - (isChantierMine(a) ? 1 : 0));
+      document.getElementById('st-chantier').innerHTML = '<option value="">— Aucun —</option>' + open.map(c => `<option value="${c.id}">${isChantierMine(c) ? '⭐ ' : ''}${escapeHTML(c.title)}</option>`).join('');
+      document.getElementById('st-chantier-done').checked = false;
+      document.getElementById('st-chantier-done-row').style.display = 'none';
+      document.getElementById('st-progress-label').textContent = '';
+      document.getElementById('st-test-hint').style.display = IS_TEST_ENV ? 'block' : 'none';
+      updateStudioVersionHint();
+      openModal('modal-studio');
+    }
+    function updateStudioVersionHint() {
+      const songId = parseInt(document.getElementById('st-song').value) || 0;
+      const kind = document.getElementById('st-kind').value;
+      const v = nextStudioVersion(currentUser.docId, songId, kind);
+      document.getElementById('st-version-hint').textContent = 'Ce dépôt sera enregistré en version v' + v + (v > 1 ? ' (tes versions précédentes restent disponibles).' : '.');
+    }
+    function onStudioChantierChange() {
+      const has = !!document.getElementById('st-chantier').value;
+      document.getElementById('st-chantier-done-row').style.display = has ? 'flex' : 'none';
+      if (!has) document.getElementById('st-chantier-done').checked = false;
+    }
+
+    async function saveStudioDeposit() {
+      if (!currentUser) return;
+      const songId = parseInt(document.getElementById('st-song').value) || 0;
+      const song = songId ? songsData.find(x => x.id === songId) : null;
+      const kind = document.getElementById('st-kind').value;
+      const link = document.getElementById('st-link').value.trim();
+      const files = [...document.getElementById('st-files').files];
+      if (!files.length && !link) return alert('Ajoute au moins un fichier ou un lien.');
+      if (link && !/^https:\/\/\S+$/i.test(link)) return alert('Le lien doit commencer par https:// et ne pas contenir d’espace.');
+      if (files.length && IS_TEST_ENV) return alert('Dans la version de test, l’envoi de fichiers est désactivé. Utilise un lien.');
+      if (files.some(f => f.size > 2 * 1024 * 1024 * 1024)) return alert('Un fichier dépasse 2 Go : compresse-le ou dépose un lien.');
+
+      const id = Date.now();
+      const btn = document.getElementById('st-save-btn');
+      const wrap = document.getElementById('st-progress');
+      const bar = document.getElementById('st-progress-bar');
+      const label = document.getElementById('st-progress-label');
+      btn.disabled = true;
+      const uploaded = [];
+      try {
+        for (let i = 0; i < files.length; i++) {
+          const f = files[i];
+          label.textContent = 'Envoi ' + (i + 1) + '/' + files.length + ' : ' + f.name + ' (' + fmtSize(f.size) + ')';
+          const path = 'studio/' + currentUser.docId + '/' + id + '/' + i + '_' + f.name.replace(/[^\w.\-]+/g, '_');
+          const url = await uploadFileWithProgress(storage.ref(path), f, wrap, bar);
+          uploaded.push({ name: f.name, path, url, size: f.size });
+        }
+        const chantierId = parseInt(document.getElementById('st-chantier').value) || 0;
+        const chantier = chantierId ? chantiersData.find(c => c.id === chantierId) : null;
+        const status = document.getElementById('st-done').checked ? 'done' : 'wip';
+        const version = nextStudioVersion(currentUser.docId, songId, kind);
+        await studioCol.doc(String(id)).set({
+          id, ownerId: currentUser.docId, ownerName: currentUser.name,
+          songId, songTitle: song ? song.title : '', kind, version,
+          note: document.getElementById('st-note').value.trim(), status,
+          files: uploaded, link, chantierId, chantierTitle: chantier ? chantier.title : '', createdAt: id
+        });
+        if (chantier && document.getElementById('st-chantier-done').checked) {
+          await chantiersCol.doc(String(chantierId)).update({ done: true });
+        }
+        logActivity(`a déposé ${kindMeta(kind).label.toLowerCase()}${song ? ' de « ' + song.title + ' »' : ''} (v${version})${status === 'done' ? ' — terminé' : ''}`, 'fa-compact-disc');
+        label.textContent = '';
+        closeModal('modal-studio');
+      } catch (err) {
+        console.error(err);
+        for (const u of uploaded) { try { await storage.ref(u.path).delete(); } catch (e) {} }
+        alert('Dépôt impossible : ' + (err.code === 'storage/unauthorized' ? 'droits insuffisants sur le stockage.' : 'vérifie ta connexion et réessaie.'));
+      } finally {
+        btn.disabled = false;
+        wrap.style.display = 'none';
+      }
+    }
+
+    function toggleStudioDone(id) {
+      const d = studioData.find(x => x.id === id);
+      if (!d || !currentUser || d.ownerId !== currentUser.docId) return;
+      studioCol.doc(String(id)).update({ status: d.status === 'done' ? 'wip' : 'done' })
+        .catch(err => { console.error(err); alert('Modification impossible (droits ou réseau).'); });
+    }
+    async function deleteStudioDeposit(id) {
+      const d = studioData.find(x => x.id === id);
+      if (!d || !confirm('Supprimer ce dépôt (et ses fichiers) ?')) return;
+      if (currentUser && d.ownerId === currentUser.docId) {
+        for (const f of (d.files || [])) { try { await storage.ref(f.path).delete(); } catch (e) { console.warn('Fichier non supprimé', e.code); } }
+      }
+      studioCol.doc(String(id)).delete().catch(err => { console.error(err); alert('Suppression impossible (droits ou réseau).'); });
+    }
+
+    /* ================= RÉCEPTIONS : LIENS SWISSTRANSFER, WETRANSFER… ================= */
+    const TRANSFER_SERVICES = [
+      ['swisstransfer.com', 'SwissTransfer'], ['wetransfer.com', 'WeTransfer'], ['we.tl', 'WeTransfer'],
+      ['drive.google.com', 'Google Drive'], ['docs.google.com', 'Google Drive'], ['dropbox.com', 'Dropbox'],
+      ['onedrive.live.com', 'OneDrive'], ['1drv.ms', 'OneDrive'], ['mega.nz', 'MEGA'], ['icloud.com', 'iCloud']
+    ];
+    function transferService(url) {
+      try {
+        const h = new URL(url).hostname.toLowerCase();
+        const m = TRANSFER_SERVICES.find(([d]) => h === d || h.endsWith('.' + d));
+        return m ? m[1] : h.replace(/^www\./, '');
+      } catch (e) { return 'Lien'; }
+    }
+    function transferExpired(t) { return !!t.expires && t.expires < todayStr(); }
+    function transferDaysLeft(t) { const d = parseDateOnly(t.expires); return d ? daysBetween(new Date(), d) : null; }
+    function transferForMe(t) {
+      if (!currentUser) return false;
+      return t.to === 'all' || (Array.isArray(t.to) && t.to.includes(currentUser.docId)) || t.createdById === currentUser.docId;
+    }
+    function transferPendingForMe(t) {
+      return !!currentUser && transferForMe(t) && t.createdById !== currentUser.docId && !(t.done && t.done[currentUser.docId]) && !transferExpired(t);
+    }
+    function updateTransfersBadge() {
+      const badge = document.getElementById('transfers-pending-badge');
+      if (!badge || !currentUser) return;
+      const n = transfersData.filter(transferPendingForMe).length;
+      badge.textContent = n;
+      badge.style.display = n ? 'inline-block' : 'none';
+    }
+
+    function renderTransfers() {
+      updateTransfersBadge();
+      const box = document.getElementById('transfers-container');
+      if (!box) return;
+      const f = (document.getElementById('transfers-filter') || {}).value || 'pending';
+      let list = transfersData.filter(transferForMe);
+      if (f === 'pending') list = list.filter(t => !transferExpired(t) && (transferPendingForMe(t) || t.createdById === (currentUser && currentUser.docId)));
+      if (f === 'expired') list = list.filter(transferExpired);
+      list.sort((a, b) => (transferExpired(a) - transferExpired(b)) || String(a.expires || '9999').localeCompare(String(b.expires || '9999')));
+      if (!list.length) {
+        box.innerHTML = '<p style="font-size:13px; color:var(--text-muted);">' + (f === 'pending' ? 'Rien à télécharger pour le moment. ✅' : 'Aucun lien.') + '</p>';
+        return;
+      }
+      box.innerHTML = list.map(t => {
+        const expired = transferExpired(t);
+        const left = transferDaysLeft(t);
+        const soon = !expired && left !== null && left <= 2;
+        const mineDone = !!(currentUser && t.done && t.done[currentUser.docId]);
+        const isCreator = !!currentUser && t.createdById === currentUser.docId;
+        const recipients = t.to === 'all' ? usersData.filter(u => u.docId !== t.createdById) : usersData.filter(u => (t.to || []).includes(u.docId));
+        const doneNames = recipients.filter(u => t.done && t.done[u.docId]).map(memberName);
+        const waitNames = recipients.filter(u => !(t.done && t.done[u.docId])).map(memberName);
+        return `<div class="tr-card ${expired ? 'expired' : (soon ? 'soon' : '')}">
+          <div style="min-width:0; flex:1;">
+            <div style="font-weight:800;">${escapeHTML(t.title)} <span class="brief-tag new">${escapeHTML(t.service || transferService(t.url))}</span>
+              ${expired ? '<span class="brief-tag urgent">Expiré</span>' : (t.expires ? `<span class="brief-tag ${soon ? 'urgent' : 'due'}">${left === 0 ? 'Expire aujourd’hui' : (left === 1 ? 'Expire demain' : 'Expire le ' + new Date(t.expires + 'T12:00').toLocaleDateString('fr-FR'))}</span>` : '')}</div>
+            <div class="feed-time">Ajouté par ${escapeHTML(t.createdBy || '?')} • pour ${t.to === 'all' ? 'tout le groupe' : escapeHTML(recipients.map(memberName).join(', ') || '—')}</div>
+            ${t.note ? `<div style="font-size:13px; margin-top:4px;">${escapeHTML(t.note)}</div>` : ''}
+            ${(isCreator || canManageContent()) && recipients.length ? `<div class="feed-time" style="margin-top:4px;">✅ ${escapeHTML(doneNames.join(', ') || '—')} • ⏳ ${escapeHTML(waitNames.join(', ') || '—')}</div>` : ''}
+          </div>
+          <div style="display:flex; gap:6px; flex-wrap:wrap; align-items:center;">
+            ${expired ? '' : `<a class="btn btn-primary btn-sm" href="${escapeHTML(t.url)}" target="_blank" rel="noopener"><i class="fa-solid fa-arrow-up-right-from-square"></i> Ouvrir</a>`}
+            ${(!isCreator && transferForMe(t)) ? `<button class="btn ${mineDone ? 'btn-secondary' : 'btn-secondary'} btn-sm" onclick="toggleTransferDone(${t.id})">${mineDone ? '✅ Téléchargé' : 'J’ai téléchargé'}</button>` : ''}
+            ${(isCreator || canManageContent()) ? `<button class="btn btn-secondary btn-sm" onclick="openTransferModal(${t.id})"><i class="fa-solid fa-pen"></i></button><button class="btn btn-danger btn-sm" onclick="deleteTransfer(${t.id})"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function onTransferToModeChange() {
+      document.getElementById('tr-to-list').style.display = document.getElementById('tr-to-mode').value === 'some' ? 'block' : 'none';
+    }
+    function openTransferModal(id) {
+      const t = id ? transfersData.find(x => x.id === id) : null;
+      if (id && !t) return;
+      document.getElementById('tr-modal-title').textContent = t ? 'Modifier le lien' : 'Ajouter un lien';
+      document.getElementById('tr-id').value = t ? t.id : '';
+      document.getElementById('tr-title').value = t ? t.title : '';
+      document.getElementById('tr-url').value = t ? t.url : '';
+      document.getElementById('tr-expires').value = t ? (t.expires || '') : '';
+      document.getElementById('tr-note').value = t ? (t.note || '') : '';
+      document.getElementById('tr-to-mode').value = (t && t.to !== 'all') ? 'some' : 'all';
+      const sel = (t && Array.isArray(t.to)) ? t.to : [];
+      document.getElementById('tr-to-list').innerHTML = usersData.filter(u => !currentUser || u.docId !== currentUser.docId)
+        .map(u => `<label class="chk-item"><input type="checkbox" class="tr-to-cb" value="${u.docId}" ${sel.includes(u.docId) ? 'checked' : ''} style="width:17px; height:17px;"> <span>${escapeHTML(memberName(u))}</span></label>`).join('');
+      onTransferToModeChange();
+      openModal('modal-transfer');
+    }
+    function saveTransfer() {
+      if (!currentUser) return;
+      const title = document.getElementById('tr-title').value.trim();
+      const url = document.getElementById('tr-url').value.trim();
+      if (!title) return alert('Donne un titre au lien.');
+      if (!/^https:\/\/\S+$/i.test(url)) return alert('Le lien doit commencer par https:// et ne pas contenir d’espace.');
+      const mode = document.getElementById('tr-to-mode').value;
+      const chosen = [...document.querySelectorAll('.tr-to-cb:checked')].map(c => c.value);
+      if (mode === 'some' && !chosen.length) return alert('Choisis au moins un destinataire.');
+      const existingId = parseInt(document.getElementById('tr-id').value) || 0;
+      const old = existingId ? transfersData.find(x => x.id === existingId) : null;
+      const id = existingId || Date.now();
+      const obj = {
+        id, title, url, service: transferService(url), expires: document.getElementById('tr-expires').value || '',
+        to: mode === 'all' ? 'all' : chosen, note: document.getElementById('tr-note').value.trim(),
+        createdBy: old ? old.createdBy : currentUser.name, createdById: old ? old.createdById : currentUser.docId,
+        done: old ? (old.done || {}) : {}
+      };
+      transfersCol.doc(String(id)).set(obj).catch(err => { console.error(err); alert('Enregistrement impossible (droits ou réseau).'); });
+      if (!old) logActivity(`a ajouté un lien à télécharger : ${title}`, 'fa-inbox');
+      closeModal('modal-transfer');
+    }
+    function toggleTransferDone(id) {
+      const t = transfersData.find(x => x.id === id);
+      if (!t || !currentUser) return;
+      const mine = !!(t.done && t.done[currentUser.docId]);
+      const upd = {};
+      upd['done.' + currentUser.docId] = mine ? firebase.firestore.FieldValue.delete() : true;
+      transfersCol.doc(String(id)).update(upd).catch(err => { console.error(err); alert('Mise à jour impossible (droits ou réseau).'); });
+    }
+    function deleteTransfer(id) {
+      if (!confirm('Supprimer ce lien ?')) return;
+      transfersCol.doc(String(id)).delete().catch(err => { console.error(err); alert('Suppression impossible (droits ou réseau).'); });
+    }
+
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
@@ -4586,6 +5094,7 @@
       renderDocsGrid();
       renderAdminUsers();
       refreshRetroIfActive();
+      if (isViewActive('studio')) renderStudio();
       updateKPIMetrics();
     }
 
