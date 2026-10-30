@@ -1159,6 +1159,44 @@
     .tr-card { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 12px 14px; border: 1px solid var(--border-color); border-radius: 14px; margin-bottom: 8px; background: var(--bg-card); }
     .tr-card.expired { opacity: .55; }
     .tr-card.soon { border-color: #EF4444; }
+    /* ===== Navigation : rubriques, défilement, menu « Plus » ===== */
+    main, .view-content, .chart-box { min-width: 0; }
+    .chart-box { max-width: 100%; }
+    .box-header { flex-wrap: wrap; gap: 10px; }
+    .nav-section { list-style: none; font-size: 10px; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; color: var(--text-light); padding: 14px 16px 4px; pointer-events: none; }
+    .nav-section:first-child { padding-top: 4px; }
+    .nav-more { display: none; }
+    @media (min-width: 641px) {
+      aside { overflow: hidden; }
+      aside > div:first-child { flex: 1 1 auto; min-height: 0; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; }
+      aside .user-card { flex-shrink: 0; margin-top: 10px; }
+    }
+    @media (min-width: 1025px) and (max-height: 860px) {
+      .nav-item { padding: 9px 14px; }
+      .nav-menu { gap: 2px; }
+      .nav-section { padding-top: 10px; }
+      .brand-logo { padding-bottom: 10px; margin-bottom: 8px; }
+    }
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .nav-section { font-size: 0; height: 1px; padding: 0; margin: 8px 12px; background: var(--border-color); }
+    }
+    .more-group { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--text-muted); margin: 14px 0 8px; }
+    .more-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+    .more-tile { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 14px 6px; min-height: 80px; border: 1px solid var(--border-color); border-radius: 14px; background: var(--bg-card); color: var(--text-dark); font-family: inherit; font-size: 12px; font-weight: 700; text-align: center; cursor: pointer; }
+    .more-tile i { font-size: 20px; color: var(--brand-red); }
+    .more-tile.active { border-color: var(--brand-red); background: var(--brand-red-light); }
+    .more-tile .nav-badge { position: absolute; top: 6px; right: 6px; margin: 0; }
+    @media (max-width: 640px) {
+      .nav-section { display: none; }
+      aside > div:first-child { overflow: visible; }
+      .nav-menu { justify-content: space-around; overflow-x: visible; }
+      .nav-item:not(.nav-primary):not(.nav-more) { display: none !important; }
+      .nav-item.nav-primary, .nav-item.nav-more { display: flex !important; flex: 1 1 0; }
+      input, select, textarea { font-size: 16px; }
+      .page-title h1 { font-size: 22px; }
+      .header-actions { flex-wrap: wrap; gap: 8px; }
+      .chat-container { height: min(520px, calc(100dvh - 300px)); min-height: 320px; }
+    }
 </style>
 </head>
 <body>
@@ -1197,12 +1235,13 @@
         <div class="logo-text">ΣLIY<span>Δ</span>H.</div>
         <span class="logo-badge">PRO</span>
       </div>
-      <ul class="nav-menu">
-        <li class="nav-item active" onclick="switchTab('dashboard', this)">
+      <ul class="nav-menu" id="nav-menu">
+        <li class="nav-section">Pilotage</li>
+        <li class="nav-item nav-primary active" onclick="switchTab('dashboard', this)">
           <i class="fa-solid fa-chart-pie"></i>
           <span>Tableau de Bord</span>
         </li>
-        <li class="nav-item" onclick="switchTab('chantiers', this)">
+        <li class="nav-item nav-primary" onclick="switchTab('chantiers', this)">
           <i class="fa-solid fa-list-check"></i>
           <span>Chantiers & Rappels</span>
           <span class="nav-badge" id="urgent-count-badge">2</span>
@@ -1212,15 +1251,7 @@
           <i class="fa-solid fa-timeline"></i>
           <span>Rétroplanning</span>
         </li>
-        <li class="nav-item" onclick="switchTab('mix', this)">
-          <i class="fa-solid fa-sliders"></i>
-          <span>Suivi & Mixage</span>
-        </li>
-        <li class="nav-item" onclick="switchTab('morceaux', this)">
-          <i class="fa-solid fa-music"></i>
-          <span>Morceaux & Audio</span>
-        </li>
-        <li class="nav-item" onclick="switchTab('agenda', this)">
+        <li class="nav-item nav-primary" onclick="switchTab('agenda', this)">
           <i class="fa-solid fa-calendar-days"></i>
           <span>Agenda & Setlist</span>
           <span class="nav-badge" id="agenda-pending-badge" style="display:none;" title="Présences à confirmer">0</span>
@@ -1230,13 +1261,14 @@
           <span>Planning & Séances</span>
           <span class="nav-badge" id="polls-pending-badge" style="display:none;" title="Sondages en attente de votre réponse">0</span>
         </li>
-        <li class="nav-item" onclick="switchTab('budget', this)">
-          <i class="fa-solid fa-wallet"></i>
-          <span>Budget & Cachets</span>
+        <li class="nav-section">Production</li>
+        <li class="nav-item" onclick="switchTab('mix', this)">
+          <i class="fa-solid fa-sliders"></i>
+          <span>Suivi & Mixage</span>
         </li>
-        <li class="nav-item" onclick="switchTab('gear', this)">
-          <i class="fa-solid fa-guitar"></i>
-          <span>Matériel</span>
+        <li class="nav-item" onclick="switchTab('morceaux', this)">
+          <i class="fa-solid fa-music"></i>
+          <span>Morceaux & Audio</span>
         </li>
         <li class="nav-item" onclick="switchTab('studio', this)">
           <i class="fa-solid fa-compact-disc"></i>
@@ -1247,18 +1279,33 @@
           <span>Réceptions</span>
           <span class="nav-badge" id="transfers-pending-badge" style="display:none;" title="Liens à télécharger">0</span>
         </li>
-        <li class="nav-item" onclick="switchTab('chat', this)">
-          <i class="fa-solid fa-comments"></i>
-          <span>Espace Chat</span>
-          <span class="nav-badge" id="chat-unread-badge" style="display:none;">0</span>
-        </li>
         <li class="nav-item" onclick="switchTab('docs', this)">
           <i class="fa-solid fa-folder-open"></i>
           <span>Documents & Medias</span>
         </li>
+        <li class="nav-section">Groupe</li>
+        <li class="nav-item nav-primary" onclick="switchTab('chat', this)">
+          <i class="fa-solid fa-comments"></i>
+          <span>Espace Chat</span>
+          <span class="nav-badge" id="chat-unread-badge" style="display:none;">0</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('budget', this)">
+          <i class="fa-solid fa-wallet"></i>
+          <span>Budget & Cachets</span>
+        </li>
+        <li class="nav-item" onclick="switchTab('gear', this)">
+          <i class="fa-solid fa-guitar"></i>
+          <span>Matériel</span>
+        </li>
+        <li class="nav-section">Administration</li>
         <li class="nav-item" id="nav-admin-item" onclick="switchTab('admin', this)">
           <i class="fa-solid fa-crown"></i>
           <span>Espace Admin</span>
+        </li>
+        <li class="nav-item nav-more" onclick="openMoreMenu()">
+          <i class="fa-solid fa-grip"></i>
+          <span>Plus</span>
+          <span class="nav-badge" id="more-badge" style="display:none;">•</span>
         </li>
       </ul>
     </div>
@@ -2232,6 +2279,16 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="modal-more" onclick="if (event.target === this) closeModal('modal-more')">
+    <div class="modal-box">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="font-weight:800;">Toutes les sections</h3>
+        <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-more')"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div id="more-content"></div>
+    </div>
+  </div>
+
   <div class="modal-overlay" id="modal-add-doc">
     <div class="modal-box">
       <h3 style="margin-bottom: 16px; font-weight: 800;">Importer un Document / Média</h3>
@@ -2958,6 +3015,7 @@
       if (viewId === 'gear') renderGear();
       if (viewId === 'studio') renderStudio();
       if (viewId === 'transfers') renderTransfers();
+      syncMoreActive(viewId);
 
       if (titles[viewId]) {
         document.getElementById('view-title').textContent = titles[viewId].title;
@@ -5081,6 +5139,74 @@
       if (!confirm('Supprimer ce lien ?')) return;
       transfersCol.doc(String(id)).delete().catch(err => { console.error(err); alert('Suppression impossible (droits ou réseau).'); });
     }
+
+
+    /* ================= NAVIGATION : INFOBULLES, MENU « PLUS », BADGES ================= */
+    document.querySelectorAll('.nav-menu .nav-item').forEach(li => {
+      const sp = li.querySelector('span');
+      if (sp && !li.title) li.title = sp.textContent.trim();
+    });
+
+    function navTiles() {
+      const groups = [];
+      document.querySelectorAll('#nav-menu > li').forEach(li => {
+        if (li.classList.contains('nav-section')) { groups.push({ title: li.textContent.trim(), tiles: [] }); return; }
+        if (!li.classList.contains('nav-item') || li.classList.contains('nav-more') || !groups.length) return;
+        if (li.id === 'nav-admin-item' && (!currentUser || currentUser.role !== 'admin')) return;
+        const m = String(li.getAttribute('onclick') || '').match(/switchTab\('(\w+)'/);
+        if (!m) return;
+        const icon = li.querySelector('i');
+        const label = li.querySelector('span');
+        const badge = [...li.querySelectorAll('.nav-badge')].map(b => ({ shown: b.style.display !== 'none', t: b.textContent.trim() }))
+          .filter(b => b.shown && b.t && b.t !== '0')[0];
+        groups[groups.length - 1].tiles.push({
+          view: m[1], icon: icon ? icon.className : 'fa-solid fa-circle',
+          label: label ? label.textContent.trim() : m[1], badge: badge ? badge.t : '', primary: li.classList.contains('nav-primary')
+        });
+      });
+      return groups.filter(g => g.tiles.length);
+    }
+
+    function currentViewId() {
+      const v = document.querySelector('.view-content.active');
+      return v ? String(v.id).replace('view-', '') : '';
+    }
+
+    function openMoreMenu() {
+      const active = currentViewId();
+      const html = navTiles().map(g => `
+        <div class="more-group">${escapeHTML(g.title)}</div>
+        <div class="more-grid">${g.tiles.map(t => `
+          <button class="more-tile ${t.view === active ? 'active' : ''}" onclick="closeModal('modal-more'); switchTab('${t.view}', null);">
+            <i class="${escapeHTML(t.icon)}"></i><span>${escapeHTML(t.label)}</span>
+            ${t.badge ? `<span class="nav-badge">${escapeHTML(t.badge)}</span>` : ''}
+          </button>`).join('')}
+        </div>`).join('') + `
+        <div class="more-group">Outils</div>
+        <div class="more-grid">
+          <button class="more-tile" onclick="closeModal('modal-more'); openGlobalSearch();"><i class="fa-solid fa-magnifying-glass"></i><span>Rechercher</span></button>
+          <button class="more-tile" onclick="toggleTheme();"><i class="fa-solid fa-circle-half-stroke"></i><span>Mode sombre / clair</span></button>
+          <button class="more-tile" onclick="closeModal('modal-more'); logoutUser();"><i class="fa-solid fa-right-from-bracket"></i><span>Déconnexion</span></button>
+        </div>`;
+      document.getElementById('more-content').innerHTML = html;
+      openModal('modal-more');
+    }
+
+    function syncMoreActive(viewId) {
+      const more = document.querySelector('.nav-more');
+      if (!more) return;
+      const primary = ['dashboard', 'chantiers', 'agenda', 'chat'];
+      more.classList.toggle('active', !!viewId && !primary.includes(viewId));
+    }
+
+    // Point sur « Plus » quand une section cachée a des notifications en attente
+    function updateMoreBadge() {
+      const dot = document.getElementById('more-badge');
+      if (!dot) return;
+      const hidden = navTiles().flatMap(g => g.tiles).filter(t => !t.primary && t.badge);
+      dot.style.display = hidden.length ? 'inline-block' : 'none';
+    }
+    setInterval(updateMoreBadge, 2000);
 
     function renderAll() {
       renderActivityFeed();
