@@ -1197,6 +1197,17 @@
       .header-actions { flex-wrap: wrap; gap: 8px; }
       .chat-container { height: min(520px, calc(100dvh - 300px)); min-height: 320px; }
     }
+    /* ===== Barre du bas du téléphone : 4 sections + « Plus » toujours visibles ===== */
+    .nav-short { display: none; }
+    @media (max-width: 640px) {
+      .nav-item.nav-primary > span:not(.nav-badge):not(.nav-short) { display: none !important; }
+      .nav-item.nav-primary > .nav-short { display: block !important; }
+      .nav-menu { overflow-x: hidden; width: 100%; gap: 0; }
+      .nav-item.nav-primary, .nav-item.nav-more { min-width: 0; flex: 1 1 0; padding-left: 2px; padding-right: 2px; justify-content: center; }
+      aside { padding-bottom: max(calc(4px + env(safe-area-inset-bottom, 0px)), 22px); }
+      .global-audio-player { bottom: calc(54px + max(calc(4px + env(safe-area-inset-bottom, 0px)), 22px)); }
+      main { padding-bottom: calc(170px + env(safe-area-inset-bottom, 0px)); }
+    }
 </style>
 </head>
 <body>
@@ -1240,10 +1251,12 @@
         <li class="nav-item nav-primary active" onclick="switchTab('dashboard', this)">
           <i class="fa-solid fa-chart-pie"></i>
           <span>Tableau de Bord</span>
+          <span class="nav-short">Accueil</span>
         </li>
         <li class="nav-item nav-primary" onclick="switchTab('chantiers', this)">
           <i class="fa-solid fa-list-check"></i>
           <span>Chantiers & Rappels</span>
+          <span class="nav-short">Chantiers</span>
           <span class="nav-badge" id="urgent-count-badge">2</span>
           <span class="nav-badge" id="chantiers-new-badge" style="display:none;" title="Nouveaux chantiers">0</span>
         </li>
@@ -1254,6 +1267,7 @@
         <li class="nav-item nav-primary" onclick="switchTab('agenda', this)">
           <i class="fa-solid fa-calendar-days"></i>
           <span>Agenda & Setlist</span>
+          <span class="nav-short">Agenda</span>
           <span class="nav-badge" id="agenda-pending-badge" style="display:none;" title="Présences à confirmer">0</span>
         </li>
         <li class="nav-item" onclick="switchTab('planning', this)">
@@ -1287,6 +1301,7 @@
         <li class="nav-item nav-primary" onclick="switchTab('chat', this)">
           <i class="fa-solid fa-comments"></i>
           <span>Espace Chat</span>
+          <span class="nav-short">Chat</span>
           <span class="nav-badge" id="chat-unread-badge" style="display:none;">0</span>
         </li>
         <li class="nav-item" onclick="switchTab('budget', this)">
