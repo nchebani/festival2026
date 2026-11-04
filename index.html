@@ -1208,6 +1208,11 @@
       .global-audio-player { bottom: calc(54px + max(calc(4px + env(safe-area-inset-bottom, 0px)), 22px)); }
       main { padding-bottom: calc(170px + env(safe-area-inset-bottom, 0px)); }
     }
+    .chat-container { position: relative; }
+    .chat-bubble { overflow-wrap: anywhere; }
+    .chat-bubble a { color: inherit; text-decoration: underline; word-break: break-all; }
+    .chat-day { align-self: center; font-size: 11px; font-weight: 700; color: var(--text-muted); background: var(--surface-3); padding: 3px 14px; border-radius: 12px; margin: 4px 0; }
+    .chat-jump { position: absolute; right: 18px; bottom: 84px; z-index: 6; border: none; border-radius: 22px; padding: 9px 16px; font-family: inherit; font-size: 12px; font-weight: 800; color: #fff; background: var(--brand-red); box-shadow: 0 6px 18px rgba(0,0,0,.28); cursor: pointer; }
 </style>
 </head>
 <body>
@@ -1732,11 +1737,13 @@
         <span style="display:flex; gap:6px;">
           <button id="notif-toggle-btn" class="btn btn-secondary btn-sm" onclick="toggleNotifications()" style="display:none;"></button>
           <button class="btn btn-secondary btn-sm" onclick="openNotifPrefs()" title="Préférences de notifications"><i class="fa-solid fa-sliders"></i></button>
+          <button id="chat-clear-btn" class="btn btn-danger btn-sm" onclick="openClearChat()" title="Supprimer des messages (administrateur)" style="display:none;"><i class="fa-solid fa-broom"></i> Libérer de la place</button>
         </span>
       </div>
       <div class="chat-container">
         <div id="chat-pinned"></div>
         <div class="chat-messages" id="chat-messages-box"></div>
+        <button id="chat-jump-btn" class="chat-jump" onclick="scrollChatToBottom(true)" style="display:none;"><i class="fa-solid fa-arrow-down"></i> <span id="chat-jump-label">Dernier message</span></button>
         <div id="chat-reply-bar"></div>
         <div id="mention-box" class="mention-box" style="display:none;"></div>
         <div class="chat-input-area">
@@ -2301,6 +2308,29 @@
         <button class="btn btn-secondary btn-sm" onclick="closeModal('modal-more')"><i class="fa-solid fa-xmark"></i></button>
       </div>
       <div id="more-content"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-clear-chat">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;">Libérer de la place dans le chat</h3>
+      <p style="font-size:13px; color:var(--text-muted); margin:6px 0 14px;">Les messages supprimés disparaissent <strong>définitivement pour tout le groupe</strong>.</p>
+      <div class="form-group">
+        <label>Que supprimer ?</label>
+        <select id="cc-scope" onchange="updateClearPreview()">
+          <option value="7">Les messages de plus de 7 jours</option>
+          <option value="30" selected>Les messages de plus de 30 jours</option>
+          <option value="90">Les messages de plus de 90 jours</option>
+          <option value="all">Tous les messages</option>
+        </select>
+      </div>
+      <label class="chk-item"><input type="checkbox" id="cc-keep-pinned" checked onchange="updateClearPreview()" style="width:17px; height:17px;"> <span>Conserver les messages épinglés</span></label>
+      <div id="cc-preview" style="font-size:13px; font-weight:700; margin-top:10px;"></div>
+      <p style="font-size:11px; color:var(--text-muted); margin-top:8px;">Conseil : télécharge d’abord une sauvegarde dans l’Espace Admin.</p>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-clear-chat')">Annuler</button>
+        <button class="btn btn-danger" onclick="executeClearChat()"><i class="fa-solid fa-trash"></i> Supprimer</button>
+      </div>
     </div>
   </div>
 
@@ -3022,7 +3052,13 @@
         'admin': { title: 'Espace Administration', sub: 'Gestion des autorisations et droits de suppression.' }
       };
 
-      if (viewId === 'chat' && currentUser) markChatRead();
+      if (viewId === 'chat' && currentUser) {
+        markChatRead();
+        chatNewBelow = 0;
+        // La vue vient d'apparaître : on se place sur le dernier message (après affichage, puis une fois la mise en page stabilisée)
+        requestAnimationFrame(() => scrollChatToBottom(false));
+        setTimeout(() => scrollChatToBottom(false), 150);
+      }
       if (viewId === 'chantiers' && currentUser && chantiersSeen) markChantiersSeen();
       if (viewId === 'retro') renderRetro();
       if (viewId === 'planning') renderPolls();
@@ -4109,10 +4145,10 @@
     function highlightMentions(text) {
       const safe = escapeHTML(text);
       const names = usersData.map(memberName).filter(Boolean).sort((a, b) => b.length - a.length);
-      if (!names.length) return safe;
+      if (!names.length) return linkifyHTML(safe);
       const re = new RegExp('@(' + names.map(n => escapeRegExp(escapeHTML(n))).join('|') + ')(?![\\p{L}\\p{N}_])', 'giu');
       const me = currentUser ? String(currentUser.name).toLowerCase() : '';
-      return safe.replace(re, (all, n) => `<span class="mention ${n.toLowerCase() === me ? 'me' : ''}">${all}</span>`);
+      return linkifyHTML(safe.replace(re, (all, n) => `<span class="mention ${n.toLowerCase() === me ? 'me' : ''}">${all}</span>`));
     }
 
     function mentionBoxOpen() { const b = document.getElementById('mention-box'); return !!(b && b.style.display !== 'none' && mentionCandidates.length); }
@@ -5223,6 +5259,103 @@
     }
     setInterval(updateMoreBadge, 2000);
 
+
+    /* ================= CHAT : DERNIER MESSAGE, JOURS, LIENS, NETTOYAGE (ADMIN) ================= */
+    let chatMaxIdRendered = 0;
+    let chatNewBelow = 0;
+    function isAdminUser() { return !!currentUser && currentUser.role === 'admin'; }
+
+    function scrollChatToBottom(smooth) {
+      const box = document.getElementById('chat-messages-box');
+      if (!box) return;
+      box.scrollTo({ top: box.scrollHeight, behavior: smooth ? 'smooth' : 'auto' });
+      chatNewBelow = 0;
+      updateChatJumpBtn();
+    }
+    function updateChatJumpBtn() {
+      const box = document.getElementById('chat-messages-box');
+      const btn = document.getElementById('chat-jump-btn');
+      if (!box || !btn) return;
+      const far = box.scrollHeight - box.scrollTop - box.clientHeight > 160;
+      if (!far) chatNewBelow = 0;
+      btn.style.display = far ? '' : 'none';
+      const label = document.getElementById('chat-jump-label');
+      if (label) label.textContent = chatNewBelow > 0 ? (chatNewBelow + ' nouveau' + (chatNewBelow > 1 ? 'x' : '') + ' message' + (chatNewBelow > 1 ? 's' : '')) : 'Dernier message';
+    }
+    (function bindChatScroll() {
+      const box = document.getElementById('chat-messages-box');
+      if (box) box.addEventListener('scroll', updateChatJumpBtn, { passive: true });
+      window.addEventListener('resize', () => { if (isChatViewActive()) updateChatJumpBtn(); });
+    })();
+
+    function chatDayKey(id) {
+      if (!(id > 1e12)) return '';
+      const d = new Date(id);
+      return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+    }
+    function chatDayLabel(id) {
+      const d = new Date(id);
+      const today = new Date();
+      const diff = daysBetween(d, today);
+      if (diff === 0) return 'Aujourd’hui';
+      if (diff === 1) return 'Hier';
+      const opts = { weekday: 'long', day: 'numeric', month: 'long' };
+      if (d.getFullYear() !== today.getFullYear()) opts.year = 'numeric';
+      const t = d.toLocaleDateString('fr-FR', opts);
+      return t.charAt(0).toUpperCase() + t.slice(1);
+    }
+
+    // Rend cliquables les adresses http(s) d'un texte DÉJÀ échappé
+    function linkifyHTML(safe) {
+      return safe.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
+    }
+
+    /* ----- Suppression (réservée à l'administrateur) ----- */
+    function deleteChatMessage(id) {
+      if (!isAdminUser()) return;
+      if (!confirm('Supprimer ce message pour tout le groupe ?')) return;
+      chatCol.doc(String(id)).delete().catch(err => { console.error(err); alert('Suppression impossible (droits ou réseau).'); });
+    }
+    function clearChatCandidates() {
+      const scope = document.getElementById('cc-scope').value;
+      const keepPinned = document.getElementById('cc-keep-pinned').checked;
+      const cutoff = scope === 'all' ? Infinity : Date.now() - Number(scope) * 86400000;
+      return chatData.filter(c => (scope === 'all' || c.id < cutoff) && !(keepPinned && c.pinned));
+    }
+    function updateClearPreview() {
+      const n = clearChatCandidates().length;
+      const el = document.getElementById('cc-preview');
+      if (el) el.textContent = n ? n + ' message' + (n > 1 ? 's' : '') + ' sur ' + chatData.length + ' seront supprimés.' : 'Aucun message à supprimer avec ce choix.';
+    }
+    function openClearChat() {
+      if (!isAdminUser()) return;
+      updateClearPreview();
+      openModal('modal-clear-chat');
+    }
+    async function executeClearChat() {
+      if (!isAdminUser()) return;
+      const list = clearChatCandidates();
+      if (!list.length) return alert('Aucun message à supprimer avec ce choix.');
+      const all = document.getElementById('cc-scope').value === 'all';
+      if (all) {
+        if (prompt('Cette action supprime TOUS les messages' + (document.getElementById('cc-keep-pinned').checked ? ' (sauf les épinglés)' : '') + '. Tapez SUPPRIMER pour confirmer.') !== 'SUPPRIMER') return;
+      } else if (!confirm('Supprimer définitivement ' + list.length + ' message(s) pour tout le groupe ?')) return;
+      try {
+        let batch = db.batch(), n = 0;
+        for (const c of list) {
+          batch.delete(chatCol.doc(String(c.id)));
+          if (++n >= 400) { await batch.commit(); batch = db.batch(); n = 0; }
+        }
+        if (n) await batch.commit();
+        logActivity('a supprimé ' + list.length + ' message(s) du chat', 'fa-broom');
+        closeModal('modal-clear-chat');
+        showToast(list.length + ' message(s) supprimé(s).');
+      } catch (err) {
+        console.error(err);
+        alert('Suppression impossible (droits ou réseau). Pense à déployer les nouvelles règles Firestore.');
+      }
+    }
+
     function renderAll() {
       renderActivityFeed();
       renderUrgentChantiersSummary();
@@ -5781,8 +5914,14 @@
     function renderChat() {
       const box = document.getElementById('chat-messages-box');
       if (!box) return;
-      const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+      const prevTop = box.scrollTop;
+      const wasNear = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
+      const prevMaxId = chatMaxIdRendered;
+      let lastDay = '';
       box.innerHTML = chatData.map(c => {
+        let sep = '';
+        const dayKey = chatDayKey(c.id);
+        if (dayKey && dayKey !== lastDay) { sep = `<div class="chat-day"><span>${escapeHTML(chatDayLabel(c.id))}</span></div>`; lastDay = dayKey; }
         const mine = c.sender === currentUser.name;
         const reactions = c.reactions || {};
         const chips = Object.keys(REACTIONS).filter(k => (reactions[k] || []).length).map(k => {
@@ -5792,8 +5931,9 @@
         }).join('');
         const actions = Object.keys(REACTIONS).map(k => `<button class="chat-act" onclick="toggleReaction(${c.id}, '${k}')" title="Réagir">${REACTIONS[k]}</button>`).join('')
           + `<button class="chat-act" onclick="startReply(${c.id})" title="Répondre"><i class="fa-solid fa-reply"></i></button>`
-          + `<button class="chat-act" onclick="togglePin(${c.id})" title="${c.pinned ? 'Désépingler' : 'Épingler'}"><i class="fa-solid fa-thumbtack"></i></button>`;
-        return `
+          + `<button class="chat-act" onclick="togglePin(${c.id})" title="${c.pinned ? 'Désépingler' : 'Épingler'}"><i class="fa-solid fa-thumbtack"></i></button>`
+          + (isAdminUser() ? `<button class="chat-act" onclick="deleteChatMessage(${c.id})" title="Supprimer ce message (administrateur)"><i class="fa-solid fa-trash"></i></button>` : '');
+        return `${sep}
         <div class="chat-bubble ${mine ? 'sent' : 'received'} ${c.pinned ? 'pinned' : ''} ${(c.mentions || []).includes(currentUser.docId) ? 'mentioned' : ''}" data-mid="${c.id}">
           <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${escapeHTML(c.sender)}${chatInstrumentIcon(c.sender)}${c.pinned ? ' 📌' : ''}</div>
           ${c.replyTo ? `<div class="chat-quote"><strong>${escapeHTML(c.replyTo.sender)}</strong><br>${escapeHTML(c.replyTo.text)}</div>` : ''}
@@ -5802,8 +5942,24 @@
           <div class="meta"><span>${escapeHTML(c.time)}</span><span class="chat-actions">${actions}</span></div>
         </div>`;
       }).join('');
-      if (nearBottom || !chatRenderedOnce) box.scrollTop = box.scrollHeight;
+      const visible = isChatViewActive();
+      const maxId = chatData.reduce((m, c) => Math.max(m, c.id), 0);
+      if (!chatRenderedOnce) {
+        if (visible) scrollChatToBottom(false);
+      } else if (wasNear && visible) {
+        scrollChatToBottom(false);
+      } else {
+        box.scrollTop = prevTop;
+        if (visible) {
+          const fresh = chatData.filter(c => c.id > prevMaxId && c.sender !== currentUser.name).length;
+          if (fresh) chatNewBelow += fresh;
+        }
+      }
+      chatMaxIdRendered = maxId;
       chatRenderedOnce = true;
+      updateChatJumpBtn();
+      const clearBtn = document.getElementById('chat-clear-btn');
+      if (clearBtn) clearBtn.style.display = isAdminUser() ? '' : 'none';
       renderPinnedBar();
     }
 
