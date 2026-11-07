@@ -1213,6 +1213,28 @@
     .chat-bubble a { color: inherit; text-decoration: underline; word-break: break-all; }
     .chat-day { align-self: center; font-size: 11px; font-weight: 700; color: var(--text-muted); background: var(--surface-3); padding: 3px 14px; border-radius: 12px; margin: 4px 0; }
     .chat-jump { position: absolute; right: 18px; bottom: 84px; z-index: 6; border: none; border-radius: 22px; padding: 9px 16px; font-family: inherit; font-size: 12px; font-weight: 800; color: #fff; background: var(--brand-red); box-shadow: 0 6px 18px rgba(0,0,0,.28); cursor: pointer; }
+    .chat-input-area { gap: 6px; align-items: center; }
+    .chat-tool { flex: none; width: 36px; height: 36px; border: 1px solid var(--border-color); border-radius: 50%; background: var(--surface-2); color: var(--text-muted); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 14px; }
+    .chat-tool:hover { color: var(--brand-red); }
+    .chat-rec { display: flex; align-items: center; gap: 10px; padding: 8px 14px; background: var(--surface-danger); border-top: 1px solid var(--border-color); }
+    .rec-dot { width: 10px; height: 10px; border-radius: 50%; background: #EF4444; animation: recPulse 1s infinite; }
+    @keyframes recPulse { 50% { opacity: .25; } }
+    .chat-audio { width: 220px; max-width: 100%; height: 36px; margin-top: 4px; }
+    .chat-img { display: block; max-width: 240px; max-height: 260px; width: auto; height: auto; border-radius: 10px; margin-top: 4px; }
+    .chat-file { display: inline-block; margin-top: 4px; font-weight: 700; }
+    .chat-seen { font-size: 10px; opacity: .8; margin-top: 4px; text-align: right; }
+    .chat-announce-tag { font-size: 11px; font-weight: 800; margin-bottom: 4px; }
+    .chat-bubble.announce { outline: 2px solid #F59E0B; }
+    .cpoll { margin-top: 6px; min-width: 200px; }
+    .cpoll-opt { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 8px; width: 100%; margin: 4px 0; padding: 8px 10px; border: 1px solid rgba(128,128,128,.35); border-radius: 10px; background: rgba(255,255,255,.12); color: inherit; font-family: inherit; font-size: 13px; cursor: pointer; overflow: hidden; text-align: left; }
+    .cpoll-opt.on { border-width: 2px; font-weight: 800; }
+    .cpoll-bar { position: absolute; left: 0; top: 0; bottom: 0; background: rgba(16,185,129,.35); z-index: 0; }
+    .cpoll-t, .cpoll-n { position: relative; z-index: 1; }
+    .ack-btn { margin-top: 6px; border: none; border-radius: 10px; padding: 6px 12px; font-weight: 800; font-size: 12px; cursor: pointer; background: #fff; color: #8B1E2D; }
+    #chat-announce { display: none; padding: 8px 14px; background: #FEF3C7; border-bottom: 1px solid #FDE68A; font-size: 12px; color: #78350F; }
+    .ann-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+    .ann-row span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    @media (max-width: 640px) { .chat-input-area { padding-left: 8px; padding-right: 8px; } .chat-tool { width: 32px; height: 32px; } }
 </style>
 </head>
 <body>
@@ -1741,14 +1763,29 @@
         </span>
       </div>
       <div class="chat-container">
+        <div id="chat-announce"></div>
         <div id="chat-pinned"></div>
         <div class="chat-messages" id="chat-messages-box"></div>
         <button id="chat-jump-btn" class="chat-jump" onclick="scrollChatToBottom(true)" style="display:none;"><i class="fa-solid fa-arrow-down"></i> <span id="chat-jump-label">Dernier message</span></button>
         <div id="chat-reply-bar"></div>
         <div id="mention-box" class="mention-box" style="display:none;"></div>
+        <div id="chat-upload" style="display:none; padding:6px 14px; font-size:12px; color:var(--text-muted);">
+          <span id="chat-upload-label"></span>
+          <div class="upload-progress-wrap" id="chat-up-wrap"><div class="upload-progress-bar" id="chat-up-bar"></div></div>
+        </div>
+        <div id="chat-rec-bar" class="chat-rec" style="display:none;">
+          <span class="rec-dot"></span> <strong id="chat-rec-time">0:00</strong> <span style="flex:1; font-size:12px;">Enregistrement en cours…</span>
+          <button class="btn btn-secondary btn-sm" onclick="stopVoiceRecording(false)">Annuler</button>
+          <button class="btn btn-primary btn-sm" onclick="stopVoiceRecording(true)"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
+        </div>
         <div class="chat-input-area">
-          <input type="text" id="chat-text-input" class="chat-input" placeholder="Écrivez votre message… (@ pour mentionner)" autocomplete="off" oninput="onChatInput()" onkeypress="if(event.key === 'Enter') { if (mentionBoxOpen()) { pickMention(0); event.preventDefault(); } else { sendChatMessage(); } }">
-          <button class="btn btn-primary" onclick="sendChatMessage()"><i class="fa-solid fa-paper-plane"></i> Envoyer</button>
+          <button class="chat-tool" title="Joindre une photo ou un fichier" onclick="document.getElementById('chat-file').click()"><i class="fa-solid fa-paperclip"></i></button>
+          <input type="file" id="chat-file" style="display:none;" onchange="onChatFilePicked(this)">
+          <button class="chat-tool" title="Message vocal" onclick="startVoiceRecording()"><i class="fa-solid fa-microphone"></i></button>
+          <button class="chat-tool" title="Sondage express" onclick="openChatPollModal()"><i class="fa-solid fa-square-poll-vertical"></i></button>
+          <button class="chat-tool" id="chat-announce-btn" style="display:none;" title="Annonce importante" onclick="openAnnounceModal()"><i class="fa-solid fa-bullhorn"></i></button>
+          <input type="text" id="chat-text-input" class="chat-input" placeholder="Votre message… (@ pour mentionner)" autocomplete="off" oninput="onChatInput()" onkeypress="if(event.key === 'Enter') { if (mentionBoxOpen()) { pickMention(0); event.preventDefault(); } else { sendChatMessage(); } }">
+          <button class="btn btn-primary" onclick="sendChatMessage()" title="Envoyer"><i class="fa-solid fa-paper-plane"></i> <span class="hide-sm">Envoyer</span></button>
         </div>
       </div>
     </section>
@@ -2163,7 +2200,10 @@
       <label class="chk-item"><input type="checkbox" id="np-polls" style="width:17px; height:17px;"> <span>Sondages de séances</span></label>
       <label class="chk-item"><input type="checkbox" id="np-studio" style="width:17px; height:17px;"> <span>Dépôts du Studio (pistes terminées, projets)</span></label>
       <label class="chk-item"><input type="checkbox" id="np-transfers" style="width:17px; height:17px;"> <span>Nouveaux liens à télécharger</span></label>
+      <label class="chk-item"><input type="checkbox" id="np-announce" style="width:17px; height:17px;"> <span>Annonces importantes du chat</span></label>
       <label class="chk-item"><input type="checkbox" id="np-reminders" style="width:17px; height:17px;"> <span>Rappels (chantiers, séances, veille d’événement, prêts en retard, liens qui expirent)</span></label>
+      <div class="brief-title" style="margin-top:16px;">Confidentialité</div>
+      <label class="chk-item"><input type="checkbox" id="np-readReceipts" style="width:17px; height:17px;"> <span>Montrer aux autres que j’ai lu les messages (« Vu par »)</span></label>
       <div class="brief-title" style="margin-top:16px;">Mode silencieux</div>
       <label class="chk-item"><input type="checkbox" id="np-quiet-on" style="width:17px; height:17px;"> <span>Ne pas me notifier la nuit</span></label>
       <div style="display:flex; gap:8px; align-items:center; font-size:13px; margin-top:4px;">
@@ -2330,6 +2370,31 @@
       <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
         <button class="btn btn-secondary" onclick="closeModal('modal-clear-chat')">Annuler</button>
         <button class="btn btn-danger" onclick="executeClearChat()"><i class="fa-solid fa-trash"></i> Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-chat-poll">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;">Sondage express</h3>
+      <div class="form-group" style="margin-top:14px;"><label>Question</label><input type="text" id="cp-question" placeholder="Ex : répétition samedi à 15h ?"></div>
+      <div class="form-group"><label>Réponses possibles</label><div id="cp-options"></div>
+        <button type="button" class="btn btn-secondary btn-sm" onclick="addChatPollOption()"><i class="fa-solid fa-plus"></i> Ajouter une réponse</button></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:18px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-chat-poll')">Annuler</button>
+        <button class="btn btn-primary" onclick="submitChatPoll()">Publier dans le chat</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-announce">
+    <div class="modal-box">
+      <h3 style="font-weight: 800;">📢 Annonce importante</h3>
+      <p style="font-size:12px; color:var(--text-muted); margin:6px 0 12px;">Tout le monde est notifié et doit confirmer avoir lu. Tu vois ensuite qui a confirmé.</p>
+      <div class="form-group"><textarea id="an-text" rows="4" placeholder="Ex : la répétition de samedi est avancée à 14h, merci de confirmer"></textarea></div>
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:14px;">
+        <button class="btn btn-secondary" onclick="closeModal('modal-announce')">Annuler</button>
+        <button class="btn btn-primary" onclick="submitAnnounce()">Publier l’annonce</button>
       </div>
     </div>
   </div>
@@ -4187,7 +4252,7 @@
         const m = ch.doc.data();
         if (m.sender === currentUser.name || !Array.isArray(m.mentions) || !m.mentions.includes(currentUser.docId)) return;
         if (!document.hidden && isChatViewActive()) return;
-        showToast(m.sender + ' vous a mentionné : ' + String(m.text || '').slice(0, 80), { actionLabel: 'Voir', onAction: () => switchTab('chat', null) });
+        showToast(m.sender + ' vous a mentionné : ' + String(chatPreview(m)).slice(0, 80), { actionLabel: 'Voir', onAction: () => switchTab('chat', null) });
       });
     }
 
@@ -4205,7 +4270,7 @@
       box.style.display = 'block';
       box.innerHTML = pins.map(c => `
         <div class="pin-row" onclick="scrollToMessage(${c.id})">
-          📌 <strong>${escapeHTML(c.sender)}</strong> <span>${escapeHTML(String(c.text || '').slice(0, 90))}</span>
+          📌 <strong>${escapeHTML(c.sender)}</strong> <span>${escapeHTML(String(chatPreview(c)).slice(0, 90))}</span>
           <button class="chat-act" title="Désépingler" onclick="event.stopPropagation(); togglePin(${c.id})"><i class="fa-solid fa-xmark"></i></button>
         </div>`).join('');
     }
@@ -4215,7 +4280,7 @@
     }
 
     /* ================= PRÉFÉRENCES DE NOTIFICATIONS ================= */
-    const NOTIF_KEYS = ['chat', 'mentions', 'chantiers', 'events', 'polls', 'studio', 'transfers', 'reminders'];
+    const NOTIF_KEYS = ['chat', 'mentions', 'chantiers', 'events', 'polls', 'studio', 'transfers', 'announce', 'reminders'];
     function myPrefs() {
       const me = currentUser ? usersData.find(u => u.docId === currentUser.docId) : null;
       return (me && me.notifPrefs) || {};
@@ -4237,6 +4302,7 @@
       const p = myPrefs();
       NOTIF_KEYS.forEach(k => { document.getElementById('np-' + k).checked = p[k] !== false; });
       const q = p.quiet || {};
+      document.getElementById('np-readReceipts').checked = p.readReceipts !== false;
       document.getElementById('np-quiet-on').checked = !!q.on;
       document.getElementById('np-quiet-from').value = q.from || '22:00';
       document.getElementById('np-quiet-to').value = q.to || '08:00';
@@ -4251,6 +4317,7 @@
         from: document.getElementById('np-quiet-from').value || '22:00',
         to: document.getElementById('np-quiet-to').value || '08:00'
       };
+      prefs.readReceipts = document.getElementById('np-readReceipts').checked;
       usersCol.doc(currentUser.docId).update({ notifPrefs: prefs })
         .then(() => { closeModal('modal-notif-prefs'); showToast('Préférences enregistrées.'); })
         .catch(err => { console.error(err); alert('Enregistrement impossible (droits ou réseau).'); });
@@ -4675,8 +4742,8 @@
       pollsData.forEach(p => add('Séances (sondages)', 'fa-calendar-check', p.title, [p.location, p.status === 'closed' ? 'validée' : 'ouverte'].filter(Boolean).join(' • '),
         [p.title, p.location, p.notes].join(' '), () => switchTab('planning', null)));
       documentsData.forEach(d => add('Documents', 'fa-folder-open', d.title, d.desc || '', [d.title, d.desc].join(' '), () => switchTab('docs', null)));
-      chatData.slice(-400).forEach(c => add('Messages', 'fa-comments', c.text, (c.sender || '') + (c.time ? ' • ' + c.time : ''),
-        [c.text, c.sender].join(' '), () => { switchTab('chat', null); setTimeout(() => scrollToMessage(c.id), 200); }));
+      chatData.slice(-400).forEach(c => add('Messages', 'fa-comments', chatPreview(c), (c.sender || '') + (c.time ? ' • ' + c.time : ''),
+        [c.text, chatPreview(c), c.sender].join(' '), () => { switchTab('chat', null); setTimeout(() => scrollToMessage(c.id), 200); }));
       gearData.forEach(g => add('Matériel', 'fa-guitar', g.name, [g.category, g.ownerName, g.loan ? 'prêté à ' + g.loan.toName : 'disponible'].filter(Boolean).join(' • '),
         [g.name, g.category, g.ownerName, g.notes, g.loan && g.loan.toName].join(' '), () => switchTab('gear', null)));
       financesData.forEach(f => add('Budget', 'fa-wallet', f.title, fmtEur(f.cents) + (f.date ? ' • ' + f.date : ''),
@@ -5313,6 +5380,8 @@
     /* ----- Suppression (réservée à l'administrateur) ----- */
     function deleteChatMessage(id) {
       if (!isAdminUser()) return;
+      const cm = chatData.find(x => x.id === id);
+      if (cm) [cm.audio && cm.audio.path, cm.file && cm.file.path].filter(Boolean).forEach(p => storage.ref(p).delete().catch(() => {}));
       if (!confirm('Supprimer ce message pour tout le groupe ?')) return;
       chatCol.doc(String(id)).delete().catch(err => { console.error(err); alert('Suppression impossible (droits ou réseau).'); });
     }
@@ -5343,6 +5412,7 @@
       try {
         let batch = db.batch(), n = 0;
         for (const c of list) {
+          [c.audio && c.audio.path, c.file && c.file.path].filter(Boolean).forEach(p => storage.ref(p).delete().catch(() => {}));
           batch.delete(chatCol.doc(String(c.id)));
           if (++n >= 400) { await batch.commit(); batch = db.batch(); n = 0; }
         }
@@ -5353,6 +5423,271 @@
       } catch (err) {
         console.error(err);
         alert('Suppression impossible (droits ou réseau). Pense à déployer les nouvelles règles Firestore.');
+      }
+    }
+
+
+    /* ================= CHAT : VOCAUX, FICHIERS, SONDAGES, ANNONCES, MODIFICATION, « VU PAR » ================= */
+    let chatLastMineId = 0;
+    function chatPreview(c) {
+      if (!c) return '';
+      if (c.text) return c.text;
+      if (c.poll) return '📊 Sondage : ' + (c.poll.q || '');
+      if (c.audio) return '🎤 Message vocal';
+      if (c.file) return c.file.isImage ? '📷 Photo' : '📎 ' + (c.file.name || 'Fichier');
+      return '';
+    }
+    function canEditMessage(c) {
+      return !!currentUser && !!c.senderId && c.senderId === currentUser.docId && !!c.text && !c.announce && (Date.now() - c.id) < 10 * 60 * 1000;
+    }
+
+    function chatBodyHTML(c) {
+      let h = '';
+      if (c.announce) h += '<div class="chat-announce-tag">📢 Annonce</div>';
+      if (c.text) h += `<div>${highlightMentions(c.text)}</div>`;
+      if (c.audio && c.audio.url) h += `<audio class="chat-audio" controls preload="none" src="${escapeHTML(c.audio.url)}"></audio><div style="font-size:10px; opacity:.75;">🎤 ${fmtTime(c.audio.dur || 0)}</div>`;
+      if (c.file && c.file.url) {
+        const u = escapeHTML(c.file.url);
+        h += c.file.isImage
+          ? `<a href="${u}" target="_blank" rel="noopener"><img class="chat-img" loading="lazy" src="${u}" alt="${escapeHTML(c.file.name || 'photo')}"></a>`
+          : `<a class="chat-file" href="${u}" target="_blank" rel="noopener">📎 ${escapeHTML(c.file.name || 'Fichier')} <small>${fmtSize(c.file.size)}</small></a>`;
+      }
+      if (c.poll) h += chatPollHTML(c);
+      if (c.announce) h += announceAckHTML(c);
+      if (c.id === chatLastMineId) h += seenByHTML(c);
+      return h;
+    }
+
+    function seenByHTML(c) {
+      const others = usersData.filter(u => u.docId !== currentUser.docId);
+      if (!others.length) return '';
+      const seen = others.filter(u => (u.chatSeen || 0) >= c.id).map(memberName);
+      const txt = !seen.length ? 'Envoyé' : (seen.length === others.length ? 'Vu par tous' : 'Vu par ' + seen.join(', '));
+      return `<div class="chat-seen">${escapeHTML(txt)}</div>`;
+    }
+
+    // Enregistre jusqu'où j'ai lu (une seule écriture, quelques secondes après l'arrivée sur le chat)
+    let chatSeenWritten = 0, chatSeenTimer = null;
+    function writeChatSeen() {
+      if (!currentUser || chatLastSeenId <= chatSeenWritten || myPrefs().readReceipts === false) return;
+      clearTimeout(chatSeenTimer);
+      chatSeenTimer = setTimeout(() => {
+        if (!isChatViewActive() || document.hidden) return;
+        const v = chatLastSeenId;
+        if (v <= chatSeenWritten) return;
+        usersCol.doc(currentUser.docId).update({ chatSeen: v }).then(() => { chatSeenWritten = v; }).catch(() => {});
+      }, 1500);
+    }
+
+    /* ----- Modifier son message (10 minutes) ----- */
+    function editChatMessage(id) {
+      const c = chatData.find(x => x.id === id);
+      if (!c || !canEditMessage(c)) return alert('Ce message ne peut plus être modifié (10 minutes maximum).');
+      const t = prompt('Modifier le message :', c.text);
+      if (t === null) return;
+      const text = t.trim();
+      if (!text) return;
+      chatCol.doc(String(id)).update({ text, edited: true, editedAt: Date.now() })
+        .catch(err => { console.error(err); alert('Modification impossible (droits ou réseau).'); });
+    }
+
+    /* ----- Sondage express ----- */
+    function chatPollHTML(c) {
+      const p = c.poll, votes = c.votes || {};
+      const total = Object.keys(votes).length;
+      const mine = votes[currentUser.docId];
+      return `<div class="cpoll"><div style="font-weight:800;">${escapeHTML(p.q || '')}</div>`
+        + (p.options || []).map(o => {
+          const n = Object.values(votes).filter(v => v === o.id).length;
+          const pct = total ? Math.round(n / total * 100) : 0;
+          const names = usersData.filter(u => votes[u.docId] === o.id).map(memberName).join(', ');
+          return `<button class="cpoll-opt ${mine === o.id ? 'on' : ''}" title="${escapeHTML(names)}" onclick="voteChatPoll(${c.id}, '${o.id}')"><span class="cpoll-bar" style="width:${pct}%;"></span><span class="cpoll-t">${escapeHTML(o.t)}</span><span class="cpoll-n">${n}</span></button>`;
+        }).join('')
+        + `<div style="font-size:10px; opacity:.75;">${total} vote${total > 1 ? 's' : ''}</div></div>`;
+    }
+    function voteChatPoll(id, optId) {
+      const c = chatData.find(x => x.id === id);
+      if (!c || !currentUser) return;
+      const cur = (c.votes || {})[currentUser.docId];
+      const upd = {};
+      upd['votes.' + currentUser.docId] = cur === optId ? firebase.firestore.FieldValue.delete() : optId;
+      chatCol.doc(String(id)).update(upd).catch(err => { console.error(err); alert('Vote impossible (droits ou réseau).'); });
+    }
+    function addChatPollOption() {
+      const box = document.getElementById('cp-options');
+      if (box.children.length >= 6) return;
+      const inp = document.createElement('input');
+      inp.type = 'text'; inp.className = 'cp-opt-input'; inp.placeholder = 'Réponse ' + (box.children.length + 1);
+      inp.style.cssText = 'display:block; width:100%; margin-bottom:6px;';
+      box.appendChild(inp);
+    }
+    function openChatPollModal() {
+      document.getElementById('cp-question').value = '';
+      document.getElementById('cp-options').innerHTML = '';
+      addChatPollOption(); addChatPollOption();
+      document.querySelectorAll('.cp-opt-input')[0].value = 'Oui';
+      document.querySelectorAll('.cp-opt-input')[1].value = 'Non';
+      openModal('modal-chat-poll');
+    }
+    function submitChatPoll() {
+      const q = document.getElementById('cp-question').value.trim();
+      const opts = [...document.querySelectorAll('.cp-opt-input')].map(i => i.value.trim()).filter(Boolean);
+      if (!q) return alert('Écris la question.');
+      if (opts.length < 2) return alert('Il faut au moins deux réponses.');
+      postChatMessage({ poll: { q, options: opts.map((t, i) => ({ id: 'o' + i, t })) }, votes: {} }, '');
+      closeModal('modal-chat-poll');
+    }
+
+    /* ----- Annonces importantes (administrateur et modérateurs) ----- */
+    function announceAckHTML(c) {
+      const acks = c.acks || {};
+      const others = usersData.filter(u => u.docId !== c.senderId);
+      const ackedNames = others.filter(u => acks[u.docId]).map(memberName);
+      const waiting = others.filter(u => !acks[u.docId]).map(memberName);
+      if (currentUser.docId === c.senderId || canManageContent()) {
+        return `<div style="font-size:11px; margin-top:6px;" title="${escapeHTML('En attente : ' + (waiting.join(', ') || '—'))}">✅ Lu par ${ackedNames.length}/${others.length}${waiting.length ? ' · en attente : ' + escapeHTML(waiting.join(', ')) : ''}</div>`;
+      }
+      return acks[currentUser.docId]
+        ? '<div style="font-size:11px; margin-top:6px;">✅ Lu</div>'
+        : `<button class="ack-btn" onclick="ackAnnounce(${c.id})">J’ai lu</button>`;
+    }
+    function ackAnnounce(id) {
+      if (!currentUser) return;
+      const upd = {};
+      upd['acks.' + currentUser.docId] = Date.now();
+      chatCol.doc(String(id)).update(upd).catch(err => { console.error(err); alert('Confirmation impossible (droits ou réseau).'); });
+    }
+    function renderAnnounceBanner() {
+      const box = document.getElementById('chat-announce');
+      if (!box || !currentUser) return;
+      const pending = chatData.filter(c => c.announce && c.senderId !== currentUser.docId && !(c.acks && c.acks[currentUser.docId])).slice(-3).reverse();
+      if (!pending.length) { box.style.display = 'none'; box.innerHTML = ''; return; }
+      box.style.display = 'block';
+      box.innerHTML = pending.map(c => `<div class="ann-row">📢 <strong>${escapeHTML(c.sender)}</strong> <span>${escapeHTML(c.text)}</span>
+        <button class="btn btn-primary btn-sm" onclick="ackAnnounce(${c.id})">J’ai lu</button></div>`).join('');
+    }
+    function openAnnounceModal() {
+      if (!canManageContent()) return;
+      document.getElementById('an-text').value = '';
+      openModal('modal-announce');
+    }
+    function submitAnnounce() {
+      if (!canManageContent()) return;
+      const text = document.getElementById('an-text').value.trim();
+      if (!text) return alert('Écris l’annonce.');
+      postChatMessage({ announce: true, acks: {} }, text);
+      closeModal('modal-announce');
+    }
+
+    /* ----- Fichiers et photos ----- */
+    function chatUploadUI(label) {
+      const box = document.getElementById('chat-upload');
+      box.style.display = label ? 'block' : 'none';
+      document.getElementById('chat-upload-label').textContent = label || '';
+    }
+    function resizeImage(file, maxDim, quality) {
+      return new Promise(resolve => {
+        const img = new Image();
+        const url = URL.createObjectURL(file);
+        img.onload = () => {
+          const k = Math.min(1, maxDim / Math.max(img.width, img.height));
+          const cv = document.createElement('canvas');
+          cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+          cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+          cv.toBlob(b => { URL.revokeObjectURL(url); resolve(b && b.size < file.size ? b : null); }, 'image/jpeg', quality);
+        };
+        img.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+        img.src = url;
+      });
+    }
+    async function onChatFilePicked(input) {
+      const f = input.files && input.files[0];
+      input.value = '';
+      if (!f || !currentUser) return;
+      if (IS_TEST_ENV) return alert('Dans la version de test, l’envoi de fichiers est désactivé (pas de stockage).');
+      if (f.size > 50 * 1024 * 1024) return alert('Fichier trop volumineux (50 Mo maximum dans le chat). Utilise le Studio pour les gros fichiers.');
+      try {
+        const isImage = /^image\//.test(f.type) && !/gif|svg/.test(f.type);
+        let blob = f, name = f.name;
+        if (isImage) {
+          chatUploadUI('Optimisation de la photo…');
+          const small = await resizeImage(f, 1600, 0.85);
+          if (small) { blob = small; name = name.replace(/\.[^.]+$/, '') + '.jpg'; }
+        }
+        const id = Date.now();
+        const path = 'chat/' + currentUser.docId + '/' + id + '_' + name.replace(/[^\w.\-]+/g, '_');
+        chatUploadUI('Envoi de ' + name + ' (' + fmtSize(blob.size) + ')…');
+        const url = await uploadFileWithProgress(storage.ref(path), blob, document.getElementById('chat-up-wrap'), document.getElementById('chat-up-bar'));
+        const input2 = document.getElementById('chat-text-input');
+        const caption = input2.value.trim();
+        postChatMessage({ file: { url, path, name, size: blob.size, isImage: isImage || /^image\//.test(f.type) } }, caption);
+        input2.value = '';
+      } catch (err) {
+        console.error(err);
+        alert('Envoi impossible : vérifie ta connexion et réessaie.');
+      } finally {
+        chatUploadUI('');
+      }
+    }
+
+    /* ----- Messages vocaux ----- */
+    let recState = null;
+    async function startVoiceRecording() {
+      if (!currentUser || recState) return;
+      if (IS_TEST_ENV) return alert('Dans la version de test, l’envoi de fichiers est désactivé (pas de stockage).');
+      if (!navigator.mediaDevices || !window.MediaRecorder) return alert('L’enregistrement vocal n’est pas pris en charge par ce navigateur.');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        const mime = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg'].find(t => MediaRecorder.isTypeSupported(t)) || '';
+        const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+        const chunks = [];
+        rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+        recState = { rec, chunks, stream, mime: rec.mimeType || mime, t0: Date.now(), cancelled: false, timer: null };
+        rec.onstop = finishVoiceRecording;
+        rec.start();
+        document.getElementById('chat-rec-bar').style.display = 'flex';
+        document.getElementById('chat-rec-time').textContent = '0:00';
+        recState.timer = setInterval(() => {
+          if (!recState) return;
+          const sec = (Date.now() - recState.t0) / 1000;
+          document.getElementById('chat-rec-time').textContent = fmtTime(sec);
+          if (sec >= 180) stopVoiceRecording(true);
+        }, 250);
+      } catch (err) {
+        console.error(err);
+        recState = null;
+        alert('Micro inaccessible : autorise-le dans les réglages du navigateur ou de l’appareil.');
+      }
+    }
+    function stopVoiceRecording(send) {
+      if (!recState) return;
+      recState.cancelled = !send;
+      clearInterval(recState.timer);
+      try { if (recState.rec.state !== 'inactive') recState.rec.stop(); } catch (e) { finishVoiceRecording(); }
+    }
+    async function finishVoiceRecording() {
+      const st = recState;
+      recState = null;
+      document.getElementById('chat-rec-bar').style.display = 'none';
+      if (!st) return;
+      clearInterval(st.timer);
+      st.stream.getTracks().forEach(t => t.stop());
+      const dur = (Date.now() - st.t0) / 1000;
+      if (st.cancelled || dur < 0.8 || !st.chunks.length) return;
+      try {
+        const type = st.mime || 'audio/webm';
+        const ext = /mp4/.test(type) ? 'm4a' : (/ogg/.test(type) ? 'ogg' : 'webm');
+        const blob = new Blob(st.chunks, { type });
+        const id = Date.now();
+        const path = 'chat/' + currentUser.docId + '/' + id + '.' + ext;
+        chatUploadUI('Envoi du message vocal…');
+        const url = await uploadFileWithProgress(storage.ref(path), blob, document.getElementById('chat-up-wrap'), document.getElementById('chat-up-bar'));
+        postChatMessage({ audio: { url, path, dur: Math.round(dur) } }, '');
+      } catch (err) {
+        console.error(err);
+        alert('Envoi du message vocal impossible : vérifie ta connexion et réessaie.');
+      } finally {
+        chatUploadUI('');
       }
     }
 
@@ -5918,6 +6253,8 @@
       const wasNear = box.scrollHeight - box.scrollTop - box.clientHeight < 80;
       const prevMaxId = chatMaxIdRendered;
       let lastDay = '';
+      const lastMine = [...chatData].reverse().find(c => c.sender === currentUser.name);
+      chatLastMineId = lastMine ? lastMine.id : 0;
       box.innerHTML = chatData.map(c => {
         let sep = '';
         const dayKey = chatDayKey(c.id);
@@ -5932,14 +6269,15 @@
         const actions = Object.keys(REACTIONS).map(k => `<button class="chat-act" onclick="toggleReaction(${c.id}, '${k}')" title="Réagir">${REACTIONS[k]}</button>`).join('')
           + `<button class="chat-act" onclick="startReply(${c.id})" title="Répondre"><i class="fa-solid fa-reply"></i></button>`
           + `<button class="chat-act" onclick="togglePin(${c.id})" title="${c.pinned ? 'Désépingler' : 'Épingler'}"><i class="fa-solid fa-thumbtack"></i></button>`
+          + (canEditMessage(c) ? `<button class="chat-act" onclick="editChatMessage(${c.id})" title="Modifier (10 minutes)"><i class="fa-solid fa-pen"></i></button>` : '')
           + (isAdminUser() ? `<button class="chat-act" onclick="deleteChatMessage(${c.id})" title="Supprimer ce message (administrateur)"><i class="fa-solid fa-trash"></i></button>` : '');
         return `${sep}
         <div class="chat-bubble ${mine ? 'sent' : 'received'} ${c.pinned ? 'pinned' : ''} ${(c.mentions || []).includes(currentUser.docId) ? 'mentioned' : ''}" data-mid="${c.id}">
           <div style="font-weight:700; font-size:11px; margin-bottom:2px;">${escapeHTML(c.sender)}${chatInstrumentIcon(c.sender)}${c.pinned ? ' 📌' : ''}</div>
           ${c.replyTo ? `<div class="chat-quote"><strong>${escapeHTML(c.replyTo.sender)}</strong><br>${escapeHTML(c.replyTo.text)}</div>` : ''}
-          <div>${highlightMentions(c.text)}</div>
+          ${chatBodyHTML(c)}
           ${chips ? `<div class="chat-reactions">${chips}</div>` : ''}
-          <div class="meta"><span>${escapeHTML(c.time)}</span><span class="chat-actions">${actions}</span></div>
+          <div class="meta"><span>${escapeHTML(c.time)}${c.edited ? ' · modifié' : ''}</span><span class="chat-actions">${actions}</span></div>
         </div>`;
       }).join('');
       const visible = isChatViewActive();
@@ -5960,6 +6298,9 @@
       updateChatJumpBtn();
       const clearBtn = document.getElementById('chat-clear-btn');
       if (clearBtn) clearBtn.style.display = isAdminUser() ? '' : 'none';
+      const annBtn = document.getElementById('chat-announce-btn');
+      if (annBtn) annBtn.style.display = canManageContent() ? '' : 'none';
+      renderAnnounceBanner();
       renderPinnedBar();
     }
 
@@ -5967,7 +6308,7 @@
     function startReply(id) {
       const msg = chatData.find(c => c.id === id);
       if (!msg) return;
-      replyingTo = { id: msg.id, sender: msg.sender, text: String(msg.text || '').slice(0, 90) };
+      replyingTo = { id: msg.id, sender: msg.sender, text: String(chatPreview(msg)).slice(0, 90) };
       const bar = document.getElementById('chat-reply-bar');
       bar.innerHTML = `<span><i class="fa-solid fa-reply"></i> Réponse à <strong>${escapeHTML(replyingTo.sender)}</strong> : ${escapeHTML(replyingTo.text)}</span>
         <button class="chat-act" onclick="cancelReply()" title="Annuler"><i class="fa-solid fa-xmark"></i></button>`;
@@ -6238,7 +6579,7 @@
         const mentionedMe = Array.isArray(m.mentions) && m.mentions.includes(currentUser.docId);
         if (!clientPrefAllows(mentionedMe ? 'mentions' : 'chat')) return;
         try {
-          new Notification('ELIYAH — ' + m.sender, { body: String(m.text || '').slice(0, 120), tag: 'eliyah-chat' });
+          new Notification('ELIYAH — ' + m.sender, { body: String(chatPreview(m) || '').slice(0, 120), tag: 'eliyah-chat' });
         } catch (e) {}
       });
     }
@@ -6266,6 +6607,7 @@
       chatLastSeenId = chatData.length ? Math.max(...chatData.map(c => c.id)) : 0;
       try { localStorage.setItem(chatStorageKey(), String(chatLastSeenId)); } catch (e) {}
       updateChatBadge();
+      writeChatSeen();
     }
     function handleChatSnapshot() {
       if (!chatBaselineReady) {
@@ -6351,24 +6693,27 @@
       return meta && meta.icon ? ` <i class="fa-solid ${meta.icon}" style="font-size:10px; opacity:.85;" title="${meta.label}"></i>` : '';
     }
 
+    function postChatMessage(extra, text) {
+      if (!currentUser) return 0;
+      const newId = Date.now();
+      const payload = Object.assign({
+        id: newId, sender: currentUser.name, senderId: currentUser.docId, text: text || '',
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }, extra || {});
+      if (replyingTo) payload.replyTo = replyingTo;
+      const mentions = payload.text ? extractMentions(payload.text) : [];
+      if (mentions.length) payload.mentions = mentions;
+      chatCol.doc(String(newId)).set(payload).catch(err => { console.error(err); alert('Envoi impossible (droits ou réseau).'); });
+      cancelReply();
+      return newId;
+    }
+
     function sendChatMessage() {
       const input = document.getElementById('chat-text-input');
       const text = input.value.trim();
       if (!text) return;
-
-      const newId = Date.now();
-      const payload = {
-        id: newId,
-        sender: currentUser.name,
-        text: text,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      if (replyingTo) payload.replyTo = replyingTo;
-      const mentions = extractMentions(text);
-      if (mentions.length) payload.mentions = mentions;
-      chatCol.doc(String(newId)).set(payload);
+      postChatMessage({}, text);
       input.value = '';
-      cancelReply();
     }
 
     function renderDocsGrid() {
